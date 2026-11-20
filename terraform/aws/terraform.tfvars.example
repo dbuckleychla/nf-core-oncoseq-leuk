@@ -29,7 +29,7 @@ read_bucket_arns = ["arn:aws:s3:::annotation-cache"]
 # Independently sized NVIDIA GPU fleets for basecalling and general work.
 # Set either instance list to [] to disable that fleet.
 # Each 48-vCPU worker admits one clinical 32-vCPU basecalling reservation.
-basecall_instance_types = ["g7e.12xlarge", "g6.12xlarge"]
+basecall_instance_types = ["g7.xlarge", g7.4xlarge, "g7.12xlarge", "g6.xlarge", g6.4xlarge, "g6.12xlarge"]
 basecall_max_vcpus      = 512
 # Blackwell basecalling requires the Dorado/AMI acceptance test before use.
 # Keep g7e out of the general fleet for DeepSomatic/Clair3 image compatibility.
