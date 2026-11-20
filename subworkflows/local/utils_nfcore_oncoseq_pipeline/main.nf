@@ -346,19 +346,22 @@ workflow PIPELINE_INITIALISATION {
 
         def ref_cache_dir      = params.ref_cache ? file(params.ref_cache) : null
         def ref_cache_resolved = ref_cache_dir ? (ref_cache_dir.isDirectory() ? ref_cache_dir.toUriString() : ref_cache_dir.parent.toUriString()) : null
+        def model_cache = params.dorado_model_cache
+            ? file(params.dorado_model_cache)
+            : (ref_cache_resolved ? file("${ref_cache_resolved}/dorado_models") : null)
 
         ch_model_dir = ref_cache_resolved
             ? channel.fromPath(ref_cache_resolved, checkIfExists: true)
             : channel.fromPath("${launchDir}")
 
-        def model_resolved = ref_cache_resolved
-            ? selectLatestModel(params.basecall_model, file("${ref_cache_resolved}/dorado_models"))
+        def model_resolved = model_cache
+            ? selectLatestModel(params.basecall_model, model_cache)
             : null
         def modif_resolved = params.m_bases && model_resolved ?
-            selectLatestModif(file("${ref_cache_resolved}/dorado_models"), model_resolved, params.m_bases) :
+            selectLatestModif(model_cache, model_resolved, params.m_bases) :
             null
         if (params.clinical && (!model_resolved || (params.m_bases && !modif_resolved))) {
-            error 'Clinical Dorado models must be present at their exact versions in ref_cache/dorado_models'
+            error 'Clinical Dorado models must be present at their exact versions in dorado_model_cache or ref_cache/dorado_models'
         }
         ch_modif = channel.fromPath("${projectDir}/assets/NOMOD")
 
@@ -903,8 +906,9 @@ def findFaFile (files, aliasList, exts) {
 }
 
 def findCached(String url) {
-    if( !params.ref_cache ) return null
-    def cache = file(params.ref_cache)
+    def cache_path = params.reference_aux_cache ?: params.ref_cache
+    if (!cache_path) return null
+    def cache = file(cache_path)
     if (!cache.isDirectory()) cache = cache.parent
 
     def cached = cache.resolve(url.tokenize('/')[-1])

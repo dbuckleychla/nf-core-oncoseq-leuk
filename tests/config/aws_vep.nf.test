@@ -1,0 +1,19 @@
+nextflow_process {
+    name "Clinical VEP cache isolation"
+    script "tests/config/processes.nf"
+    process "ENSEMBLVEP_VEP"
+    config "tests/config/local.config"
+
+    test("Stage the large reference cache on an exclusive high worker") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.settings[0].readLines() == ['bam-high', '32', '128 GB', '1d']
+        }
+    }
+}

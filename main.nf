@@ -117,6 +117,8 @@ params {
 
     // ClairS_TO model to use for SNP calling
     clairsto_model: String = 'ont_r10_dorado_sup_5khz_ssrs'
+    clairsto_indel_min_af: Float = 0.05
+    deepsomatic_indel_min_af: Float = 0.05
 
     // Path to text file containing list of genes of low fidelity for adaptive sampling (default is empty list)
     low_fidelity: Path = "${projectDir}/assets/panel_low_fidelity.txt"
@@ -216,6 +218,8 @@ params {
 
     // Path to directory containing reference genome
     ref_cache: Path?
+    dorado_model_cache: Path?
+    reference_aux_cache: Path?
 
     // Human genome assembly identifier
     genome: String = 'hg38'

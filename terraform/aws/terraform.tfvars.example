@@ -27,12 +27,12 @@ s3_prefix = "OncoseqLeuk/"
 
 # Independently sized NVIDIA GPU fleets for basecalling and general work.
 # Set either instance list to [] to disable that fleet.
-basecall_instance_types = ["g6e.xlarge", "g6e.4xlarge", "g6e.12xlarge"]
+# Each 48-vCPU worker admits one clinical 32-vCPU basecalling reservation.
+basecall_instance_types = ["g7e.12xlarge", "g6.12xlarge"]
 basecall_max_vcpus      = 512
-# Optional Blackwell basecalling candidates after Dorado/AMI acceptance testing:
-# basecall_instance_types = ["g7e.2xlarge", "g7e.4xlarge", "g7e.12xlarge", "g6e.xlarge", "g6e.4xlarge", "g6e.12xlarge"]
+# Blackwell basecalling requires the Dorado/AMI acceptance test before use.
 # Keep g7e out of the general fleet for DeepSomatic/Clair3 image compatibility.
-gpu_instance_types = ["g6e.xlarge", "g6e.4xlarge", "g6e.12xlarge"]
+gpu_instance_types = ["g6.xlarge", "g6.4xlarge"]
 gpu_max_vcpus      = 512
 
 # Optional: reuse a self-contained AWS CLI installation already in BOTH EC2 AMIs.
@@ -51,6 +51,6 @@ scratch_throughput_mibps = 500
 bam_queue_enabled = true
 bam_max_vcpus     = 256
 bam_scratch_gb    = 2000
-# Low fleet: eight exclusive 8-vCPU workers at the default capacity.
-bam_low_max_vcpus  = 64
+# Low fleet: up to 32 exclusive 8-vCPU workers at this capacity.
+bam_low_max_vcpus  = 256
 bam_low_scratch_gb = 2000

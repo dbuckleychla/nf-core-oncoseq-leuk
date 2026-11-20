@@ -7,9 +7,9 @@ include { WGET as WGET_TR_BED               } from '../../../modules/nf-core/wge
 include { WGET as WGET_PON                  } from '../../../modules/nf-core/wget/main'
 include { SNIFFLES                          } from '../../../modules/nf-core/sniffles'
 include { BCFTOOLS_INDEX                    } from '../../../modules/nf-core/bcftools/index'
-include { SEVERUS_TUMOR_SINGLE              } from '../../../modules/local/severus/main.nf'
+include { SEVERUS_TUMOR_SINGLE              } from '../../../modules/local/clinical_threads/main.nf'
 include { HTSLIB_BGZIPTABIX                 } from '../../../modules/nf-core/htslib/bgziptabix'
-include { STELLERATOR                       } from '../../../modules/local/stellerator/main.nf'
+include { STELLERATOR                       } from '../../../modules/local/clinical_threads/main.nf'
 
 // functions
 include { softwareVersionsToYAML       } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'

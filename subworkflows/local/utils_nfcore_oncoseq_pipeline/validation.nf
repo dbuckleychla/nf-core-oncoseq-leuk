@@ -15,6 +15,17 @@ def validateExecutionOptions(options, profiles, workDirectory) {
         if (options.aws_bam_low_queue && !options.aws_bam_high_queue) {
             throw new IllegalArgumentException('The BAM low queue requires --aws_bam_high_queue for larger tasks')
         }
+        if (options.clinical) {
+            if (!options.aws_bam_high_queue) {
+                throw new IllegalArgumentException('Clinical AWS execution requires --aws_bam_high_queue for isolated BAM staging')
+            }
+            if ((options.max_cpus ?: 0) < 32 || options.aws_bam_high_vcpus != 32 || (options.aws_bam_low_queue && options.aws_bam_low_vcpus != 8)) {
+                throw new IllegalArgumentException('Clinical AWS execution requires max_cpus >= 32 and full BAM reservations of 32 high / 8 low vCPUs')
+            }
+            if (options.max_memory && options.max_memory > 224.GB) {
+                throw new IllegalArgumentException('Clinical AWS execution requires max_memory <= 224 GB to leave host headroom on the BAM high workers')
+            }
+        }
     }
 
     if (options.clinical) {

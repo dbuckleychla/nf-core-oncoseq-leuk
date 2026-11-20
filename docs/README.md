@@ -12,3 +12,5 @@ You can find a lot more documentation about installing, configuring and running 
 - [Institutional AWS deployment](aws.md)
 - [FrankONTstein comparison](frankontstein-comparison.md)
 - [Dorado SUP v5.2.0 compatibility](dorado-sup520.md)
+- [Clinical step resources and failures](resource-allocation.md)
+- [Reusing institutional S3 references](institutional-references.md)

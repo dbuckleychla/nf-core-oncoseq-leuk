@@ -1,0 +1,49 @@
+nextflow_process {
+    name "ClairS-TO clinical command contract"
+    script "modules/local/clinical_threads/main.nf"
+    process "CLAIRS_TO_CALL"
+    config "tests/config/caller_local.config"
+
+    test("Pass the institutional five-percent indel threshold and tool threads") {
+        when {
+            params { aws_bam_high_queue = 'bam-high' }
+            process {
+                """
+                input[0] = [[id:'test'], file('tests/config/fixtures/input.bam'), file('tests/config/fixtures/input.bam.bai'), file('tests/config/fixtures/targets.bed')]
+                input[1] = [[id:'hg38'], file('tests/config/fixtures/reference.fa')]
+                input[2] = [[id:'hg38'], file('tests/config/fixtures/reference.fa.fai')]
+                input[3] = 'ont_r10_dorado_sup_5khz_ssrs'
+                """
+            }
+        }
+        then {
+            assert process.success
+            def args = new File(process.out.indel[0][1].toString()).readLines()
+            assert args[args.indexOf('--indel_min_af') + 1] == '0.05'
+            assert args[args.indexOf('--threads') + 1] == '16'
+            assert args.contains('--remove_intermediate_dir')
+        }
+    }
+
+    test("Pass an explicitly selected indel threshold") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                clairsto_indel_min_af = 0.1
+            }
+            process {
+                """
+                input[0] = [[id:'test'], file('tests/config/fixtures/input.bam'), file('tests/config/fixtures/input.bam.bai'), file('tests/config/fixtures/targets.bed')]
+                input[1] = [[id:'hg38'], file('tests/config/fixtures/reference.fa')]
+                input[2] = [[id:'hg38'], file('tests/config/fixtures/reference.fa.fai')]
+                input[3] = 'ont_r10_dorado_sup_5khz_ssrs'
+                """
+            }
+        }
+        then {
+            assert process.success
+            def args = new File(process.out.indel[0][1].toString()).readLines()
+            assert args[args.indexOf('--indel_min_af') + 1] == '0.1'
+        }
+    }
+}

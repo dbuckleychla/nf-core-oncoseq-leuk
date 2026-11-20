@@ -4,7 +4,7 @@ process DORADO_BASECALL {
     stdout emit: settings
     script:
     """
-    printf '%s\\n' '${task.queue}' '${task.accelerator.request}' '${task.container}' '${task.containerOptions}' '${task.clusterOptions}'
+    printf '%s\\n' '${task.queue}' '${task.accelerator.request}' '${task.container}' '${task.containerOptions}' '${task.clusterOptions}' '${task.cpus}' '${task.memory}' '${task.maxRetries}'
     """
 }
 
@@ -13,7 +13,25 @@ process CLASSY_COMBINED {
     stdout emit: settings
     script:
     """
+    printf '%s\\n' '${task.queue}' '${task.cpus}' '${task.container}' '${task.memory}' '${task.time}' '${task.ext.threads}'
+    """
+}
+
+process SAMTOOLS_VIEW {
+    output:
+    stdout emit: settings
+    script:
+    """
     printf '%s\\n' '${task.queue}' '${task.cpus}' '${task.container}'
+    """
+}
+
+process ENSEMBLVEP_VEP {
+    output:
+    stdout emit: settings
+    script:
+    """
+    printf '%s\\n' '${task.queue}' '${task.cpus}' '${task.memory}' '${task.time}'
     """
 }
 

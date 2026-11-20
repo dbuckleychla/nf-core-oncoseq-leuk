@@ -6,9 +6,9 @@
     for variant calling with ClairS-TO, annotation with SNPEff/SNPSift, and VCF
     processing with BCFtools.
 */
-include { CLAIRS_TO_CALL        } from '../../../modules/local/clairsto/main.nf'
-include { CLAIR3_CALL           } from '../../../modules/local/clair3/main.nf'
-include { DEEPSOMATIC_TUMORONLY } from '../../../modules/local/deepsomatic/main'
+include { CLAIRS_TO_CALL        } from '../../../modules/local/clinical_threads/main.nf'
+include { CLAIR3_CALL           } from '../../../modules/local/clinical_threads/main.nf'
+include { DEEPSOMATIC_TUMORONLY } from '../../../modules/local/clinical_threads/main.nf'
 include { BCFTOOLS_CONCAT       } from '../../../modules/nf-core/bcftools/concat'
 include { BCFTOOLS_SORT         } from '../../../modules/nf-core/bcftools/sort'
 include { BCFTOOLS_INDEX        } from '../../../modules/nf-core/bcftools/index'

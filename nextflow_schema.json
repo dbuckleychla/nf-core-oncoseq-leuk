@@ -255,6 +255,20 @@
             "type": "boolean",
             "description": "Scale resource allocations for very large datasets."
         },
+        "clairsto_indel_min_af": {
+            "type": "number",
+            "default": 0.05,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Minimum indel allele fraction for ClairS-TO candidate generation."
+        },
+        "deepsomatic_indel_min_af": {
+            "type": "number",
+            "default": 0.05,
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Minimum indel allele fraction for DeepSomatic candidate generation."
+        },
         "clairsto_model": {
             "type": "string",
             "description": "ClairS_TO model to use for SNP calling",
@@ -407,6 +421,16 @@
             "type": "string",
             "default": "IMPACT != LOW and IMPACT != MODIFIER and (gnomADe_AF <= 0.01 or not gnomADe_AF) and not CLIN_SIG matches benign and MANE",
             "description": "Expression accepted by filtervep for filtering snp"
+        },
+        "dorado_model_cache": {
+            "type": "string",
+            "format": "path",
+            "description": "Optional separate directory of complete versioned Dorado models, including an existing S3 model prefix."
+        },
+        "reference_aux_cache": {
+            "type": "string",
+            "format": "path",
+            "description": "Optional separate cache for auxiliary reference files under their source basenames."
         },
         "ref_cache": {
             "type": "string",

@@ -4,6 +4,8 @@
 
 - Add an independent institutional AWS Batch Terraform stack and launch profile.
 - Align example capacity with the institutional stack and make GHCR authentication optional for public images.
+- Extend exclusive BAM routing, add clinical step budgets and bounded resource retries, and set ClairS-TO/DeepSomatic indel minimum AF to 0.05.
+- Reuse institutional FASTA, panel and Dorado model paths through separate cache parameters.
 - Pin clinical candidate container digests and runtime versions, require versioned cached models, and correct S3 path handling.
 - Document FrankONTstein settings and reporting differences and Dorado SUP v5.2.0 compatibility.
 

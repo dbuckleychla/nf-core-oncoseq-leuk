@@ -1,0 +1,20 @@
+nextflow_process {
+    name "Clinical memory ceiling"
+    script "tests/config/retry_processes.nf"
+    process "CRAMINO"
+    config "tests/config/ceiling_local.config"
+
+    test("Do not repeat an OOM with the same capped memory budget") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+                test_exit_code = 137
+            }
+        }
+        then {
+            assert !process.success
+            assert process.trace.tasks().size() == 1
+        }
+    }
+}
