@@ -33,3 +33,16 @@ references
 
 # Beads / Dolt files (added by bd init)
 .beads-credential-key
+
+# Terraform deployment state and local settings
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+.beads.gate.lock
+
+# Beads / Dolt files (added by bd init)
+.beads/proxieddb/
+*.gate.lock*
