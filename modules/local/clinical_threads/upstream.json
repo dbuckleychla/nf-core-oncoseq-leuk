@@ -1,0 +1,26 @@
+{
+    "CLAIR3_CALL": {
+        "source": "modules/local/clair3/main.nf",
+        "revision": "8b8cb43505a75b551f8a8ef8e85ca9e8bb885a30"
+    },
+    "CLAIRS_TO_CALL": {
+        "source": "modules/local/clairsto/main.nf",
+        "revision": "b4b42550a669af21781cc3b9611de92e13f69a03"
+    },
+    "DEEPSOMATIC_TUMORONLY": {
+        "source": "modules/local/deepsomatic/main.nf",
+        "revision": "52b4cf61af0f6cb6e59aae429eb1d01a2f310947"
+    },
+    "CLASSY_COMBINED": {
+        "source": "modules/local/classy/main.nf",
+        "revision": "7fad127e9eb50ba52f2f0ce3fdd02d0901841ba3"
+    },
+    "SEVERUS_TUMOR_SINGLE": {
+        "source": "modules/local/severus/main.nf",
+        "revision": "d940f17afb35b246de86abced81a52753cef9536"
+    },
+    "STELLERATOR": {
+        "source": "modules/local/stellerator/main.nf",
+        "revision": "6701ed79fb9981fb4ed17c87281785e297f0b2e7"
+    }
+}

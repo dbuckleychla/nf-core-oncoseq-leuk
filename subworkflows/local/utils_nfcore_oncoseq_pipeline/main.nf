@@ -8,6 +8,8 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+include { validateExecutionOptions } from './validation'
+
 include { UTILS_NFSCHEMA_PLUGIN     } from '../../nf-core/utils_nfschema_plugin'
 include { paramsSummaryMap          } from 'plugin/nf-schema'
 include { samplesheetToList         } from 'plugin/nf-schema'
@@ -81,6 +83,8 @@ workflow PIPELINE_INITIALISATION {
     )
 
 
+    validateExecutionOptions(params, workflow.profile, workflow.workDir.toUriString())
+
     def cols = ['meta', 'project', 'input', 'ubam', 'kit', 'barcode',
                 'bed', 'padding', 'lf', 'purity', 'filter', 'tumor_type']
 
@@ -137,7 +141,7 @@ workflow PIPELINE_INITIALISATION {
                 def padding_kb = params.padding / 1000
                 log.warn("Using padding of ${padding_kb}kb around ROI for all samples")
             }
-            if (!row.bed && params.bed.contains("v2.0.1-pre-merge-panel-20kb-pad.bed")) {
+            if (!row.bed && params.bed.toString().contains("v2.0.1-pre-merge-panel-20kb-pad.bed")) {
                 log.warn("Using default bed file ${params.bed} for all samples")
             }
             tuple(
@@ -218,7 +222,7 @@ workflow PIPELINE_INITIALISATION {
                 if (refFile.isFile()) {
                     if (faExts.any { ext -> refFile.name.endsWith(ext) }) {
                         faFinal = refFile
-                        def faiFile = file("${refFile.parent}/${refFile.name}.fai")
+                        def faiFile = refFile.resolveSibling("${refFile.name}.fai")
                         faiFinal = faiFile.exists() ? faiFile : null
                         if (!faiFinal) log.warn("No FAI found next to '${refFile}' — will index")
                     } else {
@@ -233,6 +237,9 @@ workflow PIPELINE_INITIALISATION {
                     def url = genomeRes == "hg38" ? "ftp://hgdownload.cse.ucsc.edu/goldenPath/${genomeRes}/bigZips/p14/${genomeRes}.p14.fa.gz"
                         : "ftp://hgdownload.cse.ucsc.edu/goldenPath/${genomeRes}/bigZips/${genomeRes}.fa.gz"
 
+                    if (params.clinical && !faFile) {
+                        error "Clinical reference cache '${refFile}' has no FASTA for '${genome}'"
+                    }
                     faFinal  = faFile  ?: file(url)
                     faiFinal = faiFile ?: null
 
@@ -338,18 +345,24 @@ workflow PIPELINE_INITIALISATION {
         }
 
         def ref_cache_dir      = params.ref_cache ? file(params.ref_cache) : null
-        def ref_cache_resolved = ref_cache_dir ? (ref_cache_dir.isDirectory() ? ref_cache_dir.toString() : ref_cache_dir.getParent()) : null
+        def ref_cache_resolved = ref_cache_dir ? (ref_cache_dir.isDirectory() ? ref_cache_dir.toUriString() : ref_cache_dir.parent.toUriString()) : null
+        def model_cache = params.dorado_model_cache
+            ? file(params.dorado_model_cache)
+            : (ref_cache_resolved ? file("${ref_cache_resolved}/dorado_models") : null)
 
         ch_model_dir = ref_cache_resolved
             ? channel.fromPath(ref_cache_resolved, checkIfExists: true)
             : channel.fromPath("${launchDir}")
 
-        def model_resolved = ref_cache_resolved
-            ? selectLatestModel(params.basecall_model, file("${ref_cache_resolved}/dorado_models"))
+        def model_resolved = model_cache
+            ? selectLatestModel(params.basecall_model, model_cache)
             : null
         def modif_resolved = params.m_bases && model_resolved ?
-            selectLatestModif(file("${params.ref_cache}/dorado_models"), model_resolved, params.m_bases) :
+            selectLatestModif(model_cache, model_resolved, params.m_bases) :
             null
+        if (params.clinical && (!model_resolved || (params.m_bases && !modif_resolved))) {
+            error 'Clinical Dorado models must be present at their exact versions in dorado_model_cache or ref_cache/dorado_models'
+        }
         ch_modif = channel.fromPath("${projectDir}/assets/NOMOD")
 
         if (model_resolved) {
@@ -446,7 +459,7 @@ workflow PIPELINE_INITIALISATION {
     // download the exact cache required by the selected reference genome.
     def vepCacheDetails = getVepCacheDetails(params.genome)
     def refCacheFile = params.ref_cache ? file(params.ref_cache) : null
-    def refCacheDir  = refCacheFile ? (refCacheFile.isDirectory() ? refCacheFile.toString() : refCacheFile.getParent()) : null
+    def refCacheDir  = refCacheFile ? (refCacheFile.isDirectory() ? refCacheFile.toUriString() : refCacheFile.parent.toUriString()) : null
 
     def vepCacheCandidates = params.vep_cache
         ? [params.vep_cache]
@@ -454,6 +467,10 @@ workflow PIPELINE_INITIALISATION {
 
     def vepCacheDirectory = vepCacheCandidates.find { candidate ->
         hasVepCache(candidate, vepCacheDetails, params.vep_version)
+    }
+
+    if (params.clinical && !vepCacheDirectory) {
+        error "Clinical VEP cache must contain ${vepCacheDetails.species}/${params.vep_version}_${vepCacheDetails.assembly}"
     }
 
     if (vepCacheDirectory) {
@@ -880,7 +897,7 @@ def getVepCacheDetails(genome) {
 }
 
 def hasVepCache(cacheDirectory, cacheDetails, cacheVersion) {
-    cacheDirectory && file("${cacheDirectory}/${cacheDetails.species}/${cacheVersion}_${cacheDetails.assembly}").isDirectory()
+    cacheDirectory && file(cacheDirectory).resolve("${cacheDetails.species}/${cacheVersion}_${cacheDetails.assembly}").isDirectory()
 }
 
 // Case-insensitive FASTA/FAI finders
@@ -889,11 +906,15 @@ def findFaFile (files, aliasList, exts) {
 }
 
 def findCached(String url) {
-    if( !params.ref_cache ) return null
-    def cache = file(params.ref_cache)
-    if( !cache.isDirectory() ) return null
+    def cache_path = params.reference_aux_cache ?: params.ref_cache
+    if (!cache_path) return null
+    def cache = file(cache_path)
+    if (!cache.isDirectory()) cache = cache.parent
 
     def cached = cache.resolve(url.tokenize('/')[-1])
+    if (params.clinical && !cached.exists()) {
+        error "Clinical reference asset is missing from the release cache: ${cached}"
+    }
     return cached.exists() ? cached : null
 }
 

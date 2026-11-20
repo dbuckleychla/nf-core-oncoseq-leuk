@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { CLASSY_COMBINED     } from '../../../modules/local/classy/main.nf'
+include { CLASSY_COMBINED     } from '../../../modules/local/clinical_threads/main.nf'
 include { PARSE_JSON_COMBINED } from '../../../modules/local/classifier_process/main.nf'
 
 def addTypeToChannel(ch, type) {

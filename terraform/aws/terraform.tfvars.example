@@ -1,0 +1,57 @@
+region = "us-west-2"
+name   = "oncoseq-leuk-dev"
+# AWS ECS-optimised AL2023 x86-64 release 2023.0.20261113, us-west-2.
+cpu_ami_id = "ami-0f9003a6aee571ca8"
+gpu_ami_id = "ami-0c050c3f1924995a9"
+# AWS credentials / AWS_PROFILE use the standard credential chain.
+# General CPU queue: allowed instance families and total compute capacity.
+instance_types = [
+  "m8i.8xlarge", "m8i.4xlarge", "m8i.xlarge",
+  "r8i.8xlarge", "r8i.4xlarge", "r8i.xlarge"
+]
+max_vcpus = 512
+spot      = false
+# Optional existing network, with outbound connectivity for images and assets:
+# vpc_id = "vpc-..."
+# subnet_ids = ["subnet-...", "subnet-..."]
+# Required existing bucket; bucket settings are never changed.
+bucket_name = "plm-cpm-sandbox-research-usw2"
+# Pinned GHCR images are public; anonymous pulls need no registry secret.
+# Supply only when adding private images:
+# ghcr_secret_arn = "arn:aws:secretsmanager:us-west-2:<account>:secret:<ghcr-secret>"
+# ghcr_secret_kms_key_arn = "arn:aws:kms:us-west-2:<account>:key/<key-id>"
+# All work/results writes are scoped beneath this prefix.
+s3_prefix = "OncoseqLeuk/"
+# Public VEP cache; add other input/reference buckets when needed.
+read_bucket_arns = ["arn:aws:s3:::annotation-cache"]
+# permissions_boundary_arn = "arn:aws:iam::<account>:policy/<boundary>"
+
+# Independently sized NVIDIA GPU fleets for basecalling and general work.
+# Set either instance list to [] to disable that fleet.
+# Each 48-vCPU worker admits one clinical 32-vCPU basecalling reservation.
+basecall_instance_types = ["g7.2xlarge", "g7.4xlarge", "g7.12xlarge", "g6.2xlarge", "g6.4xlarge", "g6.12xlarge"]
+basecall_max_vcpus      = 512
+# Blackwell basecalling requires the Dorado/AMI acceptance test before use.
+# Keep g7e out of the general fleet for DeepSomatic/Clair3 image compatibility.
+gpu_instance_types = ["g6.xlarge", "g6.4xlarge"]
+gpu_max_vcpus      = 512
+
+# Optional: reuse a self-contained AWS CLI installation already in BOTH EC2 AMIs.
+# Skips AWS CLI installation; host diagnostics still install CloudWatch agent.
+# use_existing_aws_cli  = true
+# existing_aws_cli_path = "/usr/local/aws-cli/v2/current/bin/aws"
+
+# Shared Docker/task gp3 storage. Above-baseline performance has additional cost.
+scratch_gb               = 500
+scratch_iops             = 6000
+scratch_throughput_mibps = 500
+# New CPU and GPU workers forward journal/ECS/bootstrap logs automatically.
+# See terraform output host_diagnostics for the CloudWatch location.
+
+# Optional BAM high/low fleets; existing bam_* variables configure high workers.
+bam_queue_enabled = true
+bam_max_vcpus     = 256
+bam_scratch_gb    = 2000
+# Low fleet: up to 32 exclusive 8-vCPU workers at this capacity.
+bam_low_max_vcpus  = 256
+bam_low_scratch_gb = 2000

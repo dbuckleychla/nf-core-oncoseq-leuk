@@ -73,6 +73,21 @@ workflow NF_CORE_ONCOSEQ {
 
 params {
 
+    clinical: Boolean
+    aws_region: String?
+    aws_queue: String?
+    aws_basecall_queue: String?
+    aws_gpu_queue: String?
+    aws_bam_high_queue: String?
+    aws_bam_high_vcpus: Integer
+    aws_bam_low_queue: String?
+    aws_bam_low_vcpus: Integer
+    aws_job_role: String?
+    aws_logs_group: String?
+    aws_cli_path: String
+    run_id: String?
+
+
     // Bin size to use for CNV calling with QDNAseq (Kbp)
     qdnaseq_binsize: Integer = 500
 
@@ -102,6 +117,8 @@ params {
 
     // ClairS_TO model to use for SNP calling
     clairsto_model: String = 'ont_r10_dorado_sup_5khz_ssrs'
+    clairsto_indel_min_af: Float = 0.05
+    deepsomatic_indel_min_af: Float = 0.05
 
     // Path to text file containing list of genes of low fidelity for adaptive sampling (default is empty list)
     low_fidelity: Path = "${projectDir}/assets/panel_low_fidelity.txt"
@@ -128,6 +145,7 @@ params {
     include_full: Boolean = true
 
     basecall_model: String
+    basecall_shards: Integer = 1
 
     // Use number of sequencing hour to activate real time mode
     realtime: Integer?
@@ -201,6 +219,8 @@ params {
 
     // Path to directory containing reference genome
     ref_cache: Path?
+    dorado_model_cache: Path?
+    reference_aux_cache: Path?
 
     // Human genome assembly identifier
     genome: String = 'hg38'
@@ -212,16 +232,16 @@ params {
     input: Path
 
     // The output directory where the results will be saved. You have to use absolute paths to storage on Cloud infrastructure.
-    outdir: Path
+    outdir: String
 
     // Email address for completion summary.
     email: String?
 
     // Git commit id for Institutional configs.
-    custom_config_version: String = 'master'
+    custom_config_version: String = '4f87caf6c43b484cf358e34722a3bb6e1ce9c4c2'
 
     // Base directory for Institutional configs.
-    custom_config_base: String = 'https://github.com/nf-core/configs/raw/master/nfcore_custom.config'
+    custom_config_base: String = 'https://raw.githubusercontent.com/nf-core/configs/4f87caf6c43b484cf358e34722a3bb6e1ce9c4c2'
 
     // Institutional config name.
     config_profile_name: String?
@@ -343,7 +363,7 @@ workflow {
     ch_min_mapq   = channel.of(params.min_mapq_ichor)
 
 
-   // WORKFLOW: Run main workflow
+    // WORKFLOW: Run main workflow
     NF_CORE_ONCOSEQ (
         ch_input,
         PIPELINE_INITIALISATION.out.demux_sheet,

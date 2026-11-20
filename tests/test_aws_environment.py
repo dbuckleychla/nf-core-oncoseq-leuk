@@ -1,0 +1,114 @@
+import importlib.util
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+import tempfile
+import unittest
+from unittest.mock import patch
+
+ROOT = Path(__file__).resolve().parents[1]
+spec = importlib.util.spec_from_file_location('aws_batch_env', ROOT / 'scripts/aws_batch_env.py')
+helper = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(helper)
+
+
+def outputs(gpu='gpu-queue'):
+    return {'nextflow_params': {'value': {
+        'aws_region': 'us-west-2', 'aws_queue': 'cpu-queue', 'aws_gpu_queue': gpu,
+        'aws_job_role': 'arn:aws:iam::123456789012:role/test-task',
+        'aws_logs_group': '/test/batch', 'aws_cli_path': '/opt/aws-cli/v2/current/bin/aws',
+        'outdir': 's3://test-bucket/project/results/'}},
+        'work_dir': {'value': 's3://test-bucket/project/work/'}}
+
+
+class AWSEnvironmentTests(unittest.TestCase):
+    def test_resolves_outputs_and_run_paths(self):
+        result = helper.build_environment(outputs())
+        self.assertEqual(result['ONCOSEQ_AWS_GPU_QUEUE'], 'gpu-queue')
+        self.assertEqual(result['ONCOSEQ_RESULTS_PREFIX'], 's3://test-bucket/project/results')
+        self.assertEqual(result['ONCOSEQ_WORK_PREFIX'], 's3://test-bucket/project/work')
+        self.assertNotIn('AWS_PROFILE', result)
+        self.assertEqual(len(result), 15)
+
+    def test_bam_queue_outputs_and_clearing(self):
+        data = outputs()
+        data['nextflow_params']['value'].update(aws_bam_high_queue='bam-high', aws_bam_high_vcpus='32',
+                                               aws_bam_low_queue='bam-low', aws_bam_low_vcpus='8')
+        environment = helper.build_environment(data)
+        for name, value in [('HIGH_QUEUE', 'bam-high'), ('HIGH_VCPUS', '32'), ('LOW_QUEUE', 'bam-low'), ('LOW_VCPUS', '8')]:
+            self.assertEqual(environment['ONCOSEQ_AWS_BAM_' + name], value)
+            self.assertEqual(helper.build_environment(outputs())['ONCOSEQ_AWS_BAM_' + name], '')
+        self.assertEqual(environment['ONCOSEQ_AWS_BAM_QUEUE'], '')
+        self.assertEqual(environment['ONCOSEQ_AWS_BAM_VCPUS'], '')
+
+    def test_old_state_exports_map_to_high_only(self):
+        data = outputs()
+        data['nextflow_params']['value'].update(aws_bam_queue='old-bam', aws_bam_vcpus='32')
+        environment = helper.build_environment(data)
+        self.assertEqual(environment['ONCOSEQ_AWS_BAM_HIGH_QUEUE'], 'old-bam')
+        self.assertEqual(environment['ONCOSEQ_AWS_BAM_HIGH_VCPUS'], '32')
+        self.assertEqual(environment['ONCOSEQ_AWS_BAM_LOW_QUEUE'], '')
+        self.assertEqual(environment['ONCOSEQ_AWS_BAM_QUEUE'], '')
+
+    def test_basecall_queue_is_independent_and_cleared(self):
+        data = outputs()
+        data['nextflow_params']['value']['aws_basecall_queue'] = 'basecall-queue'
+        environment = helper.build_environment(data)
+        self.assertEqual(environment['ONCOSEQ_AWS_BASECALL_QUEUE'], 'basecall-queue')
+        self.assertEqual(environment['ONCOSEQ_AWS_GPU_QUEUE'], 'gpu-queue')
+        self.assertEqual(helper.build_environment(outputs())['ONCOSEQ_AWS_BASECALL_QUEUE'], '')
+
+    def test_cpu_only_outputs_clear_previous_gpu_queue(self):
+        self.assertEqual(helper.build_environment(outputs(None))['ONCOSEQ_AWS_GPU_QUEUE'], '')
+
+    def test_invalid_or_incomplete_outputs(self):
+        for data in [[], {}, {'nextflow_params': {'value': {}}},
+                     outputs() | {'work_dir': {'value': '/local/work'}}]:
+            with self.assertRaises(ValueError):
+                helper.build_environment(data)
+    def test_terraform_invocation_is_output_only_and_inherits_environment(self):
+        with patch.object(helper.subprocess, 'run') as run:
+            run.return_value.stdout = json.dumps(outputs())
+            self.assertEqual(helper.read_outputs(Path('/terraform path')), outputs())
+            self.assertEqual(run.call_args.args[0], ['terraform', '-chdir=/terraform path', 'output', '-json'])
+            self.assertNotIn('env', run.call_args.kwargs)
+
+    def test_saved_outputs_do_not_require_terraform(self):
+        with tempfile.TemporaryDirectory() as temp:
+            export = Path(temp) / 'outputs.json'
+            export.write_text(json.dumps(outputs()))
+            with patch.object(helper.subprocess, 'run') as run:
+                self.assertEqual(helper.read_outputs(None, export), outputs())
+                run.assert_not_called()
+            result = subprocess.run([sys.executable, str(ROOT / 'scripts/aws_batch_env.py'),
+                                     '--terraform-outputs', str(export)],
+                                    check=True, text=True, capture_output=True)
+            self.assertEqual(result.stdout, helper.shell_exports(helper.build_environment(outputs())))
+
+    def test_exports_roundtrip_without_executing_shell_characters(self):
+        with tempfile.TemporaryDirectory() as temp:
+            sentinel = Path(temp) / 'must-not-exist'
+            data = outputs()
+            data['nextflow_params']['value']['aws_queue'] = f"queue ' $(touch {sentinel}) `touch {sentinel}` ; end"
+            expected = helper.build_environment(data)
+            script = Path(temp) / 'exports.sh'
+            script.write_text(helper.shell_exports(expected))
+            result = subprocess.run(['/bin/bash', '-c', '. "$1"; "$2" -c \'import os,json; print(json.dumps({k:v for k,v in os.environ.items() if k.startswith("ONCOSEQ_")}))\'',
+                                     'test', str(script), sys.executable],
+                                    check=True, text=True, capture_output=True,
+                                    env={k:v for k,v in os.environ.items() if not k.startswith('ONCOSEQ_')})
+            self.assertEqual(json.loads(result.stdout), expected)
+            self.assertFalse(sentinel.exists())
+
+    def test_output_failure_emits_no_shell_code(self):
+        result = subprocess.run([sys.executable, str(ROOT / 'scripts/aws_batch_env.py'),
+                                 '--terraform-outputs', '/nonexistent/outputs.json'],
+                                capture_output=True, text=True)
+        self.assertNotEqual(result.returncode, 0)
+        self.assertEqual(result.stdout, '')
+
+
+if __name__ == '__main__':
+    unittest.main()

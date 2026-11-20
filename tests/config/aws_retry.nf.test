@@ -1,0 +1,33 @@
+nextflow_process {
+    name "Clinical retries and BAM queue promotion"
+    script "tests/config/retry_processes.nf"
+    process "CRAMINO"
+    config "tests/config/retry_local.config"
+
+    test("An OOM retry grows memory and promotes to an exclusive high worker") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+                test_exit_code = 137
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.settings[0].readLines() == ['bam-high', '32', '64 GB', '2']
+        }
+    }
+
+    test("A deterministic tool error is not retried") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                test_exit_code = 1
+            }
+        }
+        then {
+            assert !process.success
+            assert process.trace.tasks().size() == 1
+        }
+    }
+}

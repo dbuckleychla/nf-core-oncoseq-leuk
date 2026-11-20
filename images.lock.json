@@ -1,0 +1,185 @@
+{
+    "platform": "linux/amd64",
+    "images": {
+        "community.wave.seqera.io/library/bcftools_htslib:1.23.1--9f08ec665533d64a": {
+            "image": "community.wave.seqera.io/library/bcftools_htslib@sha256:9c0dea3c6d34d771912b4a2b0297d3e796db69d3c06620cb93b8ab41c072c613",
+            "processes": ["BCFTOOLS_CONCAT", "BCFTOOLS_INDEX", "BCFTOOLS_QUERY", "BCFTOOLS_SORT", "BCFTOOLS_VIEW"]
+        },
+        "community.wave.seqera.io/library/bcftools_htslib:1.25--130aa7603bf3bf5c": {
+            "image": "community.wave.seqera.io/library/bcftools_htslib@sha256:bc430350197787c65b371b1c9dacd163c33dda965597bcdcdd106b85d1c9e936",
+            "processes": ["BCFTOOLS_FILTER"]
+        },
+        "community.wave.seqera.io/library/bedtools:2.31.1--897920cd303d6413": {
+            "image": "community.wave.seqera.io/library/bedtools@sha256:2001773508b78b5bdec3b7f9d3c7766d394550bd78b895db901543fa71b39541",
+            "processes": ["BEDTOOLS_INTERSECT", "BEDTOOLS_MAKEWINDOWS", "BEDTOOLS_SLOP", "BEDTOOLS_SUBTRACT"]
+        },
+        "community.wave.seqera.io/library/chopper_pigz:4ae8a43e228724c3": {
+            "image": "community.wave.seqera.io/library/chopper_pigz@sha256:4d10e33017d5d985179adf761237583cf0073784f4d91289bef49b4f9e98064c",
+            "processes": ["CHOPPER"]
+        },
+        "community.wave.seqera.io/library/coreutils_grep_gzip_lbzip2_pruned:838ba80435a629f8": {
+            "image": "community.wave.seqera.io/library/coreutils_grep_gzip_lbzip2_pruned@sha256:63c2c6b22e83b2f656e88fbb1553e595da4e9e58794e3bfcb98b20b3837f328a",
+            "processes": ["CAT_FASTQ"]
+        },
+        "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf:1e13f65f931a6954": {
+            "image": "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf@sha256:442c7140afaaa36f17671eb42656d6412b5196bbe742751b88d7eae5c7cc4d4b",
+            "processes": ["ENSEMBLVEP_FILTERVEP", "ENSEMBLVEP_VEP"]
+        },
+        "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf_htslib:c4edd3fb4a233ae6": {
+            "image": "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf_htslib@sha256:918b8397048f87e44b6bd4fd1f7a6a78c77b758882bfd298c95f57c054e3e4c6",
+            "processes": ["ENSEMBLVEP_DOWNLOAD"]
+        },
+        "community.wave.seqera.io/library/htslib_mosdepth_gzip:4108dd38be84e40a": {
+            "image": "community.wave.seqera.io/library/htslib_mosdepth_gzip@sha256:426ef2ec8c93bc292862c2902a91f193ae336bdb84750581637d35f59017d2bc",
+            "processes": ["MOSDEPTH"]
+        },
+        "community.wave.seqera.io/library/htslib_samtools:1.24--8a3ddf262165ba23": {
+            "image": "community.wave.seqera.io/library/htslib_samtools@sha256:0111ab21d3c4f7e9d49ac8b9f3b58f96b5609b7b40a1634029f15fbbf7f7191f",
+            "processes": ["SAMTOOLS_SORT", "SAMTOOLS_VIEW"]
+        },
+        "community.wave.seqera.io/library/htslib_samtools:1.24--d697cfb9dce007cd": {
+            "image": "community.wave.seqera.io/library/htslib_samtools@sha256:a55ddea590e567a91df592300a960aa534cfc1bd16e7623e3938ec21f4f3df15",
+            "processes": [
+                "SAMTOOLS_COUNT_READS",
+                "SAMTOOLS_FAIDX",
+                "SAMTOOLS_INDEX",
+                "SAMTOOLS_MERGE",
+                "SAMTOOLS_QSFILTER",
+                "SAMTOOLS_TOFASTQ"
+            ]
+        },
+        "community.wave.seqera.io/library/htslib_xz:32f2772a564b3cd2": {
+            "image": "community.wave.seqera.io/library/htslib_xz@sha256:f80d3b163039303cc5b50e599aba464e43a9c97fcc7f2bb114d55a71183170a2",
+            "processes": ["HTSLIB_BGZIPTABIX"]
+        },
+        "community.wave.seqera.io/library/minimap2_samtools:b09096fc890429ce": {
+            "image": "community.wave.seqera.io/library/minimap2_samtools@sha256:a46a2b8c93894d01d1e32ed4fee123c2fc1e9febbe2a513526f19b66c2338c66",
+            "processes": ["MINIMAP2_ALIGN"]
+        },
+        "community.wave.seqera.io/library/pharmcat3:3.2.0--5126bb296d1e59ac": {
+            "image": "community.wave.seqera.io/library/pharmcat3@sha256:58adeb930ff3b6280b70129f4d0a3df835b702621077a3745922076786a2c7a2",
+            "processes": ["PHARMCAT_MATCHER", "PHARMCAT_PHENOTYPER", "PHARMCAT_REPORTER", "PHARMCAT_VCFPREPROCESSOR"]
+        },
+        "community.wave.seqera.io/library/seqkit:2.13.0--05c0a96bf9fb2751": {
+            "image": "community.wave.seqera.io/library/seqkit@sha256:1f6c3399ca530a727fd243e50348560e820cd1f97668ebbe767d5dff370168da",
+            "processes": ["SEQKIT_STATS"]
+        },
+        "community.wave.seqera.io/library/sniffles:2.8.0--c25a97c10afa095a": {
+            "image": "community.wave.seqera.io/library/sniffles@sha256:f0c86d464bab1c32fbade646cfd703128126120135030323922f43c02ac9e081",
+            "processes": ["SNIFFLES"]
+        },
+        "community.wave.seqera.io/library/wget:1.21.4--8b0fcde81c17be5e": {
+            "image": "community.wave.seqera.io/library/wget@sha256:df99425826775efe50af864d4caa2a3f54e3e3199474279e8e9c6926952873bc",
+            "processes": ["WGET"]
+        },
+        "community.wave.seqera.io/library/whatshap:2.8--7fe530bc624a3e5a": {
+            "image": "community.wave.seqera.io/library/whatshap@sha256:d63acefd18b67f3860b2614d316157fdd926380f9366a93ddd6d223e24382a58",
+            "processes": ["WHATSHAP_HAPLOTAG", "WHATSHAP_PHASE"]
+        },
+        "docker.io/google/deepsomatic:1.10.0": {
+            "image": "docker.io/google/deepsomatic@sha256:6cd98c41781cdc1a2916d8029bedef70a57b87d41f933bd4cf259c80f291e27b",
+            "processes": ["DEEPSOMATIC_TUMORONLY"]
+        },
+        "ghcr.io/chusj-pigu/clair3:5c1b224addf317c2cfe5ab5e03f6cdb23da13303": {
+            "image": "ghcr.io/chusj-pigu/clair3@sha256:e02a63cb7eef4c69291f13adab59f5203a3cf68511572db66f962d381084efed",
+            "processes": ["CLAIR3_CALL"]
+        },
+        "ghcr.io/chusj-pigu/clairsto:32908b7a702353b94cb595160a88ee05620015eb": {
+            "image": "ghcr.io/chusj-pigu/clairsto@sha256:1b1eaa5ef7bdba4ad7579b95d51b05ee9a1ea3c9b7349e947972c27a1560dbfd",
+            "processes": ["CLAIRS_TO_CALL"]
+        },
+        "ghcr.io/chusj-pigu/classy-slim:sha-71c699b": {
+            "image": "ghcr.io/chusj-pigu/classy-slim@sha256:77c7e9379dfb624b00ccb76df5270f1b9b9b00322a2f583a06a1d9e9006997ef",
+            "processes": [
+                "CLASSY_ALMA",
+                "CLASSY_ALMA_PILEUP",
+                "CLASSY_COMBINED",
+                "CLASSY_COMBINED_PILEUP",
+                "CLASSY_CROSSNN_CAPER",
+                "CLASSY_CROSSNN_CAPER_PILEUP",
+                "CLASSY_CROSSNN_PANCAN",
+                "CLASSY_CROSSNN_PANCAN_PILEUP",
+                "CLASSY_MARLIN",
+                "CLASSY_MARLIN_PILEUP",
+                "CLASSY_MPACT",
+                "CLASSY_MPACT_PILEUP"
+            ]
+        },
+        "ghcr.io/chusj-pigu/delly:4c07465cd477798fc6fe0b06d941dbe8acdba7bb": {
+            "image": "ghcr.io/chusj-pigu/delly@sha256:7009e0aebca9dd703fc0958738cb1fa3d547b7cc05086f7feab6436aa015e831",
+            "processes": ["DELLY_CNV"]
+        },
+        "ghcr.io/chusj-pigu/dorado:851b0a37ecbff6b3b952c811b31dad48ca6bf995": {
+            "image": "ghcr.io/chusj-pigu/dorado@sha256:9db144aac4cd9f6485104b0e208fe14b6201c9617fd4b31ff7b8b66e815135a0",
+            "processes": [
+                "DORADO_BASECALL",
+                "DORADO_DEMULTIPLEX",
+                "DORADO_DOWNLOAD_LIST",
+                "DORADO_DOWNLOAD_MODEL",
+                "DORADO_TRIM"
+            ]
+        },
+        "ghcr.io/chusj-pigu/figeno:e42833528621000fed543c5a6d999262ab751bcf": {
+            "image": "ghcr.io/chusj-pigu/figeno@sha256:e9a90169d979043902f3584990cc05d989e229b60fb90a019e7c65724503e98c",
+            "processes": ["FIGENO_CIRCOS", "FIGENO_PAN_CHR", "FIGENO_SV_FIGURE"]
+        },
+        "ghcr.io/chusj-pigu/ichorcna:latest": {
+            "image": "ghcr.io/chusj-pigu/ichorcna@sha256:d70be8a59c4eda1d4f7d9adf856ed603419b5d5ea65f8d573c9252165d5db95a",
+            "processes": ["HMMCOPY_WIG", "ICHORCNA", "ICHORCNA_DOWNLOAD"]
+        },
+        "ghcr.io/chusj-pigu/magick:latest": {
+            "image": "ghcr.io/chusj-pigu/magick@sha256:94f1d0b451bb3bf8cb6b30cb2c46e660f91e5d982401ce5e2a43a9bff04efb4c",
+            "processes": ["CONVERT_PDF_PNG"]
+        },
+        "ghcr.io/chusj-pigu/nasvar:4f4033bdf40a5503fd555caee4c5d0d340cc1400": {
+            "image": "ghcr.io/chusj-pigu/nasvar@sha256:aa71fb3801ba0e25bc097dbbdd445496799fe4fd54f0d72c4516ef2ff9d52e8c",
+            "processes": ["NASVAR_PIPELINE"]
+        },
+        "ghcr.io/chusj-pigu/ontime:latest": {
+            "image": "ghcr.io/chusj-pigu/ontime@sha256:db193f0b788482db943afc0bc19b31dc9fc6adc8cd2e45c2bf844734edb9a8b0",
+            "processes": ["ONTIME_RANGE_FILTER", "ONTIME_RANGE_FILTER_FASTQ", "ONTIME_TIME_RANGE"]
+        },
+        "ghcr.io/chusj-pigu/qdnaseq:latest": {
+            "image": "ghcr.io/chusj-pigu/qdnaseq@sha256:870d6228e7a6fdfb08c3093069be07adb9f26084bcc12cf11a2c24eeb99bd1d9",
+            "processes": ["QDNASEQ_CALL"]
+        },
+        "ghcr.io/chusj-pigu/quarto:1aae9c5de71b00a19debb6db4067e5eb67301126": {
+            "image": "ghcr.io/chusj-pigu/quarto@sha256:33202e0cb941b22146ac9e96cf2ba99faa693867ebb2da804529398ebbad03ec",
+            "processes": [
+                "QUARTO_CODE",
+                "QUARTO_FIGURE",
+                "QUARTO_FIGURE_TABS",
+                "QUARTO_REPORT",
+                "QUARTO_SECTION",
+                "QUARTO_TABLE",
+                "QUARTO_TABLE_COLNAMES",
+                "QUARTO_TABLE_TABS",
+                "QUARTO_TEXT"
+            ]
+        },
+        "ghcr.io/chusj-pigu/severus:a294582458464a429891218e2be1c8c0db07b199": {
+            "image": "ghcr.io/chusj-pigu/severus@sha256:07ade7f3aec9181b7f5f52cda1d505662fd256516bedb7bdfa1047fe9466dff1",
+            "processes": ["SEVERUS_TUMOR_SINGLE"]
+        },
+        "ghcr.io/chusj-pigu/stellerator:5723fc7c4383bc34f07a9e7c159f9205ce1f8e08": {
+            "image": "ghcr.io/chusj-pigu/stellerator@sha256:b464e55a95a55d442cc2c75af381ff2dffeb342760a2f49674c867a6e531ecd8",
+            "processes": ["STELLERATOR"]
+        },
+        "ghcr.io/chusj-pigu/tidyverse:006154f90a8b1b1c8647a246a76cb0562517da61": {
+            "image": "ghcr.io/chusj-pigu/tidyverse@sha256:7f95139ad20cc9f3e8156ce4cab5afdb9c3de598c4d1a3106b39c4015d82e739",
+            "processes": ["COVERAGE_PLOT", "ENSEMBL_VEP_TABLE", "PARSE_JSON_COMBINED", "QDNASEQ_PROCESS", "SV_PROCESS"]
+        },
+        "quay.io/biocontainers/cramino:1.1.0--h3dc2dae_0": {
+            "image": "quay.io/biocontainers/cramino@sha256:a0ed72cbb52240e6cb0085bea16f5356b3d790621281dd11cecc2f5173e5f791",
+            "processes": ["CRAMINO"]
+        },
+        "quay.io/biocontainers/pigz:2.8": {
+            "image": "quay.io/biocontainers/pigz@sha256:4c256586c0deb165a4675aba8cd6bbbec9b45fced5c5806af5b60b6be7303542",
+            "processes": ["PIGZ_UNCOMPRESS"]
+        },
+        "quay.io/biocontainers/whatshap:2.8--py39h2de1943_0": {
+            "image": "quay.io/biocontainers/whatshap@sha256:d63cdf64c29f99016ace7f8a4ace72d7a1dbbec262831e65d1a97d6a57960a30",
+            "processes": ["WHATSHAP_STATS"]
+        }
+    }
+}
