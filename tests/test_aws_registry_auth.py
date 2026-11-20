@@ -1,6 +1,7 @@
 import importlib.util
 import base64
 import json
+import itertools
 from pathlib import Path
 import stat
 import shutil
@@ -20,13 +21,13 @@ spec.loader.exec_module(auth)
 class RegistryAuthTests(unittest.TestCase):
     @unittest.skipUnless(shutil.which('terraform'), 'Terraform is needed for template rendering')
     def test_actual_bootstrap_renders_without_provider_or_cloud_access(self):
-        for existing in (False, True):
-            with self.subTest(existing=existing), tempfile.TemporaryDirectory() as tmp:
+        for existing, authenticated in itertools.product((False, True), repeat=2):
+            with self.subTest(existing=existing, authenticated=authenticated), tempfile.TemporaryDirectory() as tmp:
                 variables = {
                     'aws_cli_version': '2.31.0', 'use_existing_aws_cli': existing,
                     'existing_aws_cli_path': '/custom/aws/bin/aws',
                     'host_agent_config': '{}', 'region': 'us-west-2',
-                    'ghcr_secret_arn': 'arn:aws:secretsmanager:us-west-2:123456789012:secret:test-Ab1234',
+                    'ghcr_secret_arn': 'arn:aws:secretsmanager:us-west-2:123456789012:secret:test-Ab1234' if authenticated else None,
                     'registry_auth_script': SCRIPT.read_text(),
                 }
                 expression = 'base64encode(templatefile(%s, jsondecode(%s)))' % (
@@ -41,9 +42,15 @@ class RegistryAuthTests(unittest.TestCase):
                 check = subprocess.run(['/bin/bash', '-n'], input=shell, capture_output=True, text=True)
                 self.assertEqual(check.returncode, 0, check.stderr)
                 expected_cli = '/custom/aws/bin/aws' if existing else '/opt/aws-cli/v2/current/bin/aws'
-                self.assertIn('--aws-cli ' + expected_cli, content)
-                self.assertLess(content.index('20-ghcr-auth.conf'), content.index('systemctl start ecs'))
-                self.assertIn(SCRIPT.read_text(), content)
+                if authenticated:
+                    self.assertIn('--aws-cli ' + expected_cli, content)
+                    self.assertLess(content.index('20-ghcr-auth.conf'), content.index('systemctl start ecs'))
+                    self.assertIn(SCRIPT.read_text(), content)
+                else:
+                    self.assertNotIn('20-ghcr-auth.conf', content)
+                    self.assertNotIn('--secret-arn', content)
+                    self.assertNotIn(SCRIPT.read_text(), content)
+                    self.assertIn('systemctl start ecs', content)
 
     def test_msq_and_ecs_formats_preserve_config_and_rotate_credentials(self):
         for field in ('accessToken', 'password'):

@@ -4,7 +4,9 @@ The pipeline baseline is parent repository `chusj-pigu/nf-core-oncoseq` release 
 
 This fork has a separate Terraform stack under `terraform/aws`. It derives from FrankONTstein commit `46553118352caa218f82762f74c74ce635220177` and uses its institutional queue, storage, registry-authentication and IAM conventions. The stack uses its own Terraform state, resource names and S3 prefix. Its default name and prefix are `oncoseq-leuk`. The copied infrastructure and helper code retain the FrankONTstein MIT licence.
 
-Terraform 1.13.2 and AWS provider 6.13.0 are pinned. Supply an existing S3 bucket, deployment region, registry credential secret ARN and an explicit x86-64 ECS AL2023 CPU AMI. The example enables both GPU fleets. GPU workers require a pinned ECS AL2023 NVIDIA AMI. The example tfvars uses placeholder AMI IDs. The default optional VPC CIDR is `10.83.0.0/16`.
+Terraform 1.13.2 and AWS provider 6.13.0 are pinned. Supply an existing S3 bucket and deployment region. The example uses the institutional research bucket, six explicit CPU instance sizes, and independent 512-vCPU CPU/basecalling/general GPU capacities. Both GPU fleets use g6e sizes. Optional g7e basecalling candidates require Dorado/AMI acceptance testing; the general fleet retains g6e for caller-image compatibility. The default optional VPC CIDR is `10.83.0.0/16`.
+
+The example pins AWS ECS-optimised AL2023 x86-64 release `2023.0.20261113` in `us-west-2`: CPU `ami-0f9003a6aee571ca8` and NVIDIA GPU `ami-0c050c3f1924995a9`. These IDs were resolved on 20 November 2026 from the public SSM parameters `/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended` (version 165) and `/aws/service/ecs/optimized-ami/amazon-linux-2023/gpu/recommended` (version 94). EC2 confirmed both are public, available, x86-64 images owned by AWS account `591542846629`. Both contain ECS agent 1.108.3 and Docker 25.0.18. IDs are region-specific; select and pin equivalent images when changing region. Worker boot, CUDA inference and Dorado compatibility still require deployment acceptance tests.
 
 ```bash
 cp terraform/aws/terraform.tfvars.example terraform/aws/terraform.tfvars
@@ -15,7 +17,9 @@ terraform -chdir=terraform/aws plan -out=deployment.tfplan
 terraform -chdir=terraform/aws apply deployment.tfplan
 ```
 
-Use a distinct backend state key or an independently managed local state for this stack. An existing VPC can be selected with `vpc_id` and `subnet_ids`. Work and results IAM writes are scoped to the configured prefix. The coordinator requires the exported `coordinator_policy_arn`. Supply readable input/reference bucket ARNs and relevant KMS keys in tfvars. The registry secret supports the existing `username`/`accessToken` or `username`/`password` JSON formats.
+Use a distinct backend state key or an independently managed local state for this stack. An existing VPC can be selected with `vpc_id` and `subnet_ids`. Work and results IAM writes are scoped to the configured prefix. The coordinator requires the exported `coordinator_policy_arn`. Supply readable input/reference bucket ARNs and relevant KMS keys in tfvars.
+
+All 15 GHCR image digests in the current lock were verified anonymously readable on 20 November 2026. Public pulls use the default `ghcr_secret_arn = null`; workers receive no registry-secret policy or authentication hook. If private images are added, supply an existing same-region secret ARN with `username`/`accessToken` or `username`/`password` JSON. Workers retrieve it before ECS starts. Supply `ghcr_secret_kms_key_arn` only when that secret uses a customer-managed key.
 
 ## Launching
 
@@ -51,7 +55,7 @@ For SUP v5.2.0, use the compatibility evidence and GPU acceptance commands in th
 
 ## Verification
 
-The candidate passes 18 mocked Terraform cases, 14 Python helper/registry tests and 10 focused nf-test cases covering input validation, GPU routing, BAM reservations and aliased image pins. Nextflow lint reports no errors in the checked scripts. The pipeline compiles through its normal `--version` entry point.
+The candidate passes 20 mocked Terraform cases, 14 Python helper/registry tests and 10 focused nf-test cases covering input validation, GPU routing, BAM reservations and aliased image pins. Registry tests cover anonymous and authenticated worker startup. Nextflow lint reports no errors in the checked scripts. The pipeline compiles through its normal `--version` entry point.
 
 ```bash
 terraform -chdir=terraform/aws init -backend=false

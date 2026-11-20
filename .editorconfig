@@ -36,5 +36,5 @@ indent_style = unset
 [**/ro-crate-metadata.json]
 insert_final_newline = unset
 
-[*.{tf,tfvars,hcl}]
+[*.{tf,tfvars,tfvars.example,hcl}]
 indent_size = 2

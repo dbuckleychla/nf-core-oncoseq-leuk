@@ -1,33 +1,39 @@
 region = "us-west-2"
 name   = "oncoseq-leuk-dev"
-cpu_ami_id = "ami-REPLACE_WITH_PINNED_CPU_AMI"
-gpu_ami_id = "ami-REPLACE_WITH_PINNED_NVIDIA_AMI"
-# Standard AWS credentials / AWS_PROFILE are honored; no account is embedded.
+# AWS ECS-optimised AL2023 x86-64 release 2023.0.20261113, us-west-2.
+cpu_ami_id = "ami-0f9003a6aee571ca8"
+gpu_ami_id = "ami-0c050c3f1924995a9"
+# AWS credentials / AWS_PROFILE use the standard credential chain.
 # General CPU queue: allowed instance families and total compute capacity.
-instance_types = ["m8i", "r8i"]
-max_vcpus      = 256
-spot           = false
+instance_types = [
+  "m8i.8xlarge", "m8i.4xlarge", "m8i.xlarge",
+  "r8i.8xlarge", "r8i.4xlarge", "r8i.xlarge"
+]
+max_vcpus = 512
+spot      = false
 # Optional existing network, with outbound connectivity for images and assets:
 # vpc_id = "vpc-..."
 # subnet_ids = ["subnet-...", "subnet-..."]
 # Required existing bucket; bucket settings are never changed.
-bucket_name = "your-existing-bucket"
-# Required existing GHCR credential secret, in the same region. Replace this
-# placeholder, or omit the assignment to be prompted by terraform plan/apply.
-# MSQ's username/accessToken secret can be reused if it can read private Lamprey.
-ghcr_secret_arn = "arn:aws:secretsmanager:us-west-2:<account>:secret:<ghcr-secret>"
+bucket_name = "plm-cpm-sandbox-research-usw2"
+# Pinned GHCR images are public; anonymous pulls need no registry secret.
+# Supply only when adding private images:
+# ghcr_secret_arn = "arn:aws:secretsmanager:us-west-2:<account>:secret:<ghcr-secret>"
 # ghcr_secret_kms_key_arn = "arn:aws:kms:us-west-2:<account>:key/<key-id>"
 # All work/results writes are scoped beneath this prefix.
-s3_prefix = "Oncoseq Leuk/"
+s3_prefix = "OncoseqLeuk/"
 # read_bucket_arns = ["arn:aws:s3:::your-input-bucket"]
 # permissions_boundary_arn = "arn:aws:iam::<account>:policy/<boundary>"
 
 # Independently sized NVIDIA GPU fleets for basecalling and general work.
 # Set either instance list to [] to disable that fleet.
-basecall_instance_types = ["g6e"]
-basecall_max_vcpus = 32
-gpu_instance_types = ["g6e"]
-gpu_max_vcpus = 32
+basecall_instance_types = ["g6e.xlarge", "g6e.4xlarge", "g6e.12xlarge"]
+basecall_max_vcpus      = 512
+# Optional Blackwell basecalling candidates after Dorado/AMI acceptance testing:
+# basecall_instance_types = ["g7e.2xlarge", "g7e.4xlarge", "g7e.12xlarge", "g6e.xlarge", "g6e.4xlarge", "g6e.12xlarge"]
+# Keep g7e out of the general fleet for DeepSomatic/Clair3 image compatibility.
+gpu_instance_types = ["g6e.xlarge", "g6e.4xlarge", "g6e.12xlarge"]
+gpu_max_vcpus      = 512
 
 # Optional: reuse a self-contained AWS CLI installation already in BOTH EC2 AMIs.
 # Skips AWS CLI installation; host diagnostics still install CloudWatch agent.
@@ -43,8 +49,8 @@ scratch_throughput_mibps = 500
 
 # Optional BAM high/low fleets; existing bam_* variables configure high workers.
 bam_queue_enabled = true
-bam_max_vcpus = 256
-bam_scratch_gb = 2000
+bam_max_vcpus     = 256
+bam_scratch_gb    = 2000
 # Low fleet: eight exclusive 8-vCPU workers at the default capacity.
-bam_low_max_vcpus = 64
+bam_low_max_vcpus  = 64
 bam_low_scratch_gb = 2000

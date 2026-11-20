@@ -30,6 +30,7 @@ unzip -q awscliv2.zip
 install -d /etc/ecs /var/log/oncoseq-leuk
 printf '\nECS_IMAGE_PULL_BEHAVIOR=once\n' >> /etc/ecs/ecs.config
 
+%{ if ghcr_secret_arn != null ~}
 # ECS init loads this root-only file when launching the agent. Refresh registry
 # credentials on every ECS start, and fail startup if retrieval/validation fails.
 # Only the ARN and this code enter user data/Terraform state, never the token.
@@ -44,6 +45,7 @@ cat > /etc/systemd/system/ecs.service.d/20-ghcr-auth.conf <<'UNIT'
 [Service]
 ExecStartPre=/usr/bin/python3 /opt/oncoseq-leuk-registry/configure.py --aws-cli ${use_existing_aws_cli ? existing_aws_cli_path : "/opt/aws-cli/v2/current/bin/aws"} --region ${region} --secret-arn ${ghcr_secret_arn}
 UNIT
+%{ endif ~}
 
 # AL2023 keeps Docker/kernel logs in journald. Export them automatically; no
 # interactive access is needed. Rotation prevents the diagnostic file filling disk.

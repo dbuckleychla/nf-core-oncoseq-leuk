@@ -4,10 +4,10 @@ variable "region" {
 }
 variable "ghcr_secret_arn" {
   type        = string
-  nullable    = false
-  description = "Required existing Secrets Manager ARN for GHCR: JSON username plus accessToken (MSQ format) or password. Supply in tfvars or TF_VAR_ghcr_secret_arn; Terraform prompts if omitted. Never supply the token itself."
+  default     = null
+  description = "Optional existing Secrets Manager ARN for private GHCR images: JSON username plus accessToken (MSQ format) or password. Null uses anonymous pulls. Never supply the token itself."
   validation {
-    condition     = can(regex("^arn:aws[a-z-]*:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$", var.ghcr_secret_arn)) && try(split(":", var.ghcr_secret_arn)[3] == var.region, false)
+    condition     = var.ghcr_secret_arn == null ? true : can(regex("^arn:aws[a-z-]*:secretsmanager:[a-z0-9-]+:[0-9]{12}:secret:[A-Za-z0-9/_+=.@-]+$", var.ghcr_secret_arn)) && try(split(":", var.ghcr_secret_arn)[3] == var.region, false)
     error_message = "Supply a Secrets Manager secret ARN in the deployment region."
   }
 }
@@ -16,8 +16,8 @@ variable "ghcr_secret_kms_key_arn" {
   default     = null
   description = "Existing customer-managed KMS key encrypting the GHCR secret, if used. Null for the default Secrets Manager key. Grants worker decrypt only."
   validation {
-    condition     = var.ghcr_secret_kms_key_arn == null ? true : can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/[A-Za-z0-9-]+$", var.ghcr_secret_kms_key_arn))
-    error_message = "Use a KMS key ARN, not an alias, or null."
+    condition     = var.ghcr_secret_kms_key_arn == null ? true : var.ghcr_secret_arn != null && can(regex("^arn:aws[a-z-]*:kms:[a-z0-9-]+:[0-9]{12}:key/[A-Za-z0-9-]+$", var.ghcr_secret_kms_key_arn))
+    error_message = "Supply ghcr_secret_arn with a KMS key ARN, not an alias, or leave the key null."
   }
 }
 variable "name" {
