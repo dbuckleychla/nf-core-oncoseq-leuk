@@ -35,7 +35,7 @@ The `clinical` profile selects exact container builds through immutable SHA-256 
 
 Clinical runs require explicit, pre-staged reference and model assets. Separate `ref_cache`, `dorado_model_cache`, `reference_aux_cache` and `vep_cache` parameters accommodate existing storage layouts. Missing clinical assets cause an error rather than a download fallback. Existing bundled classifier, NASVAR and CNA resources are retained where applicable.
 
-The hg38 preset uses the public VEP 115 cache root `s3://annotation-cache/vep_cache/115_GRCh38/`. Its species/version layout and metadata were verified anonymously. The auxiliary reference manifest records fixed source URLs for PharmCAT positions/index, tandem repeats and the structural-variant panel of normals. Operators must record reference/model checksums and immutable object versions; runtime checks currently establish presence and version selection rather than complete content identity.
+The hg38 preset uses an institutional mirror of the public VEP 115 cache. Set `vep_cache` to the parent of `homo_sapiens`, preserving `homo_sapiens/115_GRCh38/info.txt` below it. The public source metadata was verified anonymously; the mirror is read using the Batch job role. The auxiliary reference manifest records fixed source URLs for PharmCAT positions/index, tandem repeats and the structural-variant panel of normals. Operators must record reference/model checksums and immutable object versions; runtime checks currently establish presence and version selection rather than complete content identity.
 
 ## Explicit indel sensitivity
 
