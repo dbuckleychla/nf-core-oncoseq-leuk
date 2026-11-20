@@ -10,6 +10,7 @@ The nf-core/oncoseq documentation is split into the following pages:
 You can find a lot more documentation about installing, configuring and running nf-core pipelines on the website: [https://nf-co.re](https://nf-co.re)
 
 - [Institutional AWS deployment](aws.md)
+- [AWS Batch and clinical adaptation summary](aws-clinical-changes.md)
 - [FrankONTstein comparison](frankontstein-comparison.md)
 - [Dorado SUP v5.2.0 compatibility](dorado-sup520.md)
 - [Clinical step resources and failures](resource-allocation.md)
