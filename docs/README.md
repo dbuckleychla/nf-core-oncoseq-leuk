@@ -11,6 +11,7 @@ You can find a lot more documentation about installing, configuring and running 
 
 - [Institutional AWS deployment](aws.md)
 - [AWS Batch and clinical adaptation summary](aws-clinical-changes.md)
+- [POD5 basecalling shards](pod5-sharding.md)
 - [FrankONTstein comparison](frankontstein-comparison.md)
 - [Dorado SUP v5.2.0 compatibility](dorado-sup520.md)
 - [Clinical step resources and failures](resource-allocation.md)

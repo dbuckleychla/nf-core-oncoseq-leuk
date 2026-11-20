@@ -8,6 +8,8 @@ A standalone Terraform stack provisions CPU, BAM high/low, basecalling GPU and g
 
 Large BAM inputs and intermediates can exhaust a worker's disk when several jobs share it. The BAM queues therefore use fixed worker sizes and reserve every CPU for each assigned task:
 
+POD5 basecalling can also stage large input collections. The clinical profile partitions existing POD5 files into up to 16 deterministic shards per sample/project, with independent Dorado tasks and subsequent unaligned BAM consolidation. The original downstream sample processing is retained. See [POD5 sharding](pod5-sharding.md) for partitioning and resume behaviour.
+
 | Queue    | Worker                | Task reservation | Purpose                                                                                   |
 | -------- | --------------------- | ---------------- | ----------------------------------------------------------------------------------------- |
 | BAM high | 32 vCPUs, 256 GiB RAM | 32 vCPUs         | Alignment, sorting/merging, phasing, classification, large callers and VEP cache staging. |
@@ -41,6 +43,6 @@ ClairS-TO receives `--indel_min_af 0.05`, and DeepSomatic receives `--make_examp
 
 ## Validation status
 
-Focused checks cover worker routing, input/alias coverage, retry promotion and ceilings, cache lookup, resource scaling, image locks and wrapper argument generation. The recorded suite comprises 20 mocked Terraform cases, 15 Python tests and 29 nf-test cases. Formatting and Nextflow syntax checks pass. Mock callers establish command contracts rather than inference correctness.
+Focused checks cover worker routing, input/alias coverage, retry promotion and ceilings, cache lookup, resource scaling, image locks and wrapper argument generation. The recorded suite comprises 20 mocked Terraform cases, 15 Python tests and 35 nf-test cases. Formatting and Nextflow syntax checks pass. Mock callers establish command contracts rather than inference correctness.
 
 Remaining acceptance work includes deployment and concurrent-job placement checks, largest-sample disk/RAM measurements, GPU model execution, reference content verification and biological concordance. Dorado's pinned release catalogue supports SUP v5.2.0; GPU execution, including Blackwell compatibility, remains unverified. The current Clair3 selection still uses v5.0 weights and omits move emission, so complete SUP v5.2.0 model pairing remains unresolved. Missing integration fixtures and broader pipeline lint failures also remain open release gates.

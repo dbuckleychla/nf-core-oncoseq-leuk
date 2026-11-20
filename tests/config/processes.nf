@@ -4,7 +4,7 @@ process DORADO_BASECALL {
     stdout emit: settings
     script:
     """
-    printf '%s\\n' '${task.queue}' '${task.accelerator.request}' '${task.container}' '${task.containerOptions}' '${task.clusterOptions}' '${task.cpus}' '${task.memory}' '${task.maxRetries}'
+    printf '%s\\n' '${task.queue}' '${task.accelerator.request}' '${task.container}' '${task.containerOptions}' '${task.clusterOptions}' '${task.cpus}' '${task.memory}' '${task.maxRetries}' '${params.basecall_shards}'
     """
 }
 

@@ -2,6 +2,7 @@
 
 ## 1.0.2-leuk.1-dev
 
+- Add deterministic POD5 file-group sharding, default 16 in clinical mode, and per-sample/project unaligned BAM consolidation before existing downstream processing.
 - Add an independent institutional AWS Batch Terraform stack and launch profile.
 - Align example capacity with the institutional stack and make GHCR authentication optional for public images.
 - Extend exclusive BAM routing, add clinical step budgets and bounded resource retries, and set ClairS-TO/DeepSomatic indel minimum AF to 0.05.

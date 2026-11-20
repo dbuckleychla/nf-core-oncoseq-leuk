@@ -55,7 +55,7 @@ For SUP v5.2.0, use the compatibility evidence and GPU acceptance commands in th
 
 ## Verification
 
-The candidate passes 20 mocked Terraform cases, 15 Python helper/registry/routing tests and 29 focused nf-test cases covering input/cache validation, GPU routing, BAM reservations, retry promotion/ceilings, huge-input scaling, aliased image pins and real wrapper argument capture with mock callers. These tests do not run inference. Registry tests cover anonymous and authenticated worker startup. Nextflow lint reports no errors in the checked scripts. The pipeline compiles through its normal `--version` entry point.
+The candidate passes 20 mocked Terraform cases, 15 Python helper/registry/routing tests and 35 focused nf-test cases covering input/cache validation, GPU routing, BAM reservations, retry promotion/ceilings, huge-input scaling, aliased image pins and real wrapper argument capture with mock callers. These tests do not run inference. Registry tests cover anonymous and authenticated worker startup. Nextflow lint reports no errors in the checked scripts. The pipeline compiles through its normal `--version` entry point.
 
 ```bash
 terraform -chdir=terraform/aws init -backend=false

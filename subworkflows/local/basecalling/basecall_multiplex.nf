@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { DORADO_BASECALL                           } from '../../../modules/local/dorado/main.nf'
+include { BASECALL_SHARDED } from './basecall_sharded'
 include { DORADO_DEMULTIPLEX                        } from '../../../modules/local/dorado/main.nf'
 include { DORADO_TRIM                               } from '../../../modules/local/dorado/main.nf'
 include { SAMTOOLS_QSFILTER                         } from '../../../modules/local/samtools/main.nf'
@@ -31,12 +31,12 @@ workflow BASECALL_MULTIPLEX {
 
     ch_versions = channel.empty()
 
-    DORADO_BASECALL(ch_samplesheet)
+    BASECALL_SHARDED(ch_samplesheet)
 
     ch_to_dmux = ch_demux
         .map { meta, _sample, _barcode, kit ->
             tuple(meta,kit) }
-        .join(DORADO_BASECALL.out.ubam)
+        .join(BASECALL_SHARDED.out.ubam)
 
     DORADO_DEMULTIPLEX(ch_to_dmux)
 
@@ -106,7 +106,7 @@ workflow BASECALL_MULTIPLEX {
         COLLECT VERSIONS
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
-    ch_versions = DORADO_BASECALL.out.versions
+    ch_versions = BASECALL_SHARDED.out.versions
         .mix(DORADO_DEMULTIPLEX.out.versions)
         .mix(DORADO_TRIM.out.versions)
         .mix(SAMTOOLS_QSFILTER.out.versions)

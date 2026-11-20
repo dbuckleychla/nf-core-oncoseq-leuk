@@ -145,6 +145,7 @@ params {
     include_full: Boolean = true
 
     basecall_model: String
+    basecall_shards: Integer = 1
 
     // Use number of sequencing hour to activate real time mode
     realtime: Integer?
