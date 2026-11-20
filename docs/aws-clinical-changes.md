@@ -15,7 +15,7 @@ POD5 basecalling can also stage large input collections. The clinical profile pa
 | BAM high | 32 vCPUs, 256 GiB RAM | 32 vCPUs         | Alignment, sorting/merging, phasing, classification, large callers and VEP cache staging. |
 | BAM low  | 8 vCPUs, 64 GiB RAM   | 8 vCPUs          | Lighter BAM/read processing, QC, CNA and plotting tasks.                                  |
 
-Low-tier tasks move to the high queue when their actual memory request exceeds 48 GB, including on retries. Clinical configuration rejects missing high queues, partial CPU reservations and resource caps that defeat placement. Dorado reserves 32 CPUs on the example's 48-vCPU basecalling workers, preventing concurrent POD5 staging on one worker.
+Low-tier tasks move to the high queue when their actual memory request exceeds 48 GB, including on retries. Clinical configuration rejects missing high queues, partial CPU reservations and resource caps that defeat placement. Multi-shard Dorado jobs request 8 CPUs, 30 GB and one GPU each, allowing concurrent shards on separate GPUs in the same worker. Single-shard runs retain their larger reservation.
 
 These reservations control placement. Local tool thread counts are configured independently so a full-worker reservation does not unnecessarily increase parsing or inference parallelism. Six process interfaces retain the pinned upstream inputs, outputs and image selections while supporting this thread control. Their source revisions are recorded in `modules/local/clinical_threads/upstream.json`; the original submodule pins remain intact.
 

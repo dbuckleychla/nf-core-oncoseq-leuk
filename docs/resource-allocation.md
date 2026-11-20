@@ -10,7 +10,7 @@ Clinical AWS execution requires a high queue, `max_cpus >= 32`, exact high/low r
 
 High routing covers alignment, merge, sort, phasing/haplotagging, BAM-based Classy modules, the three small-variant callers, Severus and VEP. VEP also stages a large reference-cache directory, so it uses the exclusive high worker. Low routing covers demux/trim, BAM index/view/filter/count/FASTQ conversion, Sniffles, Stellerator, NASVAR, CNA tools, mosdepth/cramino QC, Ontime, read preprocessing/statistics and BAM-based Figeno plots. An automated input/alias audit prevents BAM and read modules from silently bypassing these routes.
 
-Dorado reserves 32 CPUs on the separate basecalling queue. The example uses 48-vCPU `g7e.12xlarge` and `g6.12xlarge` candidates, so two Dorado jobs cannot share one worker. Blackwell inference compatibility remains unverified. Larger instance types with at least 64 vCPUs would defeat this placement rule and require a revised reservation. General GPU routing remains separate.
+Dorado uses the separate basecalling queue with one GPU per job. When `basecall_shards > 1`, AWS requests 8 CPUs and clinical execution requests a fixed 30 GB per shard, allowing two jobs to share a two-GPU worker. Single-shard runs retain 32 CPUs and 100 GB, or 180 GB in WGS mode. Sharded memory remains 30 GB on retries; out-of-memory failures stop rather than retry at the same limit. General GPU routing remains separate. Blackwell inference compatibility remains unverified.
 
 Dorado requests one GPU by default, while the example g7e/g6 workers contain two/four GPUs. After SUP model acceptance, benchmark a two-GPU process override with `device = cuda:all` to assess throughput and memory. Both instance types can satisfy that request; the worker CPU reservation still prevents concurrent staging. A capacity fallback to g6 does not automatically move a failed inference task away from g7e.
 
@@ -18,20 +18,20 @@ Dorado requests one GPU by default, while the example g7e/g6 workers contain two
 
 The table gives initial clinical memory. Memory grows linearly with attempt, retains the threefold `huge` multiplier, and is capped by `max_memory`; Dorado also has a 180-GB ceiling for g6 host headroom. Other steps retain Oncoseq's existing labels and resource formulas.
 
-| Step               | Initial memory                | Tool parallelism                   | Reason                                                                                    |
-| ------------------ | ----------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------- |
-| Minimap2 alignment | 72 GB                         | 32 reserved CPUs on Batch          | Retain Oncoseq's larger budget; cap sort memory per thread and leave half for alignment.  |
-| VEP                | 128 GB                        | 32 forks from the upstream wrapper | Isolate reference-cache staging and increase memory for the full-worker fork count.       |
-| SAMtools sort      | 64 GB                         | Reserved task CPUs                 | Increase the former 36-GB budget for sorting and cap `-m` per thread.                     |
-| SAMtools merge     | 32 GB                         | Reserved task CPUs                 | Increase the former 12-GB budget; staging and output copies remain the main disk concern. |
-| WhatsHap phase     | 32 GB                         | Existing wrapper behaviour         | Increase the former 12-GB budget; phase and haplotag use exclusive high workers.          |
-| Classy combined    | 64 GB                         | 8 threads                          | Match FrankONTstein's larger budget instead of the former 20 GB.                          |
-| Severus            | 64 GB                         | 4 threads                          | Match the legacy increase after a large ONT input exceeded its parsing budget.            |
-| Clair3             | 100 GB                        | 16 threads                         | Retain Oncoseq's larger memory allocation while separating threads from placement.        |
-| ClairS-TO          | 180 GB                        | 16 threads                         | Retain Oncoseq's larger allocation; a memory retry reaches at most 224 GB.                |
-| DeepSomatic        | 100 GB                        | 8 shards                           | Retain Oncoseq's larger memory budget and FrankONTstein's bounded shard count.            |
-| Stellerator        | 12 GB                         | 4 threads                          | Raise the former 10 GB to the legacy budget.                                              |
-| Dorado             | 100 GB, or 180 GB in WGS mode | Existing GPU inference options     | Retain initial Oncoseq budgets and prevent retries exceeding the g6 worker budget.        |
+| Step               | Initial memory                              | Tool parallelism                               | Reason                                                                                    |
+| ------------------ | ------------------------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| Minimap2 alignment | 72 GB                                       | 32 reserved CPUs on Batch                      | Retain Oncoseq's larger budget; cap sort memory per thread and leave half for alignment.  |
+| VEP                | 128 GB                                      | 32 forks from the upstream wrapper             | Isolate reference-cache staging and increase memory for the full-worker fork count.       |
+| SAMtools sort      | 64 GB                                       | Reserved task CPUs                             | Increase the former 36-GB budget for sorting and cap `-m` per thread.                     |
+| SAMtools merge     | 32 GB                                       | Reserved task CPUs                             | Increase the former 12-GB budget; staging and output copies remain the main disk concern. |
+| WhatsHap phase     | 32 GB                                       | Existing wrapper behaviour                     | Increase the former 12-GB budget; phase and haplotag use exclusive high workers.          |
+| Classy combined    | 64 GB                                       | 8 threads                                      | Match FrankONTstein's larger budget instead of the former 20 GB.                          |
+| Severus            | 64 GB                                       | 4 threads                                      | Match the legacy increase after a large ONT input exceeded its parsing budget.            |
+| Clair3             | 100 GB                                      | 16 threads                                     | Retain Oncoseq's larger memory allocation while separating threads from placement.        |
+| ClairS-TO          | 180 GB                                      | 16 threads                                     | Retain Oncoseq's larger allocation; a memory retry reaches at most 224 GB.                |
+| DeepSomatic        | 100 GB                                      | 8 shards                                       | Retain Oncoseq's larger memory budget and FrankONTstein's bounded shard count.            |
+| Stellerator        | 12 GB                                       | 4 threads                                      | Raise the former 10 GB to the legacy budget.                                              |
+| Dorado             | 30 GB sharded; 100 GB unsharded, 180 GB WGS | 8 CPUs sharded, 32 unsharded on Batch; one GPU | Permit concurrent shards while retaining larger single-shard budgets.                     |
 
 The expensive alignment, sorting/merging, phasing, classification, caller and QC steps receive the full `max_time` on every attempt, default 24 hours. These are allocation choices rather than measured requirements. Tool thread caps use `task.ext.threads` in six repository-owned process interfaces under `modules/local/clinical_threads`. They derive from pinned Oncoseq submodules, retain their inputs/outputs and image pins, and record source revisions in `upstream.json`. The original gitlinks remain intact. Imported nf-core modules retain their upstream interfaces.
 

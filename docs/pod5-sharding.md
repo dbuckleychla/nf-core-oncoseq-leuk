@@ -30,3 +30,5 @@ Incomplete or duplicate shard results cannot produce a valid consolidated BAM. N
 A single partial resume uBAM cannot be supplied to several shards because it could duplicate existing reads in the merged output. Multi-shard plans reject that input. Use `basecall_shards = 1` for manually supplied Dorado resume BAMs, or use Nextflow task resume for sharded runs.
 
 Focused tests check deterministic planning, duplicate input/resume rejection, sample separation, fewer-files-than-shards handling, incomplete-shard failure, and real SAMtools merging of valid fixture BAMs with read-group and modification tags. Dorado is mocked in these tests; representative GPU basecalling and result concordance remain required.
+
+With `aws,clinical` and `basecall_shards > 1`, each Dorado job requests 8 CPUs, 30 GB and one GPU. The memory reservation stays fixed on retries. Two shards can share a two-GPU worker when Batch has sufficient remaining resources.
