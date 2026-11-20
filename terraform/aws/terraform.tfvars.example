@@ -22,7 +22,8 @@ bucket_name = "plm-cpm-sandbox-research-usw2"
 # ghcr_secret_kms_key_arn = "arn:aws:kms:us-west-2:<account>:key/<key-id>"
 # All work/results writes are scoped beneath this prefix.
 s3_prefix = "OncoseqLeuk/"
-# read_bucket_arns = ["arn:aws:s3:::your-input-bucket"]
+# Public VEP cache; add other input/reference buckets when needed.
+read_bucket_arns = ["arn:aws:s3:::annotation-cache"]
 # permissions_boundary_arn = "arn:aws:iam::<account>:policy/<boundary>"
 
 # Independently sized NVIDIA GPU fleets for basecalling and general work.

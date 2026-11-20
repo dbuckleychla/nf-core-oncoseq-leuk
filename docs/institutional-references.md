@@ -7,7 +7,7 @@
 | `hg38/fasta/hg38.analysisSet.fa` and adjacent `.fai`             | Set `ref_cache` to the exact FASTA. Validate contig names/lengths against caller and annotation resources.                                                       |
 | GENCODE v50 enrichment BED with 10000-bp buffer                  | Set `bed` and `padding = 10000`; the upstream workflow derives targets by removing padding. This may differ from FrankONTstein's explicit unpadded target BED.   |
 | `dorado-models/` with SUP v5.2.0 and matching CpG v2 directories | Set `dorado_model_cache` to reuse the existing prefix without moving it beneath the FASTA directory.                                                             |
-| VEP cache `homo_sapiens/116_GRCh38`                              | Requires a new version 115 cache for the pinned Oncoseq VEP image. The root may contain both versions.                                                           |
+| VEP cache `homo_sapiens/116_GRCh38`                              | The preset uses the public `s3://annotation-cache/vep_cache/115_GRCh38/` cache for the pinned VEP image.                                                         |
 | NASVAR repeats, MAF sites and GFF                                | Oncoseq already uses its image-bundled versions. Keep those defaults until external-content parity is established.                                               |
 | Delly mappability and ichorCNA assets                            | Reuse Oncoseq's bundled resources after checking the exact FASTA/bin-size pairing. The legacy ichor 1-Mb assets cannot substitute for Oncoseq's 500-kb defaults. |
 | External Lamprey/ALMA3/OPTiC models                              | Classy already bundles these classifier families. Validate versions and preprocessing before substituting external directories.                                  |
@@ -16,14 +16,25 @@
 
 Clinical execution also requires the pinned auxiliary files used by Oncoseq: PharmCAT positions and CSI, the assembly-specific pbsv tandem-repeat BED, and the Severus PoN. Their source basenames must exist in `reference_aux_cache`, or beside the FASTA when that parameter is absent. The FrankONTstein checked-in S3 reference mapping does not identify compatible staged copies of those files. Use the fixed source URLs recorded by this fork to populate the cache and record checksums/object versions.
 
-Create the VEP 115 cache under `homo_sapiens/115_GRCh38`, including `info.txt`. Set `vep_cache` to its parent root. The preset selects the existing `hg38/vep-cache` root, which can host both 115 and 116, and will fail clinical validation until 115 is present. It leaves `input` and `reference_aux_cache` for the operator to supply.
+The public VEP 115 root is `s3://annotation-cache/vep_cache/115_GRCh38/`. Anonymous retrieval of its `homo_sapiens/115_GRCh38/info.txt` was verified on 20 November 2026. The metadata identifies GRCh38.p14 and GENCODE 49. The preset uses this root, and the Terraform example grants read access to `arn:aws:s3:::annotation-cache`. A new cache build is unnecessary. Complete cache content checksums and clinical acceptance remain required. The preset leaves `input` and `reference_aux_cache` for the operator to supply.
+
+`assets/reference_aux_hg38.urls` lists the four fixed source URLs needed for the auxiliary cache:
+
+```bash
+set -euo pipefail
+mkdir -p aux
+while IFS= read -r url; do
+  curl --fail --location --retry 3 "$url" -o "aux/${url##*/}"
+done < assets/reference_aux_hg38.urls
+sha256sum aux/*.bgz aux/*.csi aux/*.bed aux/*.gz > aux/SHA256SUMS
+aws s3 sync aux/ s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/aux/
+```
 
 ```bash
 NXF_VER=26.04.6 nextflow run . -profile aws,clinical \
   -params-file assets/institutional_hg38.params.json \
   --input validation.samplesheet.csv \
-  --vep_cache s3://plm-cpm-sandbox-research-usw2/ONT/FrankONTstein_refdata/hg38/vep-cache \
-  --reference_aux_cache s3://YOUR_BUCKET/oncoseq-release/aux \
+  --reference_aux_cache s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/aux/ \
   --run_id validation-001
 ```
 

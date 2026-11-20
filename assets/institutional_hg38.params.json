@@ -8,7 +8,7 @@
     "m_bases": "5mCG_5hmCG@v2",
     "device": "cuda:all",
     "vep_version": 115,
-    "vep_cache": "s3://plm-cpm-sandbox-research-usw2/ONT/FrankONTstein_refdata/hg38/vep-cache",
+    "vep_cache": "s3://annotation-cache/vep_cache/115_GRCh38/",
     "clairsto_indel_min_af": 0.05,
     "deepsomatic_indel_min_af": 0.05
 }
