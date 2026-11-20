@@ -29,6 +29,8 @@ Failures remain visible. Exit 137 permits a memory retry only while the allocati
 
 The `aws,clinical` profiles pin Nextflow 26.04.6, nf-schema 2.7.2 and nf-amazon 3.9.2. The release lock selects 36 Linux AMD64 container digests across 87 process names. Terraform 1.13.2 and AWS provider 6.13.0 are also pinned. Registry authentication is optional because the current pinned GHCR images permit anonymous pulls.
 
+The `clinical` profile selects exact container builds through immutable SHA-256 image references. `images.lock.json` records the original release/build tags and resolved digests. Sources using moving tags such as `latest` are also frozen at their recorded digests, so later tag changes cannot alter a run. Changing an image requires a deliberate lock/config update and release validation. Runs must select the `clinical` profile to apply these pins.
+
 Clinical runs require explicit, pre-staged reference and model assets. Separate `ref_cache`, `dorado_model_cache`, `reference_aux_cache` and `vep_cache` parameters accommodate existing storage layouts. Missing clinical assets cause an error rather than a download fallback. Existing bundled classifier, NASVAR and CNA resources are retained where applicable.
 
 The hg38 preset uses the public VEP 115 cache root `s3://annotation-cache/vep_cache/115_GRCh38/`. Its species/version layout and metadata were verified anonymously. The auxiliary reference manifest records fixed source URLs for PharmCAT positions/index, tandem repeats and the structural-variant panel of normals. Operators must record reference/model checksums and immutable object versions; runtime checks currently establish presence and version selection rather than complete content identity.
