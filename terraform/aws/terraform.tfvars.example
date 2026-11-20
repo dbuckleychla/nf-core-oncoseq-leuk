@@ -1,0 +1,50 @@
+region = "us-west-2"
+name   = "oncoseq-leuk-dev"
+cpu_ami_id = "ami-REPLACE_WITH_PINNED_CPU_AMI"
+gpu_ami_id = "ami-REPLACE_WITH_PINNED_NVIDIA_AMI"
+# Standard AWS credentials / AWS_PROFILE are honored; no account is embedded.
+# General CPU queue: allowed instance families and total compute capacity.
+instance_types = ["m8i", "r8i"]
+max_vcpus      = 256
+spot           = false
+# Optional existing network, with outbound connectivity for images and assets:
+# vpc_id = "vpc-..."
+# subnet_ids = ["subnet-...", "subnet-..."]
+# Required existing bucket; bucket settings are never changed.
+bucket_name = "your-existing-bucket"
+# Required existing GHCR credential secret, in the same region. Replace this
+# placeholder, or omit the assignment to be prompted by terraform plan/apply.
+# MSQ's username/accessToken secret can be reused if it can read private Lamprey.
+ghcr_secret_arn = "arn:aws:secretsmanager:us-west-2:<account>:secret:<ghcr-secret>"
+# ghcr_secret_kms_key_arn = "arn:aws:kms:us-west-2:<account>:key/<key-id>"
+# All work/results writes are scoped beneath this prefix.
+s3_prefix = "Oncoseq Leuk/"
+# read_bucket_arns = ["arn:aws:s3:::your-input-bucket"]
+# permissions_boundary_arn = "arn:aws:iam::<account>:policy/<boundary>"
+
+# Independently sized NVIDIA GPU fleets for basecalling and general work.
+# Set either instance list to [] to disable that fleet.
+basecall_instance_types = ["g6e"]
+basecall_max_vcpus = 32
+gpu_instance_types = ["g6e"]
+gpu_max_vcpus = 32
+
+# Optional: reuse a self-contained AWS CLI installation already in BOTH EC2 AMIs.
+# Skips AWS CLI installation; host diagnostics still install CloudWatch agent.
+# use_existing_aws_cli  = true
+# existing_aws_cli_path = "/usr/local/aws-cli/v2/current/bin/aws"
+
+# Shared Docker/task gp3 storage. Above-baseline performance has additional cost.
+scratch_gb               = 500
+scratch_iops             = 6000
+scratch_throughput_mibps = 500
+# New CPU and GPU workers forward journal/ECS/bootstrap logs automatically.
+# See terraform output host_diagnostics for the CloudWatch location.
+
+# Optional BAM high/low fleets; existing bam_* variables configure high workers.
+bam_queue_enabled = true
+bam_max_vcpus = 256
+bam_scratch_gb = 2000
+# Low fleet: eight exclusive 8-vCPU workers at the default capacity.
+bam_low_max_vcpus = 64
+bam_low_scratch_gb = 2000

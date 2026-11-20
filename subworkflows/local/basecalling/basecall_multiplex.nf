@@ -42,12 +42,7 @@ workflow BASECALL_MULTIPLEX {
 
     split_bams_ch = DORADO_DEMULTIPLEX.out.demux
         .map { meta, dir ->
-            def bams = []
-            dir.toFile().eachFileRecurse { f ->
-                if (f.name.endsWith('.bam')) {
-                    bams << file(f)
-                }
-            }
+            def bams = file("${dir.toUriString()}/**/*.bam", checkIfExists: true)
             tuple(meta, bams)
         }
         .transpose()
@@ -75,7 +70,7 @@ workflow BASECALL_MULTIPLEX {
 
     SAMTOOLS_QSFILTER(DORADO_TRIM.out.bam)
 
-     // Get the sample_ids from the demux_samplesheet that specify each barcode to each sample_id
+    // Get the sample_ids from the demux_samplesheet that specify each barcode to each sample_id
     ch_new_sample_ids_pass = SAMTOOLS_QSFILTER.out.ubam_pass
         .map { meta, ubam ->
             def meta_suffix = ubam.baseName.tokenize('_')[-1].replace('.bam', '')       // Add pass to meta in tuples for output naming
@@ -97,8 +92,8 @@ workflow BASECALL_MULTIPLEX {
     ch_fastq_pass = SAMTOOLS_TOFASTQ.out.fq
         .filter { meta, _reads -> meta.id.contains('pass')}
         .map { meta, fq ->
-         def meta_restore = [id : meta.id.replace('_pass', '')]
-         tuple(meta_restore, fq)}
+        def meta_restore = [id : meta.id.replace('_pass', '')]
+        tuple(meta_restore, fq)}
 
     ch_stats_pass = SEQKIT_STATS.out.stats
         .filter { meta, _tbl -> meta.id.contains('pass')}

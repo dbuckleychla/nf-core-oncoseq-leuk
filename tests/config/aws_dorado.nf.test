@@ -1,0 +1,23 @@
+nextflow_process {
+    name "AWS GPU configuration with clinical image lock"
+    script "tests/config/processes.nf"
+    process "DORADO_BASECALL"
+    config "tests/config/local.config"
+
+    test("Requests a Batch GPU and the locked Dorado image") {
+        when {
+            params {
+                aws_gpu_queue = 'general-gpu-test'
+                aws_basecall_queue = 'basecall-gpu-test'
+            }
+        }
+        then {
+            assert process.success
+            def values = process.out.settings[0].readLines()
+            assert values[0] == 'basecall-gpu-test'
+            assert values[1] == '1'
+            assert values[2] == 'ghcr.io/chusj-pigu/dorado@sha256:9db144aac4cd9f6485104b0e208fe14b6201c9617fd4b31ff7b8b66e815135a0'
+            assert values[3..4] == ['', '']
+        }
+    }
+}

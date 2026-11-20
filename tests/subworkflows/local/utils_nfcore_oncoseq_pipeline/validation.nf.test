@@ -1,0 +1,101 @@
+nextflow_function {
+    name "Execution and clinical input validation"
+    script "subworkflows/local/utils_nfcore_oncoseq_pipeline/validation.nf"
+    function "validateExecutionOptions"
+
+    test("Accept mapped BAM input with explicit release assets") {
+        when {
+            function {
+                """
+                input[0] = [clinical: true, skip_mapping: true, ref_cache: '/refs/hg38.fa', vep_cache: '/refs/vep']
+                input[1] = 'clinical'
+                input[2] = '/work'
+                """
+            }
+        }
+        then {
+            assert function.success
+            assert function.result == true
+        }
+    }
+
+    test("Reject unversioned basecalling models") {
+        when {
+            function {
+                """
+                input[0] = [clinical: true, basecall_model: 'sup', ref_cache: '/refs', vep_cache: '/refs/vep']
+                input[1] = 'clinical'
+                input[2] = '/work'
+                """
+            }
+        }
+        then {
+            assert function.failed
+            assert function.stdout.join('\n').contains('complete versioned --basecall_model')
+        }
+    }
+
+    test("Reject unversioned modification models") {
+        when {
+            function {
+                """
+                input[0] = [clinical: true, basecall_model: 'dna_r10.4.1_e8.2_400bps_sup@v5.2.0', m_bases: '5mC_5hmC', ref_cache: '/refs', vep_cache: '/refs/vep']
+                input[1] = 'clinical'
+                input[2] = '/work'
+                """
+            }
+        }
+        then {
+            assert function.failed
+            assert function.stdout.join('\n').contains('versioned --m_bases')
+        }
+    }
+
+    test("Reject local work paths for Batch") {
+        when {
+            function {
+                """
+                input[0] = [aws_region: 'us-west-2', aws_queue: 'cpu', aws_job_role: 'task-role', outdir: 's3://bucket/results', skip_mapping: true]
+                input[1] = 'aws'
+                input[2] = '/work'
+                """
+            }
+        }
+        then {
+            assert function.failed
+            assert function.stdout.join('\n').contains('S3 work and output prefixes')
+        }
+    }
+
+    test("Accept Batch mapped inputs without a GPU queue") {
+        when {
+            function {
+                """
+                input[0] = [aws_region: 'us-west-2', aws_queue: 'cpu', aws_job_role: 'task-role', outdir: 's3://bucket/results/run', skip_mapping: true]
+                input[1] = 'aws'
+                input[2] = 's3://bucket/work/run'
+                """
+            }
+        }
+        then {
+            assert function.success
+            assert function.result == true
+        }
+    }
+
+    test("Require a GPU queue for Batch basecalling") {
+        when {
+            function {
+                """
+                input[0] = [aws_region: 'us-west-2', aws_queue: 'cpu', aws_job_role: 'task-role', outdir: 's3://bucket/results/run']
+                input[1] = 'aws'
+                input[2] = 's3://bucket/work/run'
+                """
+            }
+        }
+        then {
+            assert function.failed
+            assert function.stdout.join('\n').contains('--aws_basecall_queue')
+        }
+    }
+}

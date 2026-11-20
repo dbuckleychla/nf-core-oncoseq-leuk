@@ -1,0 +1,39 @@
+nextflow_process {
+    name "AWS dedicated BAM queue routing"
+    script "tests/config/processes.nf"
+    process "CLASSY_COMBINED"
+    config "tests/config/local.config"
+
+    test("Reserve the low worker at 48 GB") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+                test_memory = '48 GB'
+            }
+        }
+        then {
+            assert process.success
+            def values = process.out.settings[0].readLines()
+            assert values[0] == 'bam-low'
+            assert values[1] == '8'
+            assert values[2].contains('@sha256:')
+        }
+    }
+
+    test("Promote larger memory requests to the high worker") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+                test_memory = '49 GB'
+            }
+        }
+        then {
+            assert process.success
+            def values = process.out.settings[0].readLines()
+            assert values[0] == 'bam-high'
+            assert values[1] == '32'
+        }
+    }
+}

@@ -48,14 +48,14 @@
                 "custom_config_version": {
                     "type": "string",
                     "description": "Git commit id for Institutional configs.",
-                    "default": "master",
+                    "default": "4f87caf6c43b484cf358e34722a3bb6e1ce9c4c2",
                     "hidden": true,
                     "fa_icon": "fas fa-users-cog"
                 },
                 "custom_config_base": {
                     "type": "string",
                     "description": "Base directory for Institutional configs.",
-                    "default": "https://raw.githubusercontent.com/nf-core/configs/master",
+                    "default": "https://raw.githubusercontent.com/nf-core/configs/4f87caf6c43b484cf358e34722a3bb6e1ce9c4c2",
                     "hidden": true,
                     "help_text": "If you're running offline, Nextflow will not be able to fetch the institutional config files from the internet. If you don't need them, then this is not a problem. If you do need them, you should download the files from the repo and tell Nextflow where to find them with this parameter.",
                     "fa_icon": "fas fa-users-cog"
@@ -420,6 +420,65 @@
         "clair3_gpu": {
             "type": "boolean",
             "description": "Use gpu to run Clair3"
+        },
+        "clinical": {
+            "type": "boolean",
+            "default": false,
+            "description": "Use the frozen clinical candidate configuration."
+        },
+        "aws_region": {
+            "type": "string",
+            "description": "AWS region from the Terraform outputs."
+        },
+        "aws_queue": {
+            "type": "string",
+            "description": "General AWS Batch queue."
+        },
+        "aws_gpu_queue": {
+            "type": "string",
+            "description": "General-purpose NVIDIA GPU AWS Batch queue."
+        },
+        "aws_bam_high_queue": {
+            "type": "string",
+            "description": "Optional dedicated 32-vCPU BAM queue."
+        },
+        "aws_bam_high_vcpus": {
+            "type": "integer",
+            "default": 32,
+            "minimum": 1,
+            "description": "CPU reservation on the BAM high queue."
+        },
+        "aws_bam_low_queue": {
+            "type": "string",
+            "description": "Optional dedicated 8-vCPU BAM queue."
+        },
+        "aws_bam_low_vcpus": {
+            "type": "integer",
+            "default": 8,
+            "minimum": 1,
+            "description": "CPU reservation on the BAM low queue."
+        },
+        "aws_job_role": {
+            "type": "string",
+            "description": "IAM role ARN assumed by Batch tasks."
+        },
+        "aws_logs_group": {
+            "type": "string",
+            "description": "CloudWatch group for Batch task logs."
+        },
+        "aws_cli_path": {
+            "type": "string",
+            "default": "/opt/aws-cli/v2/current/bin/aws",
+            "description": "Self-contained AWS CLI executable on Batch workers."
+        },
+        "run_id": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$",
+            "description": "Run identifier appended to Terraform work and result prefixes."
+        },
+        "aws_basecall_queue": {
+            "type": "string",
+            "description": "Dedicated NVIDIA GPU AWS Batch queue for Dorado basecalling."
         }
     }
 }

@@ -41,7 +41,7 @@ workflow PHARMCAT {
 
     ch_pgx_vcf = channel.of("vcf.bgz")
         .map { type ->
-            def url = "https://github.com/PharmGKB/PharmCAT/raw/development/pharmcat_positions.vcf.bgz"
+            def url = "https://github.com/PharmGKB/PharmCAT/raw/55e3cb30a078537b4bec63b8d2b5035a20bc2fc0/pharmcat_positions.vcf.bgz"
             tuple(id: "pharmcat_positions", url, type, findCached(url))
         }
         .branch { _meta, _url, _type, local_file ->
@@ -51,7 +51,7 @@ workflow PHARMCAT {
 
     ch_pgx_vcf_index = channel.of("vcf.bgz.csi")
         .map { type ->
-            def url = "https://github.com/PharmGKB/PharmCAT/raw/development/pharmcat_positions.vcf.bgz.csi"
+            def url = "https://github.com/PharmGKB/PharmCAT/raw/55e3cb30a078537b4bec63b8d2b5035a20bc2fc0/pharmcat_positions.vcf.bgz.csi"
             tuple(id: "pharmcat_positions", url, type, findCached(url))
         }
         .branch { _meta, _url, _type, local_file ->
@@ -131,11 +131,11 @@ workflow PHARMCAT {
 
     // Restore meta id to original to match sample field in vcf
     ch_vcf_to_preprocess = ch_bcftools_count.pos
-         .join(ch_preprocessed_vcf)
-         .map { meta, vcf_file, vcf_index ->
+        .join(ch_preprocessed_vcf)
+        .map { meta, vcf_file, vcf_index ->
             def new_id = meta.id.replaceAll(/_snp_(phased|vep)_pharmcat/, '')
             tuple(id:new_id, vcf_file, vcf_index)
-         }
+        }
 
     // Parse pharmcat gene list if provided
     ch_pharmcat_genes = params.pharmcat_genes
@@ -164,7 +164,7 @@ workflow PHARMCAT {
         ch_phenotyper_json
     )
 
-     /*
+    /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
         COLLECT VERSIONS
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
