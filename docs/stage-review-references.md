@@ -161,7 +161,9 @@ aws s3 cp review.references.json \
 aws s3 ls "$ONCOSEQ_REF_ROOT/hg38/vep-cache/homo_sapiens/115_GRCh38/info.txt"
 ```
 
-The manifest can remain local for the run. Keep a copy with validation results.
+The clinical profile reads the uploaded S3 manifest by default. A local
+manifest can be selected with `--review_references review.references.json`.
+Keep a copy with validation results.
 The review preflight checks resource hashes, indexes and assembly compatibility
 before basecalling. Do not overwrite these references with newer catalogue
 releases after approving the manifest.
@@ -169,12 +171,12 @@ releases after approving the manifest.
 ## Run with the staged resources
 
 The institutional preset now points to the Oncoseq reference root. After all
-copies finish, add these arguments to your existing run:
+copies finish, the clinical profile supplies the auxiliary cache, review
+enablement and uploaded S3 manifest automatically. Use the preset:
 
 ```bash
--params-file assets/institutional_hg38.params.json \
---reference_aux_cache "$ONCOSEQ_REF_ROOT/hg38/aux/" \
---report_review --review_references review.references.json
+-profile aws,clinical \
+-params-file assets/institutional_hg38.params.json
 ```
 
 See [the complete AWS run example](review-report.md#run-on-aws-batch). The Batch

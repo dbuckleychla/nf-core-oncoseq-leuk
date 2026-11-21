@@ -1,3 +1,12 @@
+process CLINICAL_REVIEW_SETTINGS {
+    output:
+    stdout emit: settings
+    script:
+    """
+    printf '%s\\n' '${params.report_review}' '${params.reference_aux_cache}' '${params.review_references}'
+    """
+}
+
 process DORADO_BASECALL {
     label 'process_gpu'
     output:

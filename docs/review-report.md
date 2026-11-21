@@ -1,6 +1,7 @@
 # Optional molecular review report
 
-Enable `--report_review` to produce `reports/<sample>.review.html` alongside the
+The `clinical` profile enables the molecular review by default. For other
+profiles, enable `--report_review` to produce `reports/<sample>.review.html` alongside the
 existing report. The dark-themed Oncoseq review report, aggregated by FrankONTstein, embeds its
 data, scripts, styles and displayed
 figures. It works offline and requires JavaScript for interactive tables.
@@ -13,7 +14,7 @@ not establish somatic origin or pathogenicity.
 ## Run on AWS Batch
 
 Use the existing institutional preset and Terraform-generated configuration.
-Supply the input, auxiliary cache, output and work paths used for your run:
+Supply the input, output and work paths used for your run:
 
 ```bash
 nextflow run . \
@@ -21,16 +22,19 @@ nextflow run . \
     -c aws.generated.config \
     -params-file assets/institutional_hg38.params.json \
     --input validation-pod5.csv \
-    --reference_aux_cache "$AUX_URI" \
     --outdir "$OUT_URI" \
     -work-dir "$WORK_URI" \
-    --report_review \
-    --review_references review.references.json \
     -resume
 ```
 
 Use the actual filename of your Terraform-generated configuration in place of
 `aws.generated.config`. The review manifest accepts local files and S3 URIs.
+Clinical defaults use the institutional `hg38/aux/` prefix and
+`hg38/review/review.references.json` manifest under
+`s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/`. Explicit
+`--reference_aux_cache` and `--review_references` values override those defaults.
+Use `--report_review false` to disable the extra report.
+
 Batch stages the resources using the job role. References are checked before
 basecalling. The annotation and analytical FASTAs must have identical content.
 
