@@ -1,10 +1,10 @@
 nextflow_process {
-    name "Combined classifier optional output contract"
+    name "Combined classifier required output contract"
     script "modules/local/classifier_process/main.nf"
     process "PARSE_JSON_COMBINED"
     config "tests/config/local.config"
 
-    test("Accept pinned classifier output without Optic") {
+    test("Reject incomplete classifier output without Optic") {
         when {
             process {
                 """
@@ -13,11 +13,8 @@ nextflow_process {
             }
         }
         then {
-            assert process.success
-            assert process.out.alma.size() == 1
-            assert process.out.marlin.size() == 1
-            assert process.out.nanomix.size() == 1
-            assert process.out.optic.size() == 0
+            assert process.failed
+            assert workflow.stdout.join("\n").contains("*optic.tsv")
         }
     }
 

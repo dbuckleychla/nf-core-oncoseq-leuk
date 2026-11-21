@@ -107,6 +107,54 @@
                         "name": "Synthetic optic class"
                     }
                 ]
+            },
+            {
+                "classifier_run_id": "lamprey",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "sturgeon_brainstem",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "sturgeon_general",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "tucan",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
             }
         ]
     },
@@ -121,6 +169,26 @@
             {
                 "label": "Synthetic group",
                 "probability": 0.92
+            }
+        ]
+    },
+    "tucan": {
+        "cutoff": 0.7,
+        "samplings": [
+            {
+                "family_scores": [
+                    {
+                        "family": "Synthetic family",
+                        "score": 0.9
+                    }
+                ],
+                "scores": [
+                    {
+                        "family": "Synthetic family",
+                        "name": "Synthetic class",
+                        "score": 0.9
+                    }
+                ]
             }
         ]
     }
