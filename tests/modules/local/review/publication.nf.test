@@ -1,0 +1,42 @@
+nextflow_process {
+    name "FASTQ publication controls"
+    script "modules/local/samtools/main.nf"
+    process "SAMTOOLS_TOFASTQ"
+
+    test("Keep FASTQ in work storage without publishing it") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                publish_fastq = false
+            }
+            process {
+                """
+                input[0] = [[id:'SYNTHETIC'], file('${projectDir}/test_data/review/sample.bam')]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.fq.size() == 1
+            assert !file("${outputDir}/results/reads/SYNTHETIC.fq").exists()
+        }
+    }
+
+    test("Publish FASTQ when explicitly requested") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                publish_fastq = true
+            }
+            process {
+                """
+                input[0] = [[id:'SYNTHETIC'], file('${projectDir}/test_data/review/sample.bam')]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert file("${outputDir}/results/reads/SYNTHETIC.fq").exists()
+        }
+    }
+}

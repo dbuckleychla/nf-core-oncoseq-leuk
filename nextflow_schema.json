@@ -35,6 +35,44 @@
                     "fa_icon": "fas fa-envelope",
                     "help_text": "Set this parameter to your e-mail address to get a summary e-mail with details of the run sent to you when the workflow exits. If set in your user config file (`~/.nextflow/config`) then you don't need to specify this on the command line for every run.",
                     "pattern": "^([a-zA-Z0-9_\\-\\.]+)@([a-zA-Z0-9_\\-\\.]+)\\.([a-zA-Z]{2,5})$"
+                },
+                "report_review": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Generate an additional offline leukemia review report."
+                },
+                "publish_fastq": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Publish generated FASTQ files."
+                },
+                "publish_ubam": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Publish one consolidated unaligned BAM containing quality-passing and quality-failing reads."
+                },
+                "publish_intermediate_bams": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Publish diagnostic intermediate BAMs; shard BAMs remain unpublished."
+                },
+                "review_references": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Versioned JSON annotation resource manifest required by the review report."
+                },
+                "review_panel": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Review genes and preferred transcripts."
+                },
+                "review_fusion_distance": {
+                    "type": "integer",
+                    "minimum": 0,
+                    "default": 100,
+                    "description": "Maximum distance in bases at each breakpoint for conservative caller consensus."
                 }
             }
         },
@@ -510,5 +548,16 @@
             "type": "string",
             "description": "Dedicated NVIDIA GPU AWS Batch queue for Dorado basecalling."
         }
+    },
+    "if": {
+        "properties": {
+            "report_review": {
+                "const": true
+            }
+        },
+        "required": ["report_review"]
+    },
+    "then": {
+        "required": ["review_references"]
     }
 }

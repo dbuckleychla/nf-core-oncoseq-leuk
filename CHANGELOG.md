@@ -2,6 +2,10 @@
 
 ## 1.0.2-leuk.1-dev
 
+- Add an optional offline molecular review report with exact allele annotation, COSMIC evidence, conservative breakpoint consensus and readable event plots.
+- Add immutable reference preflight and complete native caller evidence exports.
+- Retain both aligned BAMs and consolidated all-read uBAMs while suppressing shard, FASTQ and diagnostic BAM publication by default.
+
 - Add deterministic POD5 file-group sharding, default 16 in clinical mode, and per-sample/project unaligned BAM consolidation before existing downstream processing.
 - Add an independent institutional AWS Batch Terraform stack and launch profile.
 - Align example capacity with the institutional stack and make GHCR authentication optional for public images.

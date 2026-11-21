@@ -1,0 +1,71 @@
+{
+    "schema_version": 1,
+    "assembly": "GRCh38",
+    "resources": {
+        "fasta": {
+            "uri": "genome.fa",
+            "release": "synthetic",
+            "sha256": "833720a92984eac564359bad8b977f215b4c0efb624251cf7eed0188028a694d"
+        },
+        "fai": {
+            "uri": "genome.fa.fai",
+            "release": "synthetic",
+            "sha256": "3494bd108c23265734c59e706594bc4e989ffc87ca1a05a90a246cf93b64fdb8"
+        },
+        "targets": {
+            "uri": "targets.bed",
+            "release": "synthetic",
+            "sha256": "81b6dc638e5b857f412d2c6a2342783d80eecdaef9994635af32b3f36680f872"
+        },
+        "gff": {
+            "uri": "genes.gff",
+            "release": "synthetic",
+            "sha256": "e8aa867beb20fe8a22469eb3cf36ff5fdfce758792c32f2339bb5cec9439d7f4"
+        },
+        "gnomad_genome": {
+            "uri": "gnomad_genome.vcf.gz",
+            "release": "synthetic",
+            "sha256": "7704af0d09962809f679495223e55c62277583ac8e3be001039334d7a6cd8691",
+            "index": {
+                "uri": "gnomad_genome.vcf.gz.tbi",
+                "sha256": "1fc6ab58a6270513ee6f3f5e871074190a6b711e3fa3307870500f231f28e224"
+            }
+        },
+        "gnomad_exome": {
+            "uri": "gnomad_exome.vcf.gz",
+            "release": "synthetic",
+            "sha256": "7704af0d09962809f679495223e55c62277583ac8e3be001039334d7a6cd8691",
+            "index": {
+                "uri": "gnomad_exome.vcf.gz.tbi",
+                "sha256": "1fc6ab58a6270513ee6f3f5e871074190a6b711e3fa3307870500f231f28e224"
+            }
+        },
+        "clinvar": {
+            "uri": "clinvar.vcf.gz",
+            "release": "synthetic",
+            "sha256": "c428eefc419f4432c2d5563365d474437a9dc3542eb611f497bbaac619c6e2e9",
+            "index": {
+                "uri": "clinvar.vcf.gz.tbi",
+                "sha256": "d2ee5ddf8a563f4df413434d82ec48a1ef67beff7e3e9eccd285abb0870e0efd"
+            }
+        },
+        "clinvar_common_pathogenic": {
+            "uri": "rescue.vcf.gz",
+            "release": "synthetic",
+            "sha256": "6cbf6724ec076e95137baa19d0b6393b636343d700c89821dd7f7b7bd888853c",
+            "index": {
+                "uri": "rescue.vcf.gz.tbi",
+                "sha256": "5c9e74e847b0ca3ca72ab2bcc803ac43efaff23fa701271af7d9208df054c08e"
+            }
+        },
+        "cosmic_targeted": {
+            "uri": "cosmic.vcf.gz",
+            "release": "synthetic",
+            "sha256": "557f5b6a412707c28f2cb340dbcd9081d2d0295f3d6fd2d20dbea1c9bd966e8a",
+            "index": {
+                "uri": "cosmic.vcf.gz.tbi",
+                "sha256": "d959e3723af8359a6e03380b4b309b99132fe040d29e8cc8bf8e95afe684fdee"
+            }
+        }
+    }
+}

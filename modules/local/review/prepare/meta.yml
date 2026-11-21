@@ -1,0 +1,62 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/nf-core/modules/master/modules/meta-schema.json
+name: review_prepare
+description: Prepare immutable references and native artifacts for the optional molecular review report.
+keywords:
+  - oncology
+  - annotation
+  - report
+  - cosmic
+tools:
+  - oncoseq-review:
+      description: Native allele annotation, structural consensus and offline molecular review.
+      homepage: https://github.com/dbuckleychla/nf-core-oncoseq-leuk
+      documentation: https://github.com/dbuckleychla/nf-core-oncoseq-leuk/blob/institutional-batch/docs/review-report.md
+      licence: [MIT]
+input:
+  - - meta:
+        type: map
+        description: Sample identity.
+    - kinds:
+        type: list
+        description: Explicit native artifact types, including caller identity.
+    - artifacts:
+        type: file
+        description: Native VCF, JSON, coverage and figure inputs.
+  - reference_files:
+      type: file
+      description: Immutable staged reference files and matching indexes.
+  - reference_manifest:
+      type: map
+      description: Assembly, releases, deployment URIs and checksums.
+  - panel:
+      type: file
+      description: Reporting genes and preferred transcripts.
+      pattern: "*.tsv"
+  - code_digest:
+      type: string
+      description: Backend code fingerprint for cache invalidation.
+output:
+  prepared:
+    - - meta:
+          type: map
+          description: Sample identity.
+      - catalogue:
+          type: directory
+          description: Disk-backed normalised allele catalogue and native records.
+      - payload:
+          type: directory
+          description: Native artifacts with explicit source inventory.
+  versions:
+    - - process:
+          type: string
+          description: Process name.
+      - tool:
+          type: string
+          description: Review runtime.
+      - version:
+          type: eval
+          description: Runtime release.
+authors:
+  - "@dbuckleychla"
+maintainers:
+  - "@dbuckleychla"

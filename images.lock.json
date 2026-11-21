@@ -23,7 +23,7 @@
         },
         "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf:1e13f65f931a6954": {
             "image": "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf@sha256:442c7140afaaa36f17671eb42656d6412b5196bbe742751b88d7eae5c7cc4d4b",
-            "processes": ["ENSEMBLVEP_FILTERVEP", "ENSEMBLVEP_VEP"]
+            "processes": ["ENSEMBLVEP_FILTERVEP", "ENSEMBLVEP_VEP", "REVIEW_VEP"]
         },
         "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf_htslib:c4edd3fb4a233ae6": {
             "image": "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf_htslib@sha256:918b8397048f87e44b6bd4fd1f7a6a78c77b758882bfd298c95f57c054e3e4c6",
@@ -121,7 +121,7 @@
         },
         "ghcr.io/chusj-pigu/figeno:e42833528621000fed543c5a6d999262ab751bcf": {
             "image": "ghcr.io/chusj-pigu/figeno@sha256:e9a90169d979043902f3584990cc05d989e229b60fb90a019e7c65724503e98c",
-            "processes": ["FIGENO_CIRCOS", "FIGENO_PAN_CHR", "FIGENO_SV_FIGURE"]
+            "processes": ["FIGENO_CIRCOS", "FIGENO_PAN_CHR", "FIGENO_SV_FIGURE", "REVIEW_FIGURES"]
         },
         "ghcr.io/chusj-pigu/ichorcna:latest": {
             "image": "ghcr.io/chusj-pigu/ichorcna@sha256:d70be8a59c4eda1d4f7d9adf856ed603419b5d5ea65f8d573c9252165d5db95a",
@@ -180,6 +180,10 @@
         "quay.io/biocontainers/whatshap:2.8--py39h2de1943_0": {
             "image": "quay.io/biocontainers/whatshap@sha256:d63cdf64c29f99016ace7f8a4ace72d7a1dbbec262831e65d1a97d6a57960a30",
             "processes": ["WHATSHAP_STATS"]
+        },
+        "community.wave.seqera.io/library/oncoseq_review_1_0_0:3b0426ad5a1884bf": {
+            "image": "community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5",
+            "processes": ["REVIEW_VALIDATE", "REVIEW_PREPARE", "REVIEW_COMPLETE", "REVIEW_RENDER"]
         }
     }
 }

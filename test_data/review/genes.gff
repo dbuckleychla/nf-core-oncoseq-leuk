@@ -1,0 +1,4 @@
+##gff-version 3
+chr1	test	gene	100	300	.	+	.	ID=gene-TP53;Name=TP53
+chr1	test	mRNA	100	300	.	+	.	ID=NM_TEST.1;Parent=gene-TP53
+chr1	test	exon	100	300	.	+	.	Parent=NM_TEST.1

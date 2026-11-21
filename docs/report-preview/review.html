@@ -1,0 +1,2424 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SYNTHETIC | OncoSeq review</title>
+    <style>
+      :root {
+        --ink: #172c3d;
+        --muted: #526774;
+        --line: #d7e0e6;
+        --paper: #f3f6f8;
+        --accent: #086f83;
+        --warn: #955715;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          15px/1.5 system-ui,
+          sans-serif;
+        color: var(--ink);
+        background: var(--paper);
+      }
+      header {
+        background: #163748;
+        color: white;
+        padding: 26px max(24px, calc((100vw - 1360px) / 2));
+      }
+      header p {
+        margin: 4px 0;
+        color: #d9e6ed;
+      }
+      h1 {
+        font-size: 28px;
+        margin: 0;
+      }
+      h2 {
+        font-size: 23px;
+        margin: 0 0 12px;
+      }
+      h3 {
+        font-size: 17px;
+        margin: 0 0 8px;
+      }
+      nav {
+        display: flex;
+        gap: 5px;
+        flex-wrap: wrap;
+        background: white;
+        border-bottom: 1px solid var(--line);
+        padding: 12px 20px;
+        position: sticky;
+        top: 0;
+        z-index: 2;
+      }
+      button,
+      input,
+      select {
+        font: inherit;
+      }
+      button {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: white;
+        color: var(--ink);
+        padding: 7px 12px;
+        cursor: pointer;
+      }
+      button:hover,
+      button[aria-selected="true"] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: white;
+      }
+      button:focus-visible,
+      input:focus-visible {
+        outline: 3px solid #e8ab3b;
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.45;
+        cursor: default;
+      }
+      main {
+        max-width: 1400px;
+        margin: auto;
+        padding: 24px;
+      }
+      .section {
+        display: none;
+      }
+      .section.active {
+        display: block;
+      }
+      .panel,
+      .card {
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 9px;
+        padding: 20px;
+        margin-bottom: 18px;
+      }
+      .cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        margin: 0;
+      }
+      .card .value {
+        font-size: 28px;
+        font-weight: 650;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .badge {
+        display: inline-block;
+        font-size: 13px;
+        padding: 2px 7px;
+        border-radius: 4px;
+        background: #e7f2f3;
+        color: #115967;
+      }
+      .warning {
+        background: #fff5e5;
+        color: #704916;
+        border-left: 4px solid #cb8e39;
+        padding: 12px 16px;
+        margin: 14px 0;
+      }
+      .controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin: 12px 0;
+      }
+      input {
+        padding: 7px 10px;
+        border: 1px solid var(--line);
+        border-radius: 5px;
+        max-width: 100%;
+      }
+      .table-scroll {
+        overflow-x: auto;
+        max-width: 100%;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 14px;
+      }
+      th {
+        text-align: left;
+        background: #edf3f6;
+        white-space: nowrap;
+      }
+      th,
+      td {
+        padding: 10px 9px;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+      td {
+        overflow-wrap: anywhere;
+      }
+      th button {
+        border: 0;
+        background: transparent;
+        padding: 0;
+        text-align: left;
+      }
+      pre {
+        font:
+          13px/1.5 ui-monospace,
+          monospace;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        max-width: 100%;
+      }
+      details {
+        margin: 10px 0;
+      }
+      summary {
+        cursor: pointer;
+        font-weight: 600;
+      }
+      .gallery {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
+        gap: 18px;
+      }
+      .figure {
+        margin: 0;
+        background: white;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        min-width: 0;
+      }
+      .figure img {
+        width: 100%;
+        height: auto;
+        cursor: zoom-in;
+      }
+      .figure figcaption {
+        font-size: 14px;
+        overflow-wrap: anywhere;
+        margin-bottom: 10px;
+      }
+      .figure button {
+        margin-top: 8px;
+      }
+      dialog {
+        width: min(1100px, 96vw);
+        max-height: 92vh;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 20px;
+      }
+      dialog::backdrop {
+        background: #102936aa;
+      }
+      .dialog-toolbar {
+        display: flex;
+        gap: 12px;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        background: white;
+        padding-bottom: 10px;
+      }
+      .zoom-scroll {
+        overflow: auto;
+        max-height: 75vh;
+      }
+      .zoom-scroll img {
+        display: block;
+        max-width: none;
+        transform-origin: top left;
+      }
+      .scorebar {
+        height: 8px;
+        background: #e4ecef;
+        border-radius: 4px;
+        margin-top: 8px;
+      }
+      .scorebar span {
+        display: block;
+        height: 100%;
+        background: var(--accent);
+        border-radius: 4px;
+      }
+      .empty {
+        color: var(--muted);
+        padding: 12px 0;
+      }
+      .footnote {
+        font-size: 13px;
+        color: var(--muted);
+      }
+      a {
+        color: var(--accent);
+      }
+      @media print {
+        header {
+          background: white;
+          color: black;
+          padding: 10px;
+        }
+        header p {
+          color: black;
+        }
+        nav,
+        .controls,
+        button {
+          display: none !important;
+        }
+        main {
+          padding: 0;
+        }
+        .section {
+          display: block !important;
+          break-before: page;
+        }
+        .section:first-child {
+          break-before: auto;
+        }
+        .table-scroll {
+          overflow: visible;
+        }
+        tr,
+        .card,
+        .figure {
+          break-inside: avoid;
+        }
+        .gallery {
+          display: block;
+        }
+        .figure img {
+          max-height: 600px;
+          object-fit: contain;
+        }
+        details > * {
+          display: block !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p>ONCOSEQ / MOLECULAR REVIEW</p>
+      <h1>SYNTHETIC</h1>
+      <p>Candidate findings, caller evidence and assay quality</p>
+    </header>
+    <nav role="tablist" aria-label="Report sections" id="navigation"></nav>
+    <main id="report"></main>
+    <dialog id="evidence">
+      <div class="dialog-toolbar">
+        <strong id="dialog-title">Evidence</strong><button id="close-dialog">Close</button>
+      </div>
+      <div id="dialog-content"></div>
+    </dialog>
+    <script type="application/json" id="review-data">
+      {
+        "schema_version": 1,
+        "sample": "SYNTHETIC",
+        "assembly": "GRCh38",
+        "mode": "preview",
+        "runtime_version": "1.0.0",
+        "code_sha256": null,
+        "images_provenance": {
+          "platform": "linux/amd64",
+          "images": {
+            "community.wave.seqera.io/library/bcftools_htslib:1.23.1--9f08ec665533d64a": {
+              "image": "community.wave.seqera.io/library/bcftools_htslib@sha256:9c0dea3c6d34d771912b4a2b0297d3e796db69d3c06620cb93b8ab41c072c613",
+              "processes": ["BCFTOOLS_CONCAT", "BCFTOOLS_INDEX", "BCFTOOLS_QUERY", "BCFTOOLS_SORT", "BCFTOOLS_VIEW"]
+            },
+            "community.wave.seqera.io/library/bcftools_htslib:1.25--130aa7603bf3bf5c": {
+              "image": "community.wave.seqera.io/library/bcftools_htslib@sha256:bc430350197787c65b371b1c9dacd163c33dda965597bcdcdd106b85d1c9e936",
+              "processes": ["BCFTOOLS_FILTER"]
+            },
+            "community.wave.seqera.io/library/bedtools:2.31.1--897920cd303d6413": {
+              "image": "community.wave.seqera.io/library/bedtools@sha256:2001773508b78b5bdec3b7f9d3c7766d394550bd78b895db901543fa71b39541",
+              "processes": ["BEDTOOLS_INTERSECT", "BEDTOOLS_MAKEWINDOWS", "BEDTOOLS_SLOP", "BEDTOOLS_SUBTRACT"]
+            },
+            "community.wave.seqera.io/library/chopper_pigz:4ae8a43e228724c3": {
+              "image": "community.wave.seqera.io/library/chopper_pigz@sha256:4d10e33017d5d985179adf761237583cf0073784f4d91289bef49b4f9e98064c",
+              "processes": ["CHOPPER"]
+            },
+            "community.wave.seqera.io/library/coreutils_grep_gzip_lbzip2_pruned:838ba80435a629f8": {
+              "image": "community.wave.seqera.io/library/coreutils_grep_gzip_lbzip2_pruned@sha256:63c2c6b22e83b2f656e88fbb1553e595da4e9e58794e3bfcb98b20b3837f328a",
+              "processes": ["CAT_FASTQ"]
+            },
+            "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf:1e13f65f931a6954": {
+              "image": "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf@sha256:442c7140afaaa36f17671eb42656d6412b5196bbe742751b88d7eae5c7cc4d4b",
+              "processes": ["ENSEMBLVEP_FILTERVEP", "ENSEMBLVEP_VEP", "REVIEW_VEP"]
+            },
+            "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf_htslib:c4edd3fb4a233ae6": {
+              "image": "community.wave.seqera.io/library/ensembl-vep_perl-math-cdf_htslib@sha256:918b8397048f87e44b6bd4fd1f7a6a78c77b758882bfd298c95f57c054e3e4c6",
+              "processes": ["ENSEMBLVEP_DOWNLOAD"]
+            },
+            "community.wave.seqera.io/library/htslib_mosdepth_gzip:4108dd38be84e40a": {
+              "image": "community.wave.seqera.io/library/htslib_mosdepth_gzip@sha256:426ef2ec8c93bc292862c2902a91f193ae336bdb84750581637d35f59017d2bc",
+              "processes": ["MOSDEPTH"]
+            },
+            "community.wave.seqera.io/library/htslib_samtools:1.24--8a3ddf262165ba23": {
+              "image": "community.wave.seqera.io/library/htslib_samtools@sha256:0111ab21d3c4f7e9d49ac8b9f3b58f96b5609b7b40a1634029f15fbbf7f7191f",
+              "processes": ["SAMTOOLS_SORT", "SAMTOOLS_VIEW"]
+            },
+            "community.wave.seqera.io/library/htslib_samtools:1.24--d697cfb9dce007cd": {
+              "image": "community.wave.seqera.io/library/htslib_samtools@sha256:a55ddea590e567a91df592300a960aa534cfc1bd16e7623e3938ec21f4f3df15",
+              "processes": [
+                "SAMTOOLS_COUNT_READS",
+                "SAMTOOLS_FAIDX",
+                "SAMTOOLS_INDEX",
+                "SAMTOOLS_MERGE",
+                "SAMTOOLS_QSFILTER",
+                "SAMTOOLS_TOFASTQ"
+              ]
+            },
+            "community.wave.seqera.io/library/htslib_xz:32f2772a564b3cd2": {
+              "image": "community.wave.seqera.io/library/htslib_xz@sha256:f80d3b163039303cc5b50e599aba464e43a9c97fcc7f2bb114d55a71183170a2",
+              "processes": ["HTSLIB_BGZIPTABIX"]
+            },
+            "community.wave.seqera.io/library/minimap2_samtools:b09096fc890429ce": {
+              "image": "community.wave.seqera.io/library/minimap2_samtools@sha256:a46a2b8c93894d01d1e32ed4fee123c2fc1e9febbe2a513526f19b66c2338c66",
+              "processes": ["MINIMAP2_ALIGN"]
+            },
+            "community.wave.seqera.io/library/pharmcat3:3.2.0--5126bb296d1e59ac": {
+              "image": "community.wave.seqera.io/library/pharmcat3@sha256:58adeb930ff3b6280b70129f4d0a3df835b702621077a3745922076786a2c7a2",
+              "processes": ["PHARMCAT_MATCHER", "PHARMCAT_PHENOTYPER", "PHARMCAT_REPORTER", "PHARMCAT_VCFPREPROCESSOR"]
+            },
+            "community.wave.seqera.io/library/seqkit:2.13.0--05c0a96bf9fb2751": {
+              "image": "community.wave.seqera.io/library/seqkit@sha256:1f6c3399ca530a727fd243e50348560e820cd1f97668ebbe767d5dff370168da",
+              "processes": ["SEQKIT_STATS"]
+            },
+            "community.wave.seqera.io/library/sniffles:2.8.0--c25a97c10afa095a": {
+              "image": "community.wave.seqera.io/library/sniffles@sha256:f0c86d464bab1c32fbade646cfd703128126120135030323922f43c02ac9e081",
+              "processes": ["SNIFFLES"]
+            },
+            "community.wave.seqera.io/library/wget:1.21.4--8b0fcde81c17be5e": {
+              "image": "community.wave.seqera.io/library/wget@sha256:df99425826775efe50af864d4caa2a3f54e3e3199474279e8e9c6926952873bc",
+              "processes": ["WGET"]
+            },
+            "community.wave.seqera.io/library/whatshap:2.8--7fe530bc624a3e5a": {
+              "image": "community.wave.seqera.io/library/whatshap@sha256:d63acefd18b67f3860b2614d316157fdd926380f9366a93ddd6d223e24382a58",
+              "processes": ["WHATSHAP_HAPLOTAG", "WHATSHAP_PHASE"]
+            },
+            "docker.io/google/deepsomatic:1.10.0": {
+              "image": "docker.io/google/deepsomatic@sha256:6cd98c41781cdc1a2916d8029bedef70a57b87d41f933bd4cf259c80f291e27b",
+              "processes": ["DEEPSOMATIC_TUMORONLY"]
+            },
+            "ghcr.io/chusj-pigu/clair3:5c1b224addf317c2cfe5ab5e03f6cdb23da13303": {
+              "image": "ghcr.io/chusj-pigu/clair3@sha256:e02a63cb7eef4c69291f13adab59f5203a3cf68511572db66f962d381084efed",
+              "processes": ["CLAIR3_CALL"]
+            },
+            "ghcr.io/chusj-pigu/clairsto:32908b7a702353b94cb595160a88ee05620015eb": {
+              "image": "ghcr.io/chusj-pigu/clairsto@sha256:1b1eaa5ef7bdba4ad7579b95d51b05ee9a1ea3c9b7349e947972c27a1560dbfd",
+              "processes": ["CLAIRS_TO_CALL"]
+            },
+            "ghcr.io/chusj-pigu/classy:sha-6a3f603": {
+              "image": "ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a",
+              "processes": [
+                "CLASSY_ALMA",
+                "CLASSY_ALMA_PILEUP",
+                "CLASSY_COMBINED",
+                "CLASSY_COMBINED_PILEUP",
+                "CLASSY_CROSSNN_CAPER",
+                "CLASSY_CROSSNN_CAPER_PILEUP",
+                "CLASSY_CROSSNN_PANCAN",
+                "CLASSY_CROSSNN_PANCAN_PILEUP",
+                "CLASSY_MARLIN",
+                "CLASSY_MARLIN_PILEUP",
+                "CLASSY_MPACT",
+                "CLASSY_MPACT_PILEUP"
+              ]
+            },
+            "ghcr.io/chusj-pigu/delly:4c07465cd477798fc6fe0b06d941dbe8acdba7bb": {
+              "image": "ghcr.io/chusj-pigu/delly@sha256:7009e0aebca9dd703fc0958738cb1fa3d547b7cc05086f7feab6436aa015e831",
+              "processes": ["DELLY_CNV"]
+            },
+            "ghcr.io/chusj-pigu/dorado:851b0a37ecbff6b3b952c811b31dad48ca6bf995": {
+              "image": "ghcr.io/chusj-pigu/dorado@sha256:9db144aac4cd9f6485104b0e208fe14b6201c9617fd4b31ff7b8b66e815135a0",
+              "processes": [
+                "DORADO_BASECALL",
+                "DORADO_DEMULTIPLEX",
+                "DORADO_DOWNLOAD_LIST",
+                "DORADO_DOWNLOAD_MODEL",
+                "DORADO_TRIM"
+              ]
+            },
+            "ghcr.io/chusj-pigu/figeno:e42833528621000fed543c5a6d999262ab751bcf": {
+              "image": "ghcr.io/chusj-pigu/figeno@sha256:e9a90169d979043902f3584990cc05d989e229b60fb90a019e7c65724503e98c",
+              "processes": ["FIGENO_CIRCOS", "FIGENO_PAN_CHR", "FIGENO_SV_FIGURE", "REVIEW_FIGURES"]
+            },
+            "ghcr.io/chusj-pigu/ichorcna:latest": {
+              "image": "ghcr.io/chusj-pigu/ichorcna@sha256:d70be8a59c4eda1d4f7d9adf856ed603419b5d5ea65f8d573c9252165d5db95a",
+              "processes": ["HMMCOPY_WIG", "ICHORCNA", "ICHORCNA_DOWNLOAD"]
+            },
+            "ghcr.io/chusj-pigu/magick:latest": {
+              "image": "ghcr.io/chusj-pigu/magick@sha256:94f1d0b451bb3bf8cb6b30cb2c46e660f91e5d982401ce5e2a43a9bff04efb4c",
+              "processes": ["CONVERT_PDF_PNG"]
+            },
+            "ghcr.io/chusj-pigu/nasvar:4f4033bdf40a5503fd555caee4c5d0d340cc1400": {
+              "image": "ghcr.io/chusj-pigu/nasvar@sha256:aa71fb3801ba0e25bc097dbbdd445496799fe4fd54f0d72c4516ef2ff9d52e8c",
+              "processes": ["NASVAR_PIPELINE"]
+            },
+            "ghcr.io/chusj-pigu/ontime:latest": {
+              "image": "ghcr.io/chusj-pigu/ontime@sha256:db193f0b788482db943afc0bc19b31dc9fc6adc8cd2e45c2bf844734edb9a8b0",
+              "processes": ["ONTIME_RANGE_FILTER", "ONTIME_RANGE_FILTER_FASTQ", "ONTIME_TIME_RANGE"]
+            },
+            "ghcr.io/chusj-pigu/qdnaseq:latest": {
+              "image": "ghcr.io/chusj-pigu/qdnaseq@sha256:870d6228e7a6fdfb08c3093069be07adb9f26084bcc12cf11a2c24eeb99bd1d9",
+              "processes": ["QDNASEQ_CALL"]
+            },
+            "ghcr.io/chusj-pigu/quarto:1aae9c5de71b00a19debb6db4067e5eb67301126": {
+              "image": "ghcr.io/chusj-pigu/quarto@sha256:33202e0cb941b22146ac9e96cf2ba99faa693867ebb2da804529398ebbad03ec",
+              "processes": [
+                "QUARTO_CODE",
+                "QUARTO_FIGURE",
+                "QUARTO_FIGURE_TABS",
+                "QUARTO_REPORT",
+                "QUARTO_SECTION",
+                "QUARTO_TABLE",
+                "QUARTO_TABLE_COLNAMES",
+                "QUARTO_TABLE_TABS",
+                "QUARTO_TEXT"
+              ]
+            },
+            "ghcr.io/chusj-pigu/severus:a294582458464a429891218e2be1c8c0db07b199": {
+              "image": "ghcr.io/chusj-pigu/severus@sha256:07ade7f3aec9181b7f5f52cda1d505662fd256516bedb7bdfa1047fe9466dff1",
+              "processes": ["SEVERUS_TUMOR_SINGLE"]
+            },
+            "ghcr.io/chusj-pigu/stellerator:5723fc7c4383bc34f07a9e7c159f9205ce1f8e08": {
+              "image": "ghcr.io/chusj-pigu/stellerator@sha256:b464e55a95a55d442cc2c75af381ff2dffeb342760a2f49674c867a6e531ecd8",
+              "processes": ["STELLERATOR"]
+            },
+            "ghcr.io/chusj-pigu/tidyverse:006154f90a8b1b1c8647a246a76cb0562517da61": {
+              "image": "ghcr.io/chusj-pigu/tidyverse@sha256:7f95139ad20cc9f3e8156ce4cab5afdb9c3de598c4d1a3106b39c4015d82e739",
+              "processes": [
+                "COVERAGE_PLOT",
+                "ENSEMBL_VEP_TABLE",
+                "PARSE_JSON_COMBINED",
+                "QDNASEQ_PROCESS",
+                "SV_PROCESS"
+              ]
+            },
+            "quay.io/biocontainers/cramino:1.1.0--h3dc2dae_0": {
+              "image": "quay.io/biocontainers/cramino@sha256:a0ed72cbb52240e6cb0085bea16f5356b3d790621281dd11cecc2f5173e5f791",
+              "processes": ["CRAMINO"]
+            },
+            "quay.io/biocontainers/pigz:2.8": {
+              "image": "quay.io/biocontainers/pigz@sha256:4c256586c0deb165a4675aba8cd6bbbec9b45fced5c5806af5b60b6be7303542",
+              "processes": ["PIGZ_UNCOMPRESS"]
+            },
+            "quay.io/biocontainers/whatshap:2.8--py39h2de1943_0": {
+              "image": "quay.io/biocontainers/whatshap@sha256:d63cdf64c29f99016ace7f8a4ace72d7a1dbbec262831e65d1a97d6a57960a30",
+              "processes": ["WHATSHAP_STATS"]
+            },
+            "community.wave.seqera.io/library/oncoseq_review_1_0_0:3b0426ad5a1884bf": {
+              "image": "community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5",
+              "processes": ["REVIEW_VALIDATE", "REVIEW_PREPARE", "REVIEW_COMPLETE", "REVIEW_RENDER"]
+            }
+          }
+        },
+        "policy_version": 3,
+        "fusion_distance": 100,
+        "statuses": {
+          "small:clair3": "completed",
+          "small:clairsto": "completed",
+          "small:deepsomatic": "completed",
+          "sv:sniffles": "completed",
+          "sv:severus": "completed",
+          "sv:stellerator": "completed",
+          "classification": "completed",
+          "nasvar": "completed"
+        },
+        "small_variants": {
+          "schema_version": 1,
+          "sample": "SYNTHETIC",
+          "build": "hg38",
+          "status": "completed",
+          "report_policy_version": 3,
+          "report_panel": {
+            "name": "panel.tsv",
+            "sha256": "9dcf70b529f9a2bcd147ee931fbe5e8e59db3c310ed3e8da1c1593079d7e9bf5",
+            "genes": { "TP53": "NM_TEST.1" }
+          },
+          "records": [
+            {
+              "coordinates": ["chr1", 150, "A", "T"],
+              "selections": [
+                {
+                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "T",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [],
+                  "priority": 0,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "missense_variant",
+                  "hgvsc": "NM_TEST.1:c.150A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": "pathogenic",
+                  "clinvar_review": "reviewed_by_expert_panel",
+                  "coordinates": ["chr1", 150, "A", "T"],
+                  "caller": "clair3",
+                  "kind": "germline",
+                  "inclusion_reasons": [
+                    "ClinVar pathogenic / likely pathogenic",
+                    "Panel coding variant; significance not established"
+                  ]
+                },
+                {
+                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "T",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [],
+                  "priority": 0,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "missense_variant",
+                  "hgvsc": "NM_TEST.1:c.150A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": "pathogenic",
+                  "clinvar_review": "reviewed_by_expert_panel",
+                  "coordinates": ["chr1", 150, "A", "T"],
+                  "caller": "clairsto",
+                  "kind": "tumor_only",
+                  "inclusion_reasons": [
+                    "ClinVar pathogenic / likely pathogenic",
+                    "Panel coding variant; significance not established"
+                  ]
+                },
+                {
+                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "T",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [],
+                  "priority": 0,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "missense_variant",
+                  "hgvsc": "NM_TEST.1:c.150A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": "pathogenic",
+                  "clinvar_review": "reviewed_by_expert_panel",
+                  "coordinates": ["chr1", 150, "A", "T"],
+                  "caller": "consensus",
+                  "kind": "derived_exact_pass",
+                  "inclusion_reasons": [
+                    "ClinVar pathogenic / likely pathogenic",
+                    "Panel coding variant; significance not established"
+                  ]
+                },
+                {
+                  "reason": "ClinVar P/LP",
+                  "display": {
+                    "transcript": {
+                      "Allele": "T",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "transcripts": [
+                    {
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE"
+                    }
+                  ],
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "coordinates": ["chr1", 150, "A", "T"],
+                  "caller": "consensus",
+                  "kind": "derived_exact_pass",
+                  "priority": 1,
+                  "review_group": "consensus_review",
+                  "gene": "TP53",
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "T",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "transcript": "NM_TEST.1",
+                  "consequence": "missense_variant",
+                  "hgvsc": "NM_TEST.1:c.150A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "inclusion_reasons": ["Consensus review: ClinVar P/LP"]
+                },
+                {
+                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "T",
+                      "Consequence": "missense_variant",
+                      "IMPACT": "MODERATE",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.150A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [],
+                  "priority": 0,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "missense_variant",
+                  "hgvsc": "NM_TEST.1:c.150A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": "pathogenic",
+                  "clinvar_review": "reviewed_by_expert_panel",
+                  "coordinates": ["chr1", 150, "A", "T"],
+                  "caller": "deepsomatic",
+                  "kind": "tumor_only",
+                  "inclusion_reasons": [
+                    "ClinVar pathogenic / likely pathogenic",
+                    "Panel coding variant; significance not established"
+                  ]
+                }
+              ],
+              "evidence": [
+                {
+                  "caller": "clair3",
+                  "kind": "germline",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "clair3": {
+                      "depth": 100,
+                      "af": 0.3,
+                      "af_source": "FORMAT/AF",
+                      "supporting_reads": 30,
+                      "support_source": "FORMAT/AD ALT count"
+                    }
+                  },
+                  "source_record": "chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "matched",
+                    "sources": [
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX1",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 7
+                            }
+                          },
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX2",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 9
+                            }
+                          }
+                        ],
+                        "identifiers": ["COSV1"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV1",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [7, 9],
+                            "inconsistent": true
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "native_records": ["chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
+                  "file": "SYNTHETIC.clair3.germline.targets.annotation.tsv.gz"
+                },
+                {
+                  "caller": "clairsto",
+                  "kind": "tumor_only",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "clairsto": {
+                      "depth": 100,
+                      "af": 0.3,
+                      "af_source": "FORMAT/AF",
+                      "supporting_reads": 30,
+                      "support_source": "FORMAT/AD ALT count"
+                    }
+                  },
+                  "source_record": "chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "matched",
+                    "sources": [
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX1",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 7
+                            }
+                          },
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX2",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 9
+                            }
+                          }
+                        ],
+                        "identifiers": ["COSV1"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV1",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [7, 9],
+                            "inconsistent": true
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "native_records": ["chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
+                  "file": "SYNTHETIC.clairsto.tumor_only.targets.annotation.tsv.gz"
+                },
+                {
+                  "caller": "consensus",
+                  "kind": "derived_exact_pass",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "deepsomatic": { "depth": 100, "af": 0.3, "af_source": "consensus native caller INFO" },
+                    "clairsto": { "depth": 100, "af": 0.3, "af_source": "consensus native caller INFO" }
+                  },
+                  "source_record": "chr1\t150\t.\tA\tT\t.\tPASS\tCS_DP=100;CS_AF=0.3;DS_DP=100;DS_AF=0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "matched",
+                    "sources": [
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX1",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 7
+                            }
+                          },
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX2",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 9
+                            }
+                          }
+                        ],
+                        "identifiers": ["COSV1"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV1",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [7, 9],
+                            "inconsistent": true
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "native_records": [],
+                  "file": "SYNTHETIC.consensus.derived_exact_pass.targets.annotation.tsv.gz"
+                },
+                {
+                  "caller": "deepsomatic",
+                  "kind": "tumor_only",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "deepsomatic": {
+                      "depth": 100,
+                      "af": 0.3,
+                      "af_source": "FORMAT/AF",
+                      "supporting_reads": 30,
+                      "support_source": "FORMAT/AD ALT count"
+                    }
+                  },
+                  "source_record": "chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "matched",
+                    "sources": [
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX1",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 7
+                            }
+                          },
+                          {
+                            "ids": ["COSV1"],
+                            "info": {
+                              "GENE": "TP53",
+                              "TRANSCRIPT": "TX2",
+                              "TIER": "1",
+                              "TARGETED_SCREEN_SAMPLE_COUNT": 9
+                            }
+                          }
+                        ],
+                        "identifiers": ["COSV1"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV1",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [7, 9],
+                            "inconsistent": true
+                          }
+                        ]
+                      }
+                    ]
+                  },
+                  "native_records": ["chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
+                  "file": "SYNTHETIC.deepsomatic.tumor_only.targets.annotation.tsv.gz"
+                }
+              ],
+              "exact_pass_agreement": true
+            },
+            {
+              "coordinates": ["chr1", 160, "A", "AT"],
+              "selections": [
+                {
+                  "reason": "Predicted loss of function",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [
+                    {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    }
+                  ],
+                  "priority": 1,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "frameshift_variant",
+                  "hgvsc": "NM_TEST.1:c.160A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": null,
+                  "clinvar_review": "",
+                  "coordinates": ["chr1", 160, "A", "AT"],
+                  "caller": "clair3",
+                  "kind": "germline",
+                  "inclusion_reasons": ["Predicted loss of function"]
+                },
+                {
+                  "reason": "Predicted loss of function",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [
+                    {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    }
+                  ],
+                  "priority": 1,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "frameshift_variant",
+                  "hgvsc": "NM_TEST.1:c.160A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": null,
+                  "clinvar_review": "",
+                  "coordinates": ["chr1", 160, "A", "AT"],
+                  "caller": "clairsto",
+                  "kind": "tumor_only",
+                  "inclusion_reasons": ["Predicted loss of function"]
+                },
+                {
+                  "reason": "Predicted loss of function",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [
+                    {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    }
+                  ],
+                  "priority": 1,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "frameshift_variant",
+                  "hgvsc": "NM_TEST.1:c.160A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": null,
+                  "clinvar_review": "",
+                  "coordinates": ["chr1", 160, "A", "AT"],
+                  "caller": "consensus",
+                  "kind": "derived_exact_pass",
+                  "inclusion_reasons": ["Predicted loss of function"]
+                },
+                {
+                  "reason": "VEP HIGH",
+                  "display": {
+                    "transcript": {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "transcripts": [
+                    {
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH"
+                    }
+                  ],
+                  "clinvar": [],
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "coordinates": ["chr1", 160, "A", "AT"],
+                  "caller": "consensus",
+                  "kind": "derived_exact_pass",
+                  "priority": 1,
+                  "review_group": "consensus_review",
+                  "gene": "TP53",
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "transcript": "NM_TEST.1",
+                  "consequence": "frameshift_variant",
+                  "hgvsc": "NM_TEST.1:c.160A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "inclusion_reasons": ["Consensus review: VEP HIGH"]
+                },
+                {
+                  "reason": "Predicted loss of function",
+                  "review_group": "findings",
+                  "panel_gene": true,
+                  "clinvar": [],
+                  "gene_context": {
+                    "transcript": {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": []
+                  },
+                  "trigger_transcripts": [
+                    {
+                      "Allele": "AT",
+                      "Consequence": "frameshift_variant",
+                      "IMPACT": "HIGH",
+                      "SYMBOL": "TP53",
+                      "Feature": "NM_TEST.1",
+                      "BIOTYPE": "protein_coding",
+                      "CANONICAL": "YES",
+                      "MANE_SELECT": "NM_TEST.1",
+                      "MANE_PLUS_CLINICAL": "",
+                      "HGVSc": "NM_TEST.1:c.160A>T",
+                      "HGVSp": "NP_TEST:p.X",
+                      "FLAGS": ""
+                    }
+                  ],
+                  "priority": 1,
+                  "gene": "TP53",
+                  "transcript": "NM_TEST.1",
+                  "consequence": "frameshift_variant",
+                  "hgvsc": "NM_TEST.1:c.160A>T",
+                  "hgvsp": "NP_TEST:p.X",
+                  "population_af": 0.001,
+                  "clinvar_significance": null,
+                  "clinvar_review": "",
+                  "coordinates": ["chr1", 160, "A", "AT"],
+                  "caller": "deepsomatic",
+                  "kind": "tumor_only",
+                  "inclusion_reasons": ["Predicted loss of function"]
+                }
+              ],
+              "evidence": [
+                {
+                  "caller": "clair3",
+                  "kind": "germline",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "clair3": {
+                      "depth": 100,
+                      "af": 0.3,
+                      "af_source": "FORMAT/AF",
+                      "supporting_reads": 30,
+                      "support_source": "FORMAT/AD ALT count"
+                    }
+                  },
+                  "source_record": "chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "no_match",
+                    "sources": [
+                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
+                    ]
+                  },
+                  "native_records": ["chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
+                  "file": "SYNTHETIC.clair3.germline.targets.annotation.tsv.gz"
+                },
+                {
+                  "caller": "clairsto",
+                  "kind": "tumor_only",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "clairsto": {
+                      "depth": 100,
+                      "af": 0.3,
+                      "af_source": "FORMAT/AF",
+                      "supporting_reads": 30,
+                      "support_source": "FORMAT/AD ALT count"
+                    }
+                  },
+                  "source_record": "chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "no_match",
+                    "sources": [
+                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
+                    ]
+                  },
+                  "native_records": ["chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
+                  "file": "SYNTHETIC.clairsto.tumor_only.targets.annotation.tsv.gz"
+                },
+                {
+                  "caller": "consensus",
+                  "kind": "derived_exact_pass",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "deepsomatic": { "depth": 100, "af": 0.3, "af_source": "consensus native caller INFO" },
+                    "clairsto": { "depth": 100, "af": 0.3, "af_source": "consensus native caller INFO" }
+                  },
+                  "source_record": "chr1\t160\t.\tA\tAT\t.\tPASS\tCS_DP=100;CS_AF=0.3;DS_DP=100;DS_AF=0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "no_match",
+                    "sources": [
+                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
+                    ]
+                  },
+                  "native_records": [],
+                  "file": "SYNTHETIC.consensus.derived_exact_pass.targets.annotation.tsv.gz"
+                },
+                {
+                  "caller": "deepsomatic",
+                  "kind": "tumor_only",
+                  "filter": "PASS",
+                  "sample_evidence": {
+                    "deepsomatic": {
+                      "depth": 100,
+                      "af": 0.3,
+                      "af_source": "FORMAT/AF",
+                      "supporting_reads": 30,
+                      "support_source": "FORMAT/AD ALT count"
+                    }
+                  },
+                  "source_record": "chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "population": {
+                    "genome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "exome": { "ac": 1, "an": 1000, "af": 0.001 },
+                    "combined_af": 0.001,
+                    "status": "retained_rare",
+                    "whitelist_rescue": false
+                  },
+                  "cosmic": {
+                    "status": "no_match",
+                    "sources": [
+                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
+                    ]
+                  },
+                  "native_records": ["chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
+                  "file": "SYNTHETIC.deepsomatic.tumor_only.targets.annotation.tsv.gz"
+                }
+              ],
+              "exact_pass_agreement": true
+            }
+          ],
+          "total_records": 2,
+          "selection_counts": [
+            {
+              "caller": "clair3",
+              "kind": "germline",
+              "selected_total": 2,
+              "selected_display": 2,
+              "consensus_review_total": 0,
+              "consensus_review_display": 0
+            },
+            {
+              "caller": "clairsto",
+              "kind": "tumor_only",
+              "selected_total": 2,
+              "selected_display": 2,
+              "consensus_review_total": 0,
+              "consensus_review_display": 0
+            },
+            {
+              "caller": "consensus",
+              "kind": "derived_exact_pass",
+              "selected_total": 2,
+              "selected_display": 2,
+              "consensus_review_total": 2,
+              "consensus_review_display": 2
+            },
+            {
+              "caller": "deepsomatic",
+              "kind": "tumor_only",
+              "selected_total": 2,
+              "selected_display": 2,
+              "consensus_review_total": 0,
+              "consensus_review_display": 0
+            }
+          ],
+          "files": [
+            "SYNTHETIC.clair3.germline.targets.annotation.tsv.gz",
+            "SYNTHETIC.clairsto.tumor_only.targets.annotation.tsv.gz",
+            "SYNTHETIC.consensus.derived_exact_pass.targets.annotation.tsv.gz",
+            "SYNTHETIC.deepsomatic.tumor_only.targets.annotation.tsv.gz"
+          ],
+          "policy": "Existing review groups and broad consensus selection before pagination. Exact normalized allele grouping; native FILTER/DP/AD/AF retained; no caller-count or AF pooling."
+        },
+        "structural_events": [
+          {
+            "id": "b6cf96d02bf1f8f39bc0333a",
+            "representative": ["BND", ["chr1", 800, "right"], ["chr2", 899, "left"]],
+            "gene_pairs": [["RUNX1", "RUNX1T1"]],
+            "selected": true,
+            "selection": [
+              {
+                "pair": ["RUNX1", "RUNX1T1"],
+                "caller": "sniffles",
+                "support": 65,
+                "native_id": null,
+                "chrom": "chr1",
+                "pos": 800,
+                "partner": { "chrom": "chr2", "pos": 900, "local_side": "right", "remote_side": "left" },
+                "coordinate_convention": "Illustrative coordinates",
+                "overlapping_gene_ambiguity": false,
+                "reason": "Curated fusion pair; at least 3 supporting reads",
+                "evidence_kind": "fusion_candidate",
+                "native_type": "BND",
+                "genes1": [{ "name": "RUNX1" }],
+                "genes2": [{ "name": "RUNX1T1" }],
+                "native_gene_pair": null,
+                "evidence": { "info": { "SVTYPE": "BND", "SUPPORT": 65 }, "format": {} },
+                "filter": ["PASS"],
+                "source_records": [],
+                "mate_evidence": null,
+                "breakpoint_annotations": [],
+                "mate_status": null
+              },
+              {
+                "pair": ["RUNX1", "RUNX1T1"],
+                "caller": "severus",
+                "support": 63,
+                "native_id": null,
+                "chrom": "chr1",
+                "pos": 805,
+                "partner": { "chrom": "chr2", "pos": 905, "local_side": "right", "remote_side": "left" },
+                "coordinate_convention": "Illustrative coordinates",
+                "overlapping_gene_ambiguity": false,
+                "reason": "Curated fusion pair; at least 3 supporting reads",
+                "evidence_kind": "fusion_candidate",
+                "native_type": "BND",
+                "genes1": [{ "name": "RUNX1" }],
+                "genes2": [{ "name": "RUNX1T1" }],
+                "native_gene_pair": null,
+                "evidence": { "info": { "SVTYPE": "BND", "SUPPORT": 63 }, "format": {} },
+                "filter": ["PASS"],
+                "source_records": [],
+                "mate_evidence": null,
+                "breakpoint_annotations": [],
+                "mate_status": null
+              }
+            ],
+            "consensus": true,
+            "ambiguous": false,
+            "possible_matches": [],
+            "callers": ["severus", "sniffles"],
+            "evidence": [
+              {
+                "id": "illustrative:sniffles",
+                "caller": "sniffles",
+                "sample": "SYNTHETIC",
+                "chrom": "chr1",
+                "pos": 800,
+                "partner": { "chrom": "chr2", "pos": 900, "local_side": "right", "remote_side": "left" },
+                "filter": ["PASS"],
+                "evidence": { "info": { "SVTYPE": "BND", "SUPPORT": 65 }, "format": {} },
+                "genes1": [{ "name": "RUNX1" }],
+                "genes2": [{ "name": "RUNX1T1" }],
+                "gene_pair": ["RUNX1", "RUNX1T1"],
+                "source_records": [],
+                "coordinate_convention": "Illustrative coordinates",
+                "native_support": 65
+              },
+              {
+                "id": "illustrative:severus",
+                "caller": "severus",
+                "sample": "SYNTHETIC",
+                "chrom": "chr1",
+                "pos": 805,
+                "partner": { "chrom": "chr2", "pos": 905, "local_side": "right", "remote_side": "left" },
+                "filter": ["PASS"],
+                "evidence": { "info": { "SVTYPE": "BND", "SUPPORT": 63 }, "format": {} },
+                "genes1": [{ "name": "RUNX1" }],
+                "genes2": [{ "name": "RUNX1T1" }],
+                "gene_pair": ["RUNX1", "RUNX1T1"],
+                "source_records": [],
+                "coordinate_convention": "Illustrative coordinates",
+                "native_support": 63
+              }
+            ]
+          }
+        ],
+        "classification": [
+          {
+            "name": "marlin",
+            "status": "completed",
+            "label": "Synthetic model class",
+            "score": 0.9,
+            "cutoff": 0.8,
+            "thresholds": { "cutoff": 0.8 },
+            "scores": [{ "label": "Synthetic model class", "score": 0.9 }],
+            "target_coverage": null,
+            "model": null
+          },
+          { "name": "optic", "status": "disabled", "reason": "Model assets unavailable in pinned image" }
+        ],
+        "coverage": [
+          {
+            "chrom": "chr1",
+            "start": 0,
+            "end": 1000,
+            "gene": "TP53",
+            "primary": 80.0,
+            "mapq60": 60.0,
+            "nofilter": 100.0
+          }
+        ],
+        "cnv": [],
+        "nasvar": { "version": "synthetic", "fusions": { "fusions": [] }, "qc": { "mean_depth": 100 } },
+        "figures": [
+          {
+            "category": "fusions",
+            "generated": true,
+            "event_id": "b6cf96d02bf1f8f39bc0333a",
+            "path": "/tmp/tmpc0d_6f9s/figures/illustrative.svg",
+            "name": "Illustrative RUNX1::RUNX1T1 junction",
+            "image_key": "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf",
+            "order": [27, "Illustrative RUNX1::RUNX1T1 junction"]
+          }
+        ],
+        "references": {
+          "schema_version": 1,
+          "assembly": "GRCh38",
+          "resources": {
+            "fasta": {
+              "uri": "genome.fa",
+              "release": "synthetic",
+              "sha256": "833720a92984eac564359bad8b977f215b4c0efb624251cf7eed0188028a694d"
+            },
+            "fai": {
+              "uri": "genome.fa.fai",
+              "release": "synthetic",
+              "sha256": "3494bd108c23265734c59e706594bc4e989ffc87ca1a05a90a246cf93b64fdb8"
+            },
+            "targets": {
+              "uri": "targets.bed",
+              "release": "synthetic",
+              "sha256": "81b6dc638e5b857f412d2c6a2342783d80eecdaef9994635af32b3f36680f872"
+            },
+            "gff": {
+              "uri": "genes.gff",
+              "release": "synthetic",
+              "sha256": "e8aa867beb20fe8a22469eb3cf36ff5fdfce758792c32f2339bb5cec9439d7f4"
+            },
+            "gnomad_genome": {
+              "uri": "gnomad_genome.vcf.gz",
+              "release": "synthetic",
+              "sha256": "7704af0d09962809f679495223e55c62277583ac8e3be001039334d7a6cd8691",
+              "index": {
+                "uri": "gnomad_genome.vcf.gz.tbi",
+                "sha256": "1fc6ab58a6270513ee6f3f5e871074190a6b711e3fa3307870500f231f28e224"
+              }
+            },
+            "gnomad_exome": {
+              "uri": "gnomad_exome.vcf.gz",
+              "release": "synthetic",
+              "sha256": "7704af0d09962809f679495223e55c62277583ac8e3be001039334d7a6cd8691",
+              "index": {
+                "uri": "gnomad_exome.vcf.gz.tbi",
+                "sha256": "1fc6ab58a6270513ee6f3f5e871074190a6b711e3fa3307870500f231f28e224"
+              }
+            },
+            "clinvar": {
+              "uri": "clinvar.vcf.gz",
+              "release": "synthetic",
+              "sha256": "c428eefc419f4432c2d5563365d474437a9dc3542eb611f497bbaac619c6e2e9",
+              "index": {
+                "uri": "clinvar.vcf.gz.tbi",
+                "sha256": "d2ee5ddf8a563f4df413434d82ec48a1ef67beff7e3e9eccd285abb0870e0efd"
+              }
+            },
+            "clinvar_common_pathogenic": {
+              "uri": "rescue.vcf.gz",
+              "release": "synthetic",
+              "sha256": "6cbf6724ec076e95137baa19d0b6393b636343d700c89821dd7f7b7bd888853c",
+              "index": {
+                "uri": "rescue.vcf.gz.tbi",
+                "sha256": "5c9e74e847b0ca3ca72ab2bcc803ac43efaff23fa701271af7d9208df054c08e"
+              }
+            },
+            "cosmic_targeted": {
+              "uri": "cosmic.vcf.gz",
+              "release": "synthetic",
+              "sha256": "557f5b6a412707c28f2cb340dbcd9081d2d0295f3d6fd2d20dbea1c9bd966e8a",
+              "index": {
+                "uri": "cosmic.vcf.gz.tbi",
+                "sha256": "d959e3723af8359a6e03380b4b309b99132fe040d29e8cc8bf8e95afe684fdee"
+              }
+            }
+          }
+        },
+        "panel": {
+          "name": "panel.tsv",
+          "sha256": "9dcf70b529f9a2bcd147ee931fbe5e8e59db3c310ed3e8da1c1593079d7e9bf5",
+          "genes": { "TP53": "NM_TEST.1" }
+        },
+        "warnings": ["Synthetic records and an illustrative fusion figure are used to demonstrate the layout."],
+        "images": {
+          "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiB2aWV3Qm94PSIwIDAgMTEwMCA0NDAiPgo8bnMwOnJlY3Qgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiBmaWxsPSJ3aGl0ZSIgLz48bnMwOnRleHQgeD0iMzUiIHk9IjM4IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzE3MmMzZCI+SWxsdXN0cmF0aXZlIGp1bmN0aW9uOiBSVU5YMSA6OiBSVU5YMVQxPC9uczA6dGV4dD4KPG5zMDp0ZXh0IHg9IjM1IiB5PSI3NiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1MjY3NzQiPlN5bnRoZXRpYyBjb3ZlcmFnZSBhbmQgc3BsaXQtcmVhZCB0cmFja3M8L25zMDp0ZXh0Pgo8bnMwOmcgc3Ryb2tlPSIjZDdlMGU2Ij48bnMwOnBhdGggZD0iTTEyMCAxMTBINTEwTTU5MCAxMTBIMTAxME0xMjAgMjIwSDUxME01OTAgMjIwSDEwMTBNMTIwIDM1MEg1MTBNNTkwIDM1MEgxMDEwIiAvPjwvbnMwOmc+CjxuczA6ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzE3MmMzZCI+PG5zMDp0ZXh0IHg9IjE1IiB5PSIxNTAiPkNvdmVyYWdlPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTUiIHk9IjI3MCI+U3BsaXQgcmVhZHM8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIxNSIgeT0iMzk1Ij5HZW5lczwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjI5MCIgeT0iNDIwIj5SVU5YMTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9Ijc2MCIgeT0iNDIwIj5SVU5YMVQxPC9uczA6dGV4dD48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzc0OGE5NiI+PG5zMDpwYXRoIGQ9Ik0xMzAgMjEwVjE1NUgxNjBWMTUwSDE5MFYxNDBIMjIwVjEzMEgyNTBWMTM1SDI4MFYxNDBIMzEwVjEzMEgzNDBWMTI1SDM3MFYxNDVINDAwVjEzMEg0MzBWMTM1SDQ2MFYxNDVINDkwVjIxMFoiIC8+PG5zMDpwYXRoIGQ9Ik02MTAgMjEwVjE0NUg2NDBWMTMwSDY3MFYxNDBINzAwVjEyNUg3MzBWMTM1SDc2MFYxMzBINzkwVjEyMEg4MjBWMTM1SDg1MFYxNDVIODgwVjE0MEg5MTBWMTM1SDk0MFYxNDVIOTcwVjE1MEgxMDAwVjIxMFoiIC8+PC9uczA6Zz4KPG5zMDpnIHN0cm9rZT0iIzA4NmY4MyIgc3Ryb2tlLXdpZHRoPSI2Ij48bnMwOnBhdGggZD0iTTE3MCAyNjBINDEwTTE2MCAyODBINDIwTTE4MCAzMDBINDAwTTcwMCAyNjBIOTQwTTcxMCAyODBIOTUwTTcwMCAzMDBIOTMwIiAvPjwvbnMwOmc+CjxuczA6ZyBzdHJva2U9IiM5NTU3MTUiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSI+PG5zMDpwYXRoIGQ9Ik00MTAgMjYwUTU1NSAyMjAgNzAwIDI2ME00MjAgMjgwUTU1MCAyNDAgNzEwIDI4ME00MDAgMzAwUTU1MCAyNjUgNzAwIDMwMCIgLz48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzA4NmY4MyI+PG5zMDpyZWN0IHg9IjIwMCIgeT0iMzc1IiB3aWR0aD0iNTUiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjMwMCIgeT0iMzc1IiB3aWR0aD0iNDAiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjQwNSIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iMjAiIC8+PC9uczA6Zz4KPG5zMDpnIGZpbGw9IiNiMTY4MzIiPjxuczA6cmVjdCB4PSI2MzAiIHk9IjM3NSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI3NDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI5MDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjwvbnMwOmc+CjwvbnMwOnN2Zz4="
+        }
+      }
+    </script>
+    <script>
+      "use strict";
+      const data = JSON.parse(document.getElementById("review-data").textContent);
+      const el = (tag, text, cls) => {
+        const n = document.createElement(tag);
+        if (text !== undefined) n.textContent = text;
+        if (cls) n.className = cls;
+        return n;
+      };
+      const fmt = (v) =>
+        v === null || v === undefined
+          ? "Not available"
+          : typeof v === "number"
+            ? Number(v.toFixed(4)).toLocaleString()
+            : String(v);
+      const names = [
+        ["overview", "Overview"],
+        ["classification", "Classification"],
+        ["fusions", "Fusions"],
+        ["small", "Small variants"],
+        ["sv", "CNV and other SVs"],
+        ["nasvar", "NASVAR"],
+        ["qc", "Coverage and QC"],
+        ["targets", "Target loci"],
+        ["methods", "Methods and files"],
+      ];
+      const sections = {};
+      for (const [id, label] of names) {
+        const b = el("button", label);
+        b.id = "tab-" + id;
+        b.role = "tab";
+        b.setAttribute("aria-controls", id);
+        b.onclick = () => activate(id);
+        document.getElementById("navigation").append(b);
+        const s = el("section", undefined, "section");
+        s.id = id;
+        s.role = "tabpanel";
+        s.setAttribute("aria-labelledby", b.id);
+        s.append(el("h2", label));
+        sections[id] = s;
+        document.getElementById("report").append(s);
+      }
+      function activate(id) {
+        if (!sections[id]) id = "overview";
+        for (const [k, s] of Object.entries(sections)) {
+          s.classList.toggle("active", k === id);
+          document.getElementById("tab-" + k).setAttribute("aria-selected", String(k === id));
+        }
+        history.replaceState(null, "", "#" + id);
+        document.querySelectorAll("#" + id + " img[data-image]").forEach(loadImage);
+      }
+      function panel(section, title, text) {
+        const p = el("div", undefined, "panel");
+        if (title) p.append(el("h3", title));
+        if (text) p.append(el("p", text, "muted"));
+        section.append(p);
+        return p;
+      }
+      function showEvidence(title, value) {
+        const content = document.getElementById("dialog-content");
+        content.replaceChildren();
+        document.getElementById("dialog-title").textContent = title;
+        if (value.coordinates) {
+          content.append(el("h3", value.coordinates.join(":")));
+          for (const selection of value.selections || []) {
+            content.append(
+              el(
+                "p",
+                (selection.gene || "") + " | " + (selection.hgvsp || selection.hgvsc || "") + " | " + selection.reason,
+              ),
+            );
+            if (selection.gene_context?.warnings?.length)
+              content.append(el("p", selection.gene_context.warnings.join("; "), "warning"));
+            if (selection.clinvar?.length)
+              table(
+                content,
+                selection.clinvar,
+                [
+                  { label: "ClinVar assertion", value: (r) => JSON.stringify(r.CLNSIG) },
+                  { label: "Review status", value: (r) => JSON.stringify(r.CLNREVSTAT) },
+                  { label: "Disease context", value: (r) => JSON.stringify(r.CLNDN || null) },
+                ],
+                "ClinVar assertions",
+              );
+          }
+          const evidence = (value.evidence || []).filter((r) => r.caller !== "consensus");
+          table(
+            content,
+            evidence,
+            [
+              { label: "Caller", value: (r) => r.caller },
+              { label: "Filter", value: (r) => r.filter },
+              { label: "Depth", value: (r) => r.sample_evidence[r.caller]?.depth },
+              { label: "Allele fraction", value: (r) => r.sample_evidence[r.caller]?.af },
+              { label: "ALT support", value: (r) => r.sample_evidence[r.caller]?.supporting_reads },
+            ],
+            "native caller evidence",
+          );
+          const cosmicRows = [];
+          for (const row of evidence)
+            for (const source of row.cosmic?.sources || [])
+              for (const recurrence of source.recurrence || []) {
+                const key = source.source + recurrence.identifier + JSON.stringify(recurrence.values);
+                if (!cosmicRows.some((r) => r.key === key))
+                  cosmicRows.push({
+                    key,
+                    source: source.source,
+                    id: recurrence.identifier,
+                    values: recurrence.values.join(" / "),
+                    inconsistent: recurrence.inconsistent,
+                    tier: [...new Set(source.observations.map((r) => r.info.TIER).filter(Boolean))].join(", "),
+                  });
+              }
+          if (cosmicRows.length)
+            table(
+              content,
+              cosmicRows,
+              [
+                { label: "COSMIC ID", value: (r) => r.id },
+                { label: "Catalogue", value: (r) => r.source },
+                { label: "Recurrence values", value: (r) => r.values + (r.inconsistent ? " (inconsistent)" : "") },
+                { label: "Gene Census tier", value: (r) => r.tier || "Not available" },
+              ],
+              "COSMIC annotations",
+            );
+        } else if (value.evidence && value.callers) {
+          table(
+            content,
+            value.evidence,
+            [
+              { label: "Caller", value: (r) => r.caller },
+              { label: "VCF sample", value: (r) => r.vcf_sample || r.sample },
+              { label: "Native locus 1", value: (r) => r.chrom + ":" + r.pos },
+              { label: "Native locus 2", value: (r) => r.partner.chrom + ":" + r.partner.pos },
+              { label: "Filter", value: (r) => (r.filter || ["Native semantics"]).join("; ") },
+              { label: "Support", value: (r) => r.native_support },
+              { label: "Coordinates", value: (r) => r.coordinate_convention },
+            ],
+            "junction evidence",
+          );
+        }
+        const detail = el("details");
+        detail.append(el("summary", "Complete source evidence"), el("pre", JSON.stringify(value, null, 2)));
+        content.append(detail);
+        document.getElementById("evidence").showModal();
+      }
+      document.getElementById("close-dialog").onclick = () => document.getElementById("evidence").close();
+      document.getElementById("navigation").onkeydown = (e) => {
+        if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+        const buttons = [...e.currentTarget.children];
+        let i = buttons.indexOf(document.activeElement);
+        i =
+          e.key === "Home"
+            ? 0
+            : e.key === "End"
+              ? buttons.length - 1
+              : (i + (e.key === "ArrowRight" ? 1 : -1) + buttons.length) % buttons.length;
+        buttons[i].focus();
+        buttons[i].click();
+        e.preventDefault();
+      };
+      function table(parent, rows, columns, title) {
+        const box = el("div");
+        const controls = el("div", undefined, "controls");
+        const search = el("input");
+        search.type = "search";
+        search.placeholder = "Search " + title;
+        search.setAttribute("aria-label", search.placeholder);
+        const prev = el("button", "Previous"),
+          next = el("button", "Next"),
+          count = el("span", undefined, "muted");
+        controls.append(search, prev, next, count);
+        let cosmicOnly = null;
+        if (columns.some((c) => c.label === "COSMIC IDs")) {
+          const label = el("label"),
+            check = el("input");
+          check.type = "checkbox";
+          check.onchange = () => {
+            page = 0;
+            draw();
+          };
+          label.append(check, document.createTextNode(" COSMIC matches only"));
+          controls.append(label);
+          cosmicOnly = check;
+        }
+        box.append(controls);
+        const wrap = el("div", undefined, "table-scroll"),
+          t = el("table"),
+          head = el("thead"),
+          tr = el("tr"),
+          body = el("tbody");
+        let page = 0,
+          sort = -1,
+          direction = 1;
+        columns.forEach((c, i) => {
+          const th = el("th");
+          if (c.value) {
+            const b = el("button", c.label);
+            b.onclick = () => {
+              direction = sort === i ? -direction : 1;
+              sort = i;
+              page = 0;
+              draw();
+            };
+            th.append(b);
+          } else th.textContent = c.label;
+          tr.append(th);
+        });
+        head.append(tr);
+        t.append(head, body);
+        wrap.append(t);
+        box.append(wrap);
+        parent.append(box);
+        search.oninput = () => {
+          page = 0;
+          draw();
+        };
+        prev.onclick = () => {
+          page--;
+          draw();
+        };
+        next.onclick = () => {
+          page++;
+          draw();
+        };
+        function draw() {
+          let selected = rows.filter(
+            (r) =>
+              (!cosmicOnly?.checked || (r.evidence || []).some((e) => e.cosmic?.status === "matched")) &&
+              JSON.stringify(r).toLowerCase().includes(search.value.toLowerCase()),
+          );
+          if (sort >= 0)
+            selected.sort((a, b) => {
+              const av = columns[sort].value(a),
+                bv = columns[sort].value(b);
+              return (
+                direction *
+                (typeof av === "number" && typeof bv === "number"
+                  ? av - bv
+                  : fmt(av).localeCompare(fmt(bv), undefined, { numeric: true }))
+              );
+            });
+          body.replaceChildren();
+          for (const r of selected.slice(page * 25, (page + 1) * 25)) {
+            const row = el("tr");
+            for (const c of columns) {
+              const cell = el("td");
+              if (c.figure) {
+                const figure = data.figures.find((f) => f.event_id === r.id);
+                if (figure) {
+                  const b = el("button", "Plot");
+                  b.onclick = () => zoom(figure);
+                  cell.append(b);
+                } else cell.textContent = "Not generated";
+              } else if (c.plot) {
+                const b = el("button", "Plot");
+                b.onclick = () => showCoverage(r);
+                cell.append(b);
+              } else if (c.detail) {
+                const b = el("button", "Evidence");
+                b.onclick = () => showEvidence(title, r);
+                cell.append(b);
+              } else cell.textContent = fmt(c.value(r));
+              row.append(cell);
+            }
+            body.append(row);
+          }
+          count.textContent = `${selected.length ? Math.min(page * 25 + 1, selected.length) : 0}-${Math.min((page + 1) * 25, selected.length)} of ${selected.length} / ${rows.length} total`;
+          prev.disabled = page === 0;
+          next.disabled = (page + 1) * 25 >= selected.length;
+          if (!selected.length) {
+            const r = el("tr"),
+              c = el("td", "No records match this view.", "empty");
+            c.colSpan = columns.length;
+            r.append(c);
+            body.append(r);
+          }
+        }
+        draw();
+      }
+      const small = data.small_variants?.records || [],
+        events = data.structural_events || [],
+        selected = events.filter((e) => e.selected);
+      const cards = el("div", undefined, "cards");
+      for (const [label, value] of [
+        ["Selected small variants", small.length],
+        ["Fusion / gene-pair candidates", selected.length],
+        ["Corroborated junctions", selected.filter((e) => e.consensus).length],
+        ["Reference assembly", data.assembly],
+      ]) {
+        const c = el("div", undefined, "card");
+        c.append(el("div", label, "muted"), el("div", String(value), "value"));
+        cards.append(c);
+      }
+      sections.overview.append(cards);
+      if (data.mode === "preview")
+        sections.overview.append(
+          el(
+            "p",
+            "Layout preview. External reference joins and production normalisation were not performed.",
+            "warning",
+          ),
+        );
+      for (const warning of data.warnings || []) sections.overview.append(el("p", warning, "warning"));
+      panel(
+        sections.overview,
+        "Review context",
+        "Selection identifies candidates for review. Caller agreement, predicted consequences and catalogue membership retain their source meaning. Coverage and negative findings require assay-specific interpretation.",
+      );
+      const status = panel(sections.overview, "Analysis status");
+      table(
+        status,
+        Object.entries(data.statuses || {}).map(([name, state]) => ({ name, state })),
+        [
+          { label: "Analysis", value: (r) => r.name },
+          { label: "Status", value: (r) => r.state },
+        ],
+        "analysis status",
+      );
+      const cc = el("div", undefined, "cards");
+      for (const c of data.classification || []) {
+        const box = el("div", undefined, "card");
+        box.append(
+          el("h3", c.name),
+          el("strong", c.label || c.status),
+          el(
+            "p",
+            "Score: " +
+              fmt(c.score) +
+              " | Threshold metadata: " +
+              Object.entries(c.thresholds || {})
+                .map(([k, v]) => k + ": " + fmt(v))
+                .join("; "),
+            "muted",
+          ),
+        );
+        if (typeof c.score === "number") {
+          const bar = el("div", undefined, "scorebar"),
+            fill = el("span");
+          fill.style.width = Math.max(0, Math.min(100, c.score * 100)) + "%";
+          bar.append(fill);
+          box.append(bar);
+        }
+        const b = el("button", "Model evidence");
+        b.onclick = () => showEvidence(c.name, c);
+        box.append(b);
+        cc.append(box);
+      }
+      sections.classification.append(cc);
+      if (!(data.classification || []).length)
+        panel(sections.classification, null, "Classification was not run for this sample.");
+      const fusionCols = [
+        { label: "Gene pair", value: (r) => r.gene_pairs.map((p) => p.join("::")).join("; ") || "Unresolved" },
+        {
+          label: "Event",
+          value: (r) => r.representative?.[0] || r.evidence[0].evidence?.info?.SVTYPE || "Native junction",
+        },
+        {
+          label: "Loci",
+          value: (r) =>
+            r.evidence[0].chrom +
+            ":" +
+            r.evidence[0].pos +
+            " / " +
+            r.evidence[0].partner.chrom +
+            ":" +
+            r.evidence[0].partner.pos,
+        },
+        { label: "Callers", value: (r) => r.callers.join(", ") },
+        {
+          label: "Support by caller",
+          value: (r) => r.evidence.map((e) => e.caller + ": " + fmt(e.native_support)).join("; "),
+        },
+        {
+          label: "Consensus",
+          value: (r) =>
+            r.consensus ? "Breakpoint agreement" : r.ambiguous ? "Ambiguous correspondence" : "Single caller",
+        },
+        { label: "Plot", figure: true },
+        { label: "Details", detail: true },
+      ];
+      table(
+        panel(
+          sections.fusions,
+          "Prioritised gene-pair events",
+          "Curated pairs with applicable native filters and at least three supporting reads. Counts from different callers are not added.",
+        ),
+        selected,
+        fusionCols,
+        "fusion candidates",
+      );
+      table(
+        panel(
+          sections.fusions,
+          "Supporting junction evidence",
+          "Includes unselected, low-support, failed-filter and ambiguous junctions.",
+        ),
+        events.filter((e) => !e.selected),
+        fusionCols,
+        "supporting junctions",
+      );
+      function choice(r) {
+        return r.selections[0] || {};
+      }
+      function cosmic(r) {
+        const hits = r.evidence.flatMap((e) => e.cosmic?.sources || []).flatMap((s) => s.identifiers || []);
+        return (
+          [...new Set(hits)].join(", ") ||
+          ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Not configured")
+        );
+      }
+      const scols = [
+        { label: "Gene", value: (r) => choice(r).gene },
+        {
+          label: "Change",
+          value: (r) => decodeURIComponent(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
+        },
+        { label: "Reason", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
+        {
+          label: "PASS agreement",
+          value: (r) => (r.exact_pass_agreement ? "ClairS-TO + DeepSomatic" : "Independent caller evidence"),
+        },
+        {
+          label: "AF / depth by caller",
+          value: (r) =>
+            r.evidence
+              .filter((e) => e.caller !== "consensus")
+              .map((e) => {
+                const s = e.sample_evidence[e.caller] || {};
+                return `${e.caller}: ${fmt(s.af)} / ${fmt(s.depth)} (${e.filter})`;
+              })
+              .join("; "),
+        },
+        { label: "COSMIC IDs", value: cosmic },
+        { label: "Details", detail: true },
+      ];
+      for (const [group, title] of [
+        ["findings", "Prioritised findings"],
+        ["coding", "Additional coding review"],
+        ["supporting", "Supporting small variants"],
+        ["consensus_review", "Broad consensus review"],
+      ]) {
+        const rows = small.filter((r) => r.selections.some((s) => s.review_group === group));
+        if (rows.length || group === "findings") table(panel(sections.small, title), rows, scols, title);
+      }
+      panel(
+        sections.small,
+        null,
+        "Population AF > 0.01 is excluded unless the exact allele is whitelisted. Predicted loss of function and COSMIC recurrence do not establish pathogenicity. COSMIC gene tier is a gene-level Cancer Gene Census property. Full annotation exports retain native filters.",
+      );
+      table(
+        panel(sections.sv, "Copy-number intervals", "Values retain their native caller representation."),
+        data.cnv || [],
+        [
+          { label: "Source", value: (r) => r.source },
+          { label: "Chromosome", value: (r) => r.chrom },
+          { label: "Native start", value: (r) => r.start },
+          { label: "Native end", value: (r) => r.end },
+          { label: "Native values", value: (r) => r.native_values.join(" | ") },
+          { label: "Details", detail: true },
+        ],
+        "copy-number intervals",
+      );
+      table(
+        panel(sections.sv, "Other structural evidence"),
+        events.filter((e) => !e.selected),
+        fusionCols,
+        "structural evidence",
+      );
+      const nsnv = data.nasvar?.snv?.genes;
+      if (nsnv)
+        table(
+          panel(sections.nasvar, "Native genotypes"),
+          Object.entries(nsnv).map(([gene, value]) => ({ gene, ...value })),
+          [
+            { label: "Gene", value: (r) => r.gene },
+            { label: "Genotype", value: (r) => r.genotype },
+            { label: "Coverage", value: (r) => r.coverage },
+            { label: "Amino acid changes", value: (r) => (r.aa_changes || []).join("; ") },
+            { label: "Mutations / native AF", value: (r) => JSON.stringify(r.mutations) },
+          ],
+          "NASVAR genotypes",
+        );
+      const ncnv = data.nasvar?.cnv?.genes;
+      if (ncnv)
+        table(
+          panel(sections.nasvar, "Native gene copy estimates"),
+          Object.entries(ncnv).map(([gene, value]) => ({ gene, ...value })),
+          [
+            { label: "Gene", value: (r) => r.gene },
+            { label: "Focal estimate", value: (r) => r.focal },
+            { label: "Local estimate", value: (r) => r.local },
+          ],
+          "NASVAR gene copy estimates",
+        );
+      const nk = data.nasvar?.karyotype?.karyotype;
+      if (nk)
+        table(
+          panel(sections.nasvar, "Native chromosome-arm estimates"),
+          Object.entries(nk)
+            .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
+            .map(([arm, copies]) => ({ arm, copies })),
+          [
+            { label: "Chromosome / arm", value: (r) => r.arm },
+            { label: "Estimated copies", value: (r) => r.copies },
+          ],
+          "NASVAR chromosome arms",
+        );
+      const nitd = data.nasvar?.itd?.genes;
+      if (nitd)
+        table(
+          panel(
+            sections.nasvar,
+            "Native ITD scan",
+            "Event counts describe the native scan. They do not establish assay-level absence.",
+          ),
+          Object.entries(nitd).map(([gene, events]) => ({ gene, events })),
+          [
+            { label: "Gene", value: (r) => r.gene },
+            { label: "Native events", value: (r) => r.events.length },
+            { label: "Evidence", detail: true },
+          ],
+          "NASVAR ITD events",
+        );
+      for (const key of ["qc", "karyotype", "cnv", "snv", "itd"])
+        if (data.nasvar?.[key] !== undefined) {
+          const p = panel(sections.nasvar, key.toUpperCase() + " source"),
+            d = el("details"),
+            s = el("summary", "Native " + key + " results");
+          d.append(s, el("pre", JSON.stringify(data.nasvar[key], null, 2)));
+          p.append(d);
+        }
+      const q = panel(
+        sections.qc,
+        "Region coverage",
+        "Mean interval depth. Alignment-filter strata are separate measurements. These summaries do not establish per-base depth thresholds or a copy-number diagnosis.",
+      );
+      table(
+        q,
+        data.coverage || [],
+        [
+          { label: "Gene / interval", value: (r) => r.gene },
+          { label: "Chromosome", value: (r) => r.chrom },
+          { label: "Start (BED)", value: (r) => r.start },
+          { label: "End (BED)", value: (r) => r.end },
+          { label: "Primary", value: (r) => r.primary },
+          { label: "MAPQ 60", value: (r) => r.mapq60 },
+          { label: "Unfiltered", value: (r) => r.nofilter },
+          { label: "Plot", plot: true },
+        ],
+        "coverage regions",
+      );
+      panel(
+        sections.targets,
+        null,
+        "Target-locus figures show the configured loci and selected evidence. Absence from a prioritised event list is not a negative molecular finding.",
+      );
+      function showCoverage(row) {
+        const dialog = document.getElementById("evidence"),
+          content = document.getElementById("dialog-content");
+        document.getElementById("dialog-title").textContent =
+          (row.gene || "Region") + " | " + row.chrom + ":" + row.start + "-" + row.end;
+        const ns = "http://www.w3.org/2000/svg",
+          svg = document.createElementNS(ns, "svg");
+        svg.setAttribute("viewBox", "0 0 700 210");
+        svg.setAttribute("role", "img");
+        svg.setAttribute("aria-label", "Mean region depth by alignment filter");
+        const values = ["primary", "mapq60", "nofilter"];
+        const maximum = Math.max(1, ...values.map((k) => row[k] || 0));
+        values.forEach((key, i) => {
+          const y = 25 + i * 55,
+            label = document.createElementNS(ns, "text"),
+            bar = document.createElementNS(ns, "rect"),
+            value = document.createElementNS(ns, "text");
+          label.setAttribute("x", 0);
+          label.setAttribute("y", y + 20);
+          label.textContent = key;
+          bar.setAttribute("x", 120);
+          bar.setAttribute("y", y);
+          bar.setAttribute("width", Math.max(0, ((row[key] || 0) / maximum) * 420));
+          bar.setAttribute("height", 28);
+          bar.setAttribute("fill", ["#086f83", "#b16832", "#748a96"][i]);
+          value.setAttribute("x", 550);
+          value.setAttribute("y", y + 20);
+          value.textContent = fmt(row[key]) + " mean depth";
+          svg.append(label, bar, value);
+        });
+        content.replaceChildren(
+          svg,
+          el(
+            "p",
+            "Mean interval coverage. Filtered measurements are separate strata, not components of a stacked total.",
+            "muted",
+          ),
+        );
+        dialog.showModal();
+      }
+      function loadImage(img) {
+        if (!img.src) img.src = data.images[img.dataset.image];
+      }
+      function zoom(item) {
+        const dialog = document.getElementById("evidence"),
+          content = document.getElementById("dialog-content");
+        document.getElementById("dialog-title").textContent = item.name;
+        content.replaceChildren();
+        const scale = el("input");
+        scale.type = "range";
+        scale.min = 50;
+        scale.max = 200;
+        scale.value = 100;
+        scale.setAttribute("aria-label", "Figure zoom");
+        const viewport = el("div", undefined, "zoom-scroll"),
+          img = el("img");
+        img.src = data.images[item.image_key];
+        img.alt = item.name;
+        img.style.width = "100%";
+        scale.oninput = () => (img.style.width = scale.value + "%");
+        viewport.append(img);
+        content.append(scale, viewport);
+        dialog.showModal();
+      }
+      const galleries = {};
+      for (const item of data.figures || []) {
+        if (item.generated) continue;
+        const id =
+          item.category === "fusions"
+            ? "fusions"
+            : item.category === "target_loci"
+              ? "targets"
+              : item.category === "coverage"
+                ? "qc"
+                : item.category === "classification"
+                  ? "classification"
+                  : "sv";
+        if (!galleries[id]) {
+          galleries[id] = el("div", undefined, "gallery");
+          const archive = el("details"),
+            label = el("summary", "Original caller figures");
+          archive.append(label, galleries[id]);
+          sections[id].append(archive);
+        }
+        const f = el("figure", undefined, "figure"),
+          img = el("img");
+        img.dataset.image = item.image_key;
+        img.alt = item.name;
+        img.loading = "lazy";
+        img.onclick = () => zoom(item);
+        const b = el("button", "Open full view");
+        b.onclick = () => zoom(item);
+        f.append(el("figcaption", item.name), img, b);
+        galleries[id].append(f);
+      }
+      const methods = panel(sections.methods, "References and policy");
+      const detail = el("details"),
+        summary = el("summary", "Resource provenance");
+      detail.append(
+        summary,
+        el(
+          "pre",
+          JSON.stringify(
+            {
+              code_sha256: data.code_sha256,
+              policy_version: data.policy_version,
+              fusion_distance: data.fusion_distance,
+              panel: data.panel,
+              references: data.references,
+              images: data.images_lock || data.images_provenance,
+            },
+            null,
+            2,
+          ),
+        ),
+      );
+      methods.append(detail);
+      const files = panel(sections.methods, "Complete exports");
+      for (const name of [
+        "small_variants.tsv.gz",
+        "structural_events.tsv.gz",
+        "caller_evidence.tsv.gz",
+        "manifest.json",
+      ]) {
+        const p = el("p"),
+          a = el("a", name);
+        a.href = "review/" + encodeURIComponent(data.sample) + "/" + name;
+        p.append(a);
+        files.append(p);
+      }
+      files.append(
+        el(
+          "p",
+          "External export links require the adjacent results directory. This HTML itself works offline.",
+          "footnote",
+        ),
+      );
+      window.addEventListener("beforeprint", () => document.querySelectorAll("img[data-image]").forEach(loadImage));
+      window.addEventListener("hashchange", () => activate(location.hash.slice(1)));
+      activate(location.hash.slice(1) || "overview");
+    </script>
+    <noscript
+      ><p>
+        This report requires JavaScript for interactive tables. Complete machine-readable exports accompany the report.
+      </p></noscript
+    >
+  </body>
+</html>

@@ -1,0 +1,43 @@
+nextflow_workflow {
+    name "Optional review report"
+    script "tests/subworkflows/local/report/workflow.nf"
+    workflow "CHECK_REVIEW"
+    config "tests/subworkflows/local/report/local.config"
+
+    test("Native annotations and portable HTML") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+            }
+        }
+        then {
+            assert workflow.success
+            assert workflow.out.html.size() == 1
+            def data = new groovy.json.JsonSlurperClassic().parseText(file("${workflow.out.data[0][1]}/review.json").text)
+            assert data.small_variants.total_records == 2
+            assert data.small_variants.records.every { row -> row.exact_pass_agreement }
+            assert data.classification[0].score == 0.9
+            assert data.structural_events.every { event -> !event.selected }
+            assert file(workflow.out.html[0][1]).text.contains('SYNTHETIC')
+            assert file("${outputDir}/results/reports/SYNTHETIC.review.html").exists()
+            assert file("${outputDir}/results/reports/review/SYNTHETIC/manifest.json").exists()
+            assert !file("${outputDir}/results/reports/review/SYNTHETIC/review_data").exists()
+        }
+    }
+    test("Empty candidate union remains a completed report") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                review_empty = true
+            }
+        }
+        then {
+            assert workflow.success
+            def data = new groovy.json.JsonSlurperClassic().parseText(file("${workflow.out.data[0][1]}/review.json").text)
+            assert data.small_variants.total_records == 0
+            assert data.statuses['small:deepsomatic'] == 'completed'
+            assert file("${outputDir}/results/reports/SYNTHETIC.review.html").exists()
+        }
+    }
+
+}

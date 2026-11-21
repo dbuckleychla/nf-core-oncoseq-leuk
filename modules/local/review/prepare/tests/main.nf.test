@@ -1,0 +1,33 @@
+nextflow_process {
+    name "Immutable review reference validation"
+    script "modules/local/review/prepare/main.nf"
+    process "REVIEW_VALIDATE"
+
+    test("Validate staged references and analytical FASTA") {
+        when {
+            process {
+                """
+                def root = file("${projectDir}/test_data/review")
+                def refs = new groovy.json.JsonSlurperClassic().parseText(file("\${root}/references.json").text)
+                def paths = []
+                refs.resources.each { name, entry ->
+                    paths << file("\${root}/\${entry.uri}")
+                    entry.path = "references/\${entry.uri}"
+                    if (entry.index) {
+                        paths << file("\${root}/\${entry.index.uri}")
+                        entry.index.path = "references/\${entry.index.uri}"
+                    }
+                }
+                input[0] = paths
+                input[1] = refs
+                input[2] = 'fixture-code'
+                input[3] = [[id: 'reference'], file("\${root}/genome.fa")]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert file(process.out.validated[0]).text.contains('GRCh38')
+        }
+    }
+}

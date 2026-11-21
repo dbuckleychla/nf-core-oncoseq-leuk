@@ -15,31 +15,29 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { ONCOSEQ                 } from './workflows/oncoseq'
+include { ONCOSEQ } from './workflows/oncoseq'
 include { PIPELINE_INITIALISATION } from './subworkflows/local/utils_nfcore_oncoseq_pipeline'
-include { PIPELINE_COMPLETION     } from './subworkflows/local/utils_nfcore_oncoseq_pipeline'
-include { getMinQC                } from './subworkflows/local/utils_nfcore_oncoseq_pipeline'
+include { PIPELINE_COMPLETION } from './subworkflows/local/utils_nfcore_oncoseq_pipeline'
+include { getMinQC } from './subworkflows/local/utils_nfcore_oncoseq_pipeline'
 
 //
 // WORKFLOW: Run main analysis pipeline depending on type of input
 //
 workflow NF_CORE_ONCOSEQ {
-
-
     take:
-    samplesheet     // channel: samplesheet read in from --input
-    demux           // channel: demux_samplesheet read in from samplesheet
-    tumor_type      // channel: tumor type read in from samplesheet
-    cfdna_ss        // channel: purity and filter directive from samplesheet
-    ref             // channel : reference fasta file
-    ref_fai         // channel : reference fasta file index
-    genome          // variable: standardized genome ID
-    ichor_bin       // cfDNA mode only
-    mapq_wig        // cfDNA mode only
-    basecall_model   // channel: model for basecalling
-    bed             // channel: from path read from params.bed, bed file used for adaptive sampling
-    bed_nopad       // channel: bed file without padding
-    sv_targets      // channel : list of genes with their position to represent in Figeno
+    samplesheet // channel: samplesheet read in from --input
+    demux // channel: demux_samplesheet read in from samplesheet
+    tumor_type // channel: tumor type read in from samplesheet
+    cfdna_ss // channel: purity and filter directive from samplesheet
+    ref // channel : reference fasta file
+    ref_fai // channel : reference fasta file index
+    genome // variable: standardized genome ID
+    ichor_bin // cfDNA mode only
+    mapq_wig // cfDNA mode only
+    basecall_model // channel: model for basecalling
+    bed // channel: from path read from params.bed, bed file used for adaptive sampling
+    bed_nopad // channel: bed file without padding
+    sv_targets // channel : list of genes with their position to represent in Figeno
     vep_cache
 
     main:
@@ -47,7 +45,7 @@ workflow NF_CORE_ONCOSEQ {
     //
     // WORKFLOW: Run pipeline
     //
-    ONCOSEQ (
+    ONCOSEQ(
         samplesheet,
         demux,
         tumor_type,
@@ -61,7 +59,7 @@ workflow NF_CORE_ONCOSEQ {
         bed,
         bed_nopad,
         sv_targets,
-        vep_cache
+        vep_cache,
     )
 }
 
@@ -74,6 +72,13 @@ workflow NF_CORE_ONCOSEQ {
 params {
 
     clinical: Boolean
+    report_review: Boolean = false
+    review_references: Path?
+    review_panel: Path = "${projectDir}/assets/reporting/leukemia-v1.tsv"
+    review_fusion_distance: Integer = 100
+    publish_fastq: Boolean = false
+    publish_ubam: Boolean = true
+    publish_intermediate_bams: Boolean = false
     aws_region: String?
     aws_queue: String?
     aws_basecall_queue: String?
@@ -306,12 +311,10 @@ params {
 
 workflow {
 
-    main:
-
     //
     // SUBWORKFLOW: Run initialisation tasks
     //
-    PIPELINE_INITIALISATION (
+    PIPELINE_INITIALISATION(
         params.version,
         params.validate_params,
         params.monochrome_logs,
@@ -320,31 +323,23 @@ workflow {
         params.input,
         params.basecall_model,
         params.ref_cache,
-        params.vep_cache
+        params.vep_cache,
     )
     // Standardize genome nomenclature for all subworkflows:
-    def genomeMap = [
-        'hg38'   : 'hg38',
-        'GRCh38' : 'hg38',
-        'hg19'   : 'hg19',
-        'GRCh37' : 'hg19',
-        'hs1'    : 'hs1',
-        'CHM13'  : 'hs1',
-        't2t'    : 'hs1'
-    ]
+    def genomeMap = ['hg38': 'hg38', 'GRCh38': 'hg38', 'hg19': 'hg19', 'GRCh37': 'hg19', 'hs1': 'hs1', 'CHM13': 'hs1', 't2t': 'hs1']
 
     def genome = genomeMap[params.genome]
 
     // Load model channels from parameters:
-    if (params.skip_basecalling || params.skip_mapping ) {
+    if (params.skip_basecalling || params.skip_mapping) {
 
-        ch_input = PIPELINE_INITIALISATION.out.samplesheet
-            .map { meta, input, _ubam ->
-            tuple(meta, input) }
+        ch_input = PIPELINE_INITIALISATION.out.samplesheet.map { meta, input, _ubam ->
+            tuple(meta, input)
+        }
 
         ch_model = channel.of(params.basecall_model)
-
-    } else {
+    }
+    else {
 
         ch_input = PIPELINE_INITIALISATION.out.samplesheet
             .combine(PIPELINE_INITIALISATION.out.model_ch)
@@ -359,12 +354,12 @@ workflow {
 
     // channels for chopper and IchorCNA (cfDNA)
 
-    ch_ichor_bin  = channel.of(params.ichor_bin_size)
-    ch_min_mapq   = channel.of(params.min_mapq_ichor)
+    ch_ichor_bin = channel.of(params.ichor_bin_size)
+    ch_min_mapq = channel.of(params.min_mapq_ichor)
 
 
     // WORKFLOW: Run main workflow
-    NF_CORE_ONCOSEQ (
+    NF_CORE_ONCOSEQ(
         ch_input,
         PIPELINE_INITIALISATION.out.demux_sheet,
         PIPELINE_INITIALISATION.out.tumor_type,
@@ -378,24 +373,18 @@ workflow {
         PIPELINE_INITIALISATION.out.bed_sheet,
         PIPELINE_INITIALISATION.out.bed_nopad,
         ch_sv_targets,
-        ch_vep_cache
+        ch_vep_cache,
     )
 
     //
     // SUBWORKFLOW: Run completion tasks
     //
-    PIPELINE_COMPLETION (
+    PIPELINE_COMPLETION(
         params.email,
         params.email_on_fail,
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
-        params.hook_url
+        params.hook_url,
     )
 }
-
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    THE END
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/

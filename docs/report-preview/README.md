@@ -9,3 +9,7 @@ To regenerate with Quarto and the R packages `knitr`, `rmarkdown` and `kableExtr
 ```bash
 quarto render docs/report-preview/mock-report.qmd --to html --no-cache
 ```
+
+## Native molecular review preview
+
+Open [review.html](review.html) for the optional offline report layout. It uses synthetic records and an illustrative fusion figure. Generate it with `tests/review/preview.py` in the pinned review runtime. The source adapters and renderer are exercised; the illustration is not sequencing evidence.

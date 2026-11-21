@@ -1,0 +1,46 @@
+[
+    {
+        "kind": "small:clair3",
+        "path": "clair3.vcf.gz"
+    },
+    {
+        "kind": "small:clairsto",
+        "path": "clairsto.vcf.gz"
+    },
+    {
+        "kind": "small:deepsomatic",
+        "path": "deepsomatic.vcf.gz"
+    },
+    {
+        "kind": "sv:sniffles",
+        "path": "sniffles.sv.vcf.gz"
+    },
+    {
+        "kind": "sv:severus",
+        "path": "severus.sv.vcf.gz"
+    },
+    {
+        "kind": "sv:stellerator",
+        "path": "stellerator.sv.vcf.gz"
+    },
+    {
+        "kind": "classification",
+        "path": "classification.json"
+    },
+    {
+        "kind": "nasvar",
+        "path": "nasvar.json"
+    },
+    {
+        "kind": "coverage:primary",
+        "path": "primary.bed"
+    },
+    {
+        "kind": "coverage:mapq60",
+        "path": "mapq60.bed"
+    },
+    {
+        "kind": "coverage:nofilter",
+        "path": "nofilter.bed"
+    }
+]
