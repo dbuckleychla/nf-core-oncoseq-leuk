@@ -43,3 +43,13 @@ process BCFTOOLS_FILTER {
     printf '%s\\n' '${task.container}'
     """
 }
+
+process FIGENO_PAN_CHR {
+    output:
+    stdout emit: settings
+    script:
+    def threads = Math.min(task.cpus as int, (task.ext.threads ?: 4) as int)
+    """
+    printf '%s\\n' '${task.queue}' '${task.cpus}' '${task.memory}' '${threads}' '${task.maxRetries}'
+    """
+}
