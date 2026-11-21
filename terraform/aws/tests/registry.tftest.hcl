@@ -87,3 +87,20 @@ run "reject_registry_key_without_secret" {
   }
   expect_failures = [var.ghcr_secret_kms_key_arn]
 }
+
+run "bundled_cli_runtime_library" {
+  command = plan
+  variables {
+    ghcr_secret_arn = null
+    bam_queue_enabled = true
+  }
+  assert {
+    condition = alltrue([for user_data in [aws_launch_template.batch.user_data, aws_launch_template.bam[0].user_data, aws_launch_template.bam_low[0].user_data] :
+      strcontains(base64decode(user_data), "dnf install -y unzip zlib") &&
+      strcontains(base64decode(user_data), "cp -L /lib64/libz.so.1 /opt/aws-cli/v2/current/runtime-libs/libz.so.1") &&
+      strcontains(base64decode(user_data), "export LD_LIBRARY_PATH=") &&
+      strcontains(base64decode(user_data), "exec \"$cli_root/dist/aws\" \"$@\"")
+    ])
+    error_message = "All downloaded CLI installations must bundle zlib and invoke the original executable through the library-path wrapper."
+  }
+}

@@ -70,3 +70,44 @@ nf-test test tests/subworkflows/local/utils_nfcore_oncoseq_pipeline/references.n
 ```
 
 The full `test,docker` run requires the missing `test_data/basecalling/samplesheets/samplesheet.csv` and its data. Broad nf-core lint also reports template, schema and vendored-module differences, including expectations that conflict with this fork's pinned institutional configuration. These results are tracked with fixture and CI restoration in `oncoseq-y3t`. GPU execution, reference-content verification and clinical concordance remain pending.
+
+### AWS CLI staging fails with missing zlib
+
+If `.command.err` reports that the mounted AWS CLI cannot load `libz.so.1`, the failure occurs during S3 staging, before the analysis command runs. Nextflow mounts the worker's CLI installation into the tool container, but the container may not include that library. Downloaded CLI installations now include a copy of the worker's zlib inside the mounted tree and a wrapper that sets the CLI library search path. Existing-AMI CLI installations remain operator-managed and must provide their own container-compatible dependencies.
+
+After updating this checkout, run `terraform plan` and `terraform apply` in `terraform/aws` to publish the corrected worker bootstrap. Existing EC2 workers do not rerun user data; drain and replace affected workers before resuming the workflow. Re-export the Terraform environment if needed, then rerun the original Nextflow command with `-resume`.
+
+For an existing worker, an administrator can apply the equivalent repair below **on the EC2 worker**, outside task containers. This applies to this stack's downloaded CLI path:
+
+```bash
+sudo bash <<'REPAIR'
+set -euo pipefail
+dnf install -y zlib
+cli_root=/opt/aws-cli/v2/current
+test -x "$cli_root/dist/aws"
+install -d "$cli_root/runtime-libs"
+cp -L /lib64/libz.so.1 "$cli_root/runtime-libs/libz.so.1"
+rm -f "$cli_root/bin/aws"
+cat > "$cli_root/bin/aws" <<'WRAPPER'
+#!/bin/sh
+set -eu
+cli_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export LD_LIBRARY_PATH="$cli_root/runtime-libs${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$cli_root/dist/aws" "$@"
+WRAPPER
+chmod 0755 "$cli_root/bin/aws"
+"$cli_root/bin/aws" --version
+REPAIR
+```
+
+Verify from the exact failing image, with the CLI mounted as Nextflow mounts it:
+
+```bash
+docker run --rm \
+  -v /opt/aws-cli:/opt/aws-cli:ro \
+  --entrypoint /opt/aws-cli/v2/current/bin/aws \
+  quay.io/biocontainers/cramino@sha256:a0ed72cbb52240e6cb0085bea16f5356b3d790621281dd11cecc2f5173e5f791 \
+  --version
+```
+
+A host-only `aws --version` check cannot establish container compatibility. Run the container check on each worker type or representative image before clinical acceptance.

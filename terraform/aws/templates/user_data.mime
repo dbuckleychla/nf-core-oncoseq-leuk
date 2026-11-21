@@ -14,7 +14,7 @@ test -x '${existing_aws_cli_path}'
 %{ else ~}
 # ECS AL2023 provides curl-minimal, which supports this HTTPS download.
 # Installing the full curl package conflicts with curl-minimal and aborts boot.
-dnf install -y unzip
+dnf install -y unzip zlib
 if ! command -v curl >/dev/null 2>&1; then
     dnf install -y curl-minimal
 fi
@@ -23,6 +23,20 @@ cd /opt/oncoseq-leuk-bootstrap
 curl --fail --location --retry 5 "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${aws_cli_version}.zip" -o awscliv2.zip
 unzip -q awscliv2.zip
 ./aws/install --install-dir /opt/aws-cli --bin-dir /opt/aws-cli-bin
+# Nextflow mounts the CLI tree, not the host's /lib64. Minimal tool images
+# may omit zlib, which the CLI executable needs before Python can start.
+install -d /opt/aws-cli/v2/current/runtime-libs
+cp -L /lib64/libz.so.1 /opt/aws-cli/v2/current/runtime-libs/libz.so.1
+# Replace only the bin symlink; retain the original executable in dist/aws.
+rm /opt/aws-cli/v2/current/bin/aws
+cat > /opt/aws-cli/v2/current/bin/aws <<'AWS_WRAPPER'
+#!/bin/sh
+set -eu
+cli_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export LD_LIBRARY_PATH="$cli_root/runtime-libs$${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$cli_root/dist/aws" "$@"
+AWS_WRAPPER
+chmod 0755 /opt/aws-cli/v2/current/bin/aws
 /opt/aws-cli/v2/current/bin/aws --version
 %{ endif ~}
 # Set before ECS registers this worker. Digest-pinned images can reuse cached
