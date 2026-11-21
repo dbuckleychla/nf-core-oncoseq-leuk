@@ -1,10 +1,9 @@
 # Stage institutional references for Oncoseq
 
-Run these commands from the cloned repository on a host with AWS CLI, Python 3,
-Docker, and sufficient local scratch for the FASTA and annotation VCFs. They
-copy existing institutional objects into the Oncoseq reference root and create
-a checksum-pinned review manifest. Use your usual AWS profile; these private
-bucket operations use authenticated access.
+The copy block requires only AWS CLI and performs direct S3-to-S3 copies.
+It downloads no reference files locally. Use your usual AWS profile; these
+private bucket operations use authenticated access. The later COSMIC and
+manifest preparation steps use existing local files, Python 3 and Docker.
 
 The source is the existing institutional reference prefix. The destination is
 `s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/`. No AWS uploads were
@@ -17,38 +16,47 @@ set -euo pipefail
 export AWS_DEFAULT_REGION=us-west-2
 export SOURCE_REF_ROOT='s3://plm-cpm-sandbox-research-usw2/ONT/FrankONTstein_refdata'
 export ONCOSEQ_REF_ROOT='s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata'
+aws s3 cp "$SOURCE_REF_ROOT/hg38/fasta/hg38.analysisSet.fa" \
+    "$ONCOSEQ_REF_ROOT/hg38/fasta/hg38.analysisSet.fa" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/fasta/hg38.analysisSet.fa.fai" \
+    "$ONCOSEQ_REF_ROOT/hg38/fasta/hg38.analysisSet.fa.fai" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed" \
+    "$ONCOSEQ_REF_ROOT/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.10000bp-buffer.hg38.bed" \
+    "$ONCOSEQ_REF_ROOT/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.10000bp-buffer.hg38.bed" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/nasvar/GCF_000001405.40_GRCh38.p14_genomic.gff" \
+    "$ONCOSEQ_REF_ROOT/hg38/nasvar/GCF_000001405.40_GRCh38.p14_genomic.gff" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz" \
+    "$ONCOSEQ_REF_ROOT/hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz.tbi" \
+    "$ONCOSEQ_REF_ROOT/hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz.tbi" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz" \
+    "$ONCOSEQ_REF_ROOT/hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz.tbi" \
+    "$ONCOSEQ_REF_ROOT/hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz.tbi" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/clinvar/clinvar.hg38.vcf.gz" \
+    "$ONCOSEQ_REF_ROOT/hg38/clinvar/clinvar.hg38.vcf.gz" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/clinvar/clinvar.hg38.vcf.gz.tbi" \
+    "$ONCOSEQ_REF_ROOT/hg38/clinvar/clinvar.hg38.vcf.gz.tbi" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/hgnc/clinvar_pathogenic_common.vcf.gz" \
+    "$ONCOSEQ_REF_ROOT/hg38/hgnc/clinvar_pathogenic_common.vcf.gz" --only-show-errors
+aws s3 cp "$SOURCE_REF_ROOT/hg38/hgnc/clinvar_pathogenic_common.vcf.gz.tbi" \
+    "$ONCOSEQ_REF_ROOT/hg38/hgnc/clinvar_pathogenic_common.vcf.gz.tbi" --only-show-errors
+
+aws s3 cp "$SOURCE_REF_ROOT/dorado-models/" \
+    "$ONCOSEQ_REF_ROOT/dorado-models/" --recursive --only-show-errors
+# Copy only VEP 115.
+aws s3 cp "$SOURCE_REF_ROOT/hg38/vep-cache/homo_sapiens/115_GRCh38/" \
+    "$ONCOSEQ_REF_ROOT/hg38/vep-cache/homo_sapiens/115_GRCh38/" --recursive --only-show-errors
+```
+
+## Prepare auxiliary assets if not already staged
+
+This separate step downloads the small Oncoseq-specific auxiliary assets from
+the pinned upstream URLs. Skip it if your destination auxiliary cache is ready.
+
+```bash
 export LOCAL_REFS="$PWD/oncoseq-ref-staging"
-mkdir -p "$LOCAL_REFS"
-
-cat > "$LOCAL_REFS/required-objects.txt" <<'OBJECTS'
-hg38/fasta/hg38.analysisSet.fa
-hg38/fasta/hg38.analysisSet.fa.fai
-hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed
-hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.10000bp-buffer.hg38.bed
-hg38/nasvar/GCF_000001405.40_GRCh38.p14_genomic.gff
-hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz
-hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz.tbi
-hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz
-hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz.tbi
-hg38/clinvar/clinvar.hg38.vcf.gz
-hg38/clinvar/clinvar.hg38.vcf.gz.tbi
-hg38/hgnc/clinvar_pathogenic_common.vcf.gz
-hg38/hgnc/clinvar_pathogenic_common.vcf.gz.tbi
-OBJECTS
-
-# Server-side S3 copies; local copies are needed to calculate manifest hashes.
-while IFS= read -r key; do
-    aws s3 cp "$SOURCE_REF_ROOT/$key" "$ONCOSEQ_REF_ROOT/$key" --only-show-errors
-    mkdir -p "$LOCAL_REFS/$(dirname "$key")"
-    aws s3 cp "$ONCOSEQ_REF_ROOT/$key" "$LOCAL_REFS/$key" --only-show-errors
-done < "$LOCAL_REFS/required-objects.txt"
-
-aws s3 sync "$SOURCE_REF_ROOT/dorado-models/" \
-    "$ONCOSEQ_REF_ROOT/dorado-models/" --only-show-errors
-# Retain VEP 115; do not copy the comparison workflow's VEP 116 cache.
-aws s3 sync "$SOURCE_REF_ROOT/hg38/vep-cache/homo_sapiens/115_GRCh38/" \
-    "$ONCOSEQ_REF_ROOT/hg38/vep-cache/homo_sapiens/115_GRCh38/" --only-show-errors
-
 # Oncoseq-specific auxiliary assets, from the pinned URLs in this repository.
 mkdir -p "$LOCAL_REFS/hg38/aux"
 while IFS= read -r url; do
@@ -67,8 +75,10 @@ BED. Source catalogue subsets remain subsets after copying.
 
 ## Prepare and upload COSMIC
 
-Supply the local path to your licensed targeted-screen VCF. Preparation uses
-the same full FASTA as analysis and creates a separate indexed derivative.
+Supply the local path to your licensed targeted-screen VCF. Set `LOCAL_REFS`
+to your existing local reference tree, with the analytical FASTA at
+`hg38/fasta/hg38.analysisSet.fa`. The S3 copy block does not populate this tree.
+Preparation uses that same full FASTA and creates a separate indexed derivative.
 
 ```bash
 export REVIEW_IMAGE='community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
@@ -93,6 +103,11 @@ another `cosmic_*` manifest entry if you obtain it; never substitute another
 assembly or merge the products' recurrence counts.
 
 ## Generate and upload the review manifest
+
+This step hashes existing local reference files beneath `LOCAL_REFS`, using
+the same relative paths as the S3 objects. It does not download them. If you
+already have a checksum-pinned manifest for these exact bytes, update its URIs
+to the destination prefix instead of regenerating hashes.
 
 Set the two release labels from your downloaded source metadata before running
 this block. Checksums pin the actual copied content; labels must identify the
