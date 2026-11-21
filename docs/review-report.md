@@ -1,7 +1,7 @@
 # Optional molecular review report
 
 Enable `--report_review` to produce `reports/<sample>.review.html` alongside the
-existing report. The new HTML embeds its data, scripts, styles and displayed
+existing report. The dark-themed FrankONTstein report embeds its data, scripts, styles and displayed
 figures. It works offline and requires JavaScript for interactive tables.
 
 The report prioritises target variants, presents caller evidence separately,
@@ -35,6 +35,9 @@ basecalling. The annotation and analytical FASTAs must have identical content.
 
 VEP remains at release 115. Supply the existing matching cache. The report
 does not download annotation resources or models at runtime.
+
+For copy/upload commands using the institutional reference root, see
+[Stage institutional references](stage-review-references.md).
 
 ## Reference manifest
 

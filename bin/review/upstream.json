@@ -17,5 +17,10 @@
         "Pipeline-relative reporting panel",
         "COSMIC joins and complete review exports",
         "Conservative breakpoint consensus"
-    ]
+    ],
+    "branding": {
+        "source": "bin/report_theme.py",
+        "revision": "46553118352caa218f82762f74c74ce635220177",
+        "adaptation": "Electric helix wordmark embedded in offline dark report template"
+    }
 }

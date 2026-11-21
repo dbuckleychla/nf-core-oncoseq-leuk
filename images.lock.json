@@ -56,6 +56,10 @@
             "image": "community.wave.seqera.io/library/minimap2_samtools@sha256:a46a2b8c93894d01d1e32ed4fee123c2fc1e9febbe2a513526f19b66c2338c66",
             "processes": ["MINIMAP2_ALIGN"]
         },
+        "community.wave.seqera.io/library/oncoseq_review_1_0_0:3b0426ad5a1884bf": {
+            "image": "community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5",
+            "processes": ["REVIEW_VALIDATE", "REVIEW_PREPARE", "REVIEW_COMPLETE", "REVIEW_RENDER"]
+        },
         "community.wave.seqera.io/library/pharmcat3:3.2.0--5126bb296d1e59ac": {
             "image": "community.wave.seqera.io/library/pharmcat3@sha256:58adeb930ff3b6280b70129f4d0a3df835b702621077a3745922076786a2c7a2",
             "processes": ["PHARMCAT_MATCHER", "PHARMCAT_PHENOTYPER", "PHARMCAT_REPORTER", "PHARMCAT_VCFPREPROCESSOR"]
@@ -109,16 +113,6 @@
             "image": "ghcr.io/chusj-pigu/delly@sha256:7009e0aebca9dd703fc0958738cb1fa3d547b7cc05086f7feab6436aa015e831",
             "processes": ["DELLY_CNV"]
         },
-        "ghcr.io/chusj-pigu/dorado:851b0a37ecbff6b3b952c811b31dad48ca6bf995": {
-            "image": "ghcr.io/chusj-pigu/dorado@sha256:9db144aac4cd9f6485104b0e208fe14b6201c9617fd4b31ff7b8b66e815135a0",
-            "processes": [
-                "DORADO_BASECALL",
-                "DORADO_DEMULTIPLEX",
-                "DORADO_DOWNLOAD_LIST",
-                "DORADO_DOWNLOAD_MODEL",
-                "DORADO_TRIM"
-            ]
-        },
         "ghcr.io/chusj-pigu/figeno:e42833528621000fed543c5a6d999262ab751bcf": {
             "image": "ghcr.io/chusj-pigu/figeno@sha256:e9a90169d979043902f3584990cc05d989e229b60fb90a019e7c65724503e98c",
             "processes": ["FIGENO_CIRCOS", "FIGENO_PAN_CHR", "FIGENO_SV_FIGURE", "REVIEW_FIGURES"]
@@ -169,6 +163,16 @@
             "image": "ghcr.io/chusj-pigu/tidyverse@sha256:7f95139ad20cc9f3e8156ce4cab5afdb9c3de598c4d1a3106b39c4015d82e739",
             "processes": ["COVERAGE_PLOT", "ENSEMBL_VEP_TABLE", "PARSE_JSON_COMBINED", "QDNASEQ_PROCESS", "SV_PROCESS"]
         },
+        "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785": {
+            "image": "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785",
+            "processes": [
+                "DORADO_BASECALL",
+                "DORADO_DEMULTIPLEX",
+                "DORADO_DOWNLOAD_LIST",
+                "DORADO_DOWNLOAD_MODEL",
+                "DORADO_TRIM"
+            ]
+        },
         "quay.io/biocontainers/cramino:1.1.0--h3dc2dae_0": {
             "image": "quay.io/biocontainers/cramino@sha256:a0ed72cbb52240e6cb0085bea16f5356b3d790621281dd11cecc2f5173e5f791",
             "processes": ["CRAMINO"]
@@ -180,10 +184,6 @@
         "quay.io/biocontainers/whatshap:2.8--py39h2de1943_0": {
             "image": "quay.io/biocontainers/whatshap@sha256:d63cdf64c29f99016ace7f8a4ace72d7a1dbbec262831e65d1a97d6a57960a30",
             "processes": ["WHATSHAP_STATS"]
-        },
-        "community.wave.seqera.io/library/oncoseq_review_1_0_0:3b0426ad5a1884bf": {
-            "image": "community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5",
-            "processes": ["REVIEW_VALIDATE", "REVIEW_PREPARE", "REVIEW_COMPLETE", "REVIEW_RENDER"]
         }
     }
 }

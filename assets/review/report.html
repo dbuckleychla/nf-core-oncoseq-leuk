@@ -6,12 +6,14 @@
     <title>{{ sample }} | OncoSeq review</title>
     <style>
       :root {
-        --ink: #172c3d;
-        --muted: #526774;
-        --line: #d7e0e6;
-        --paper: #f3f6f8;
-        --accent: #086f83;
-        --warn: #955715;
+        --ink: #e6edf3;
+        --muted: #a8bbc8;
+        --line: #344654;
+        --paper: #101820;
+        --accent: #68c7c3;
+        --warn: #e9b46c;
+        --surface: #192631;
+        color-scheme: dark;
       }
       * {
         box-sizing: border-box;
@@ -49,7 +51,7 @@
         display: flex;
         gap: 5px;
         flex-wrap: wrap;
-        background: white;
+        background: var(--surface);
         border-bottom: 1px solid var(--line);
         padding: 12px 20px;
         position: sticky;
@@ -64,7 +66,7 @@
       button {
         border: 1px solid var(--line);
         border-radius: 6px;
-        background: white;
+        background: var(--surface);
         color: var(--ink);
         padding: 7px 12px;
         cursor: pointer;
@@ -73,7 +75,7 @@
       button[aria-selected="true"] {
         background: var(--accent);
         border-color: var(--accent);
-        color: white;
+        color: #101820;
       }
       button:focus-visible,
       input:focus-visible {
@@ -97,7 +99,7 @@
       }
       .panel,
       .card {
-        background: white;
+        background: var(--surface);
         border: 1px solid var(--line);
         border-radius: 9px;
         padding: 20px;
@@ -123,12 +125,12 @@
         font-size: 13px;
         padding: 2px 7px;
         border-radius: 4px;
-        background: #e7f2f3;
-        color: #115967;
+        background: #213f43;
+        color: #9cddd8;
       }
       .warning {
-        background: #fff5e5;
-        color: #704916;
+        background: #3b3022;
+        color: #f1cf9a;
         border-left: 4px solid #cb8e39;
         padding: 12px 16px;
         margin: 14px 0;
@@ -141,6 +143,8 @@
         margin: 12px 0;
       }
       input {
+        background: var(--surface);
+        color: var(--ink);
         padding: 7px 10px;
         border: 1px solid var(--line);
         border-radius: 5px;
@@ -157,7 +161,7 @@
       }
       th {
         text-align: left;
-        background: #edf3f6;
+        background: #21333f;
         white-space: nowrap;
       }
       th,
@@ -197,7 +201,7 @@
       }
       .figure {
         margin: 0;
-        background: white;
+        background: var(--surface);
         border: 1px solid var(--line);
         border-radius: 8px;
         padding: 12px;
@@ -217,6 +221,8 @@
         margin-top: 8px;
       }
       dialog {
+        background: var(--surface);
+        color: var(--ink);
         width: min(1100px, 96vw);
         max-height: 92vh;
         border: 1px solid var(--line);
@@ -232,7 +238,7 @@
         justify-content: space-between;
         position: sticky;
         top: 0;
-        background: white;
+        background: var(--surface);
         padding-bottom: 10px;
       }
       .zoom-scroll {
@@ -246,7 +252,7 @@
       }
       .scorebar {
         height: 8px;
-        background: #e4ecef;
+        background: #344654;
         border-radius: 4px;
         margin-top: 8px;
       }
@@ -267,9 +273,40 @@
       a {
         color: var(--accent);
       }
+      .report-brand {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        flex-wrap: wrap;
+        margin: 18px 0 8px;
+      }
+      .report-brand svg {
+        width: min(280px, 100%);
+        height: auto;
+      }
+      .report-brand span {
+        color: #a8bbc8;
+        font-size: 15px;
+      }
       @media print {
+        :root {
+          --ink: #172c3d;
+          --muted: #526774;
+          --line: #d7e0e6;
+          --paper: white;
+          --surface: white;
+          --accent: #086f83;
+          color-scheme: light;
+        }
+        .report-brand svg {
+          background: #163748;
+          border-radius: 5px;
+        }
+        .report-brand span {
+          color: black;
+        }
         header {
-          background: white;
+          background: var(--surface);
           color: black;
           padding: 10px;
         }
@@ -315,6 +352,34 @@
   <body>
     <header>
       <p>ONCOSEQ / MOLECULAR REVIEW</p>
+      <div class="report-brand">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 650 144"
+          role="img"
+          aria-label="FrankONTstein electric helix logo"
+        >
+          <g stroke-linecap="round" stroke-linejoin="round">
+            <path d="M39 22h54l16 16v65l-17 18H40l-17-18V38Z" fill="none" stroke="#edf3ef" stroke-width="6" />
+            <path d="M11 60h12m-12-7v14m98-7h12m0-7v14" stroke="#80958a" stroke-width="6" />
+            <path d="M50 39c42 19-10 48 32 66M82 39c-42 19 10 48-32 66" fill="none" stroke="#82c99b" stroke-width="7" />
+            <path d="M53 43h26M60 60h12m-12 24h12m-19 17h26" stroke="#edf3ef" stroke-width="3" />
+            <path d="m90 16-3 14m-4-9 11 4" stroke="#82c99b" stroke-width="3" />
+          </g>
+          <text
+            x="154"
+            y="92"
+            font-family="Arial, Helvetica, sans-serif"
+            font-size="62"
+            letter-spacing="-2.2"
+            fill="#edf3ef"
+          >
+            <tspan font-weight="500">Frank</tspan>
+            <tspan font-weight="800" fill="#82c99b">ONT</tspan>
+            <tspan font-weight="500">stein</tspan>
+          </text></svg
+        ><span>FrankONTstein report</span>
+      </div>
       <h1>{{ sample }}</h1>
       <p>Candidate findings, caller evidence and assay quality</p>
     </header>

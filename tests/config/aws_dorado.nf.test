@@ -18,7 +18,7 @@ nextflow_process {
             def values = process.out.settings[0].readLines()
             assert values[0] == 'basecall-gpu-test'
             assert values[1] == '1'
-            assert values[2] == 'ghcr.io/chusj-pigu/dorado@sha256:9db144aac4cd9f6485104b0e208fe14b6201c9617fd4b31ff7b8b66e815135a0'
+            assert values[2] == 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
             assert values[3..4] == ['', '']
             assert values[5] == '8'
             assert values[6] == '30 GB'
