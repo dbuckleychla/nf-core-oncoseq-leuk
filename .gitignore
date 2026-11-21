@@ -1,4 +1,17 @@
 .nextflow*
+# Local credentials and clinical run inputs/outputs must never be committed.
+.env
+.env.*
+*.pem
+*.key
+*.oncoseq.csv
+validation*.csv
+combined_inputs.csv
+aws.generated.config
+review.resource-files.json
+execution_trace_*.txt
+execution_report_*.html
+execution_timeline_*.html
 work/
 data/
 results/
