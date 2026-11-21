@@ -1,7 +1,8 @@
 # Optional molecular review report
 
 Enable `--report_review` to produce `reports/<sample>.review.html` alongside the
-existing report. The dark-themed FrankONTstein report embeds its data, scripts, styles and displayed
+existing report. The dark-themed Oncoseq review report, aggregated by FrankONTstein, embeds its
+data, scripts, styles and displayed
 figures. It works offline and requires JavaScript for interactive tables.
 
 The report prioritises target variants, presents caller evidence separately,
