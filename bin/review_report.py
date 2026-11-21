@@ -30,6 +30,8 @@ def main():
     p = commands.add_parser('prepare-vcf')
     for name in ('source', 'fasta', 'output'):
         p.add_argument('--' + name, required=True)
+    p.add_argument('--skip-masked-reference', action='store_true',
+                   help='Archive and exclude records over FASTA N bases; still reject other REF mismatches')
     p = commands.add_parser('validate')
     p.add_argument('--references', required=True)
     p.add_argument('--analytical-fasta')

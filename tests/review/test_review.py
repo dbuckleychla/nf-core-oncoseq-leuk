@@ -13,7 +13,7 @@ from report_prioritization import small_candidate, sample_evidence
 from structural_consensus import consolidate, junction
 from render import render
 from annotate_structural_variants import endpoint
-from resources import validate
+from resources import validate, prepare_vcf
 from adapters import nasvar_events
 from structural_consensus import support
 from annotate_structural_variants import annotate as annotate_sv
@@ -23,6 +23,31 @@ import sqlite3
 
 
 class ReviewTests(unittest.TestCase):
+    def test_masked_reference_preparation_remains_strict_elsewhere(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            fasta = root / 'genome.fa'
+            fasta.write_text('>chrY\nANAAAAAAAA\n')
+            pysam.faidx(str(fasta))
+            source = root / 'source.vcf'
+            header = ('##fileformat=VCFv4.2\n##contig=<ID=Y,length=10>\n'
+                      '#CHROM\tPOS\tID\tREF\tALT\tQUAL\tFILTER\tINFO\n')
+            source.write_text(header + 'Y\t2\tmasked\tC\tT\t.\t.\t.\n'
+                              'Y\t4\tvalid\tA\tT\t.\t.\t.\n')
+            with self.assertRaises(pysam.utils.SamtoolsError):
+                prepare_vcf(str(source), str(fasta), str(root / 'strict.vcf.gz'))
+            output = root / 'prepared.vcf.gz'
+            audit = prepare_vcf(str(source), str(fasta), str(output), True)
+            self.assertEqual(audit['masked_reference']['records'], 1)
+            self.assertEqual(audit['masked_reference']['contigs'], {'Y': 1})
+            with pysam.VariantFile(str(output)) as handle:
+                self.assertEqual([(r.contig, r.pos, r.id) for r in handle], [('chrY', 4, 'valid')])
+            with open(audit['masked_reference']['path'], 'rb') as stream, pysam.VariantFile(stream) as handle:
+                self.assertEqual([r.id for r in handle], ['masked'])
+            source.write_text(header + 'Y\t5\twrong\tC\tT\t.\t.\t.\n')
+            with self.assertRaises(pysam.utils.SamtoolsError):
+                prepare_vcf(str(source), str(fasta), str(root / 'wrong.vcf.gz'), True)
+
     def test_native_annotation_and_cosmic(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = make(Path(tmp) / 'refs')

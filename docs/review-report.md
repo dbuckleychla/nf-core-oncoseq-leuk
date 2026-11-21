@@ -108,12 +108,23 @@ docker run --rm --platform linux/amd64 \
     bin/review_report.py prepare-vcf \
     --source /data/Cosmic_CompleteTargetedScreensMutant_Normal_v105_GRCh38.vcf.gz \
     --fasta /ref/hg38.analysisSet.fa \
-    --output /ref/cosmic.targeted.v105.GRCh38.vcf.gz
+    --output /ref/cosmic.targeted.v105.GRCh38.vcf.gz \
+    --skip-masked-reference
 ```
 
 The helper records chromosome renaming, checks reference alleles, normalises,
 sorts and indexes the derivative. It writes a preparation audit with source,
 FASTA, output and index checksums. Keep the original downloaded file.
+
+The analysis-set FASTA masks some reference regions with `N` bases (including
+parts of chrY). `--skip-masked-reference` archives those original VCF records
+in `.masked-reference.vcf.gz` and excludes them from the derivative, recording
+counts by contig and checksums in the preparation audit. It still fails on REF
+mismatches at unmasked bases. Default preparation remains strict without this
+flag. A source index is unnecessary because preparation reads sequentially.
+The inspected v105 targeted-screen catalogue completed against the full
+institutional analysis-set FASTA after excluding four chrY transcript records;
+all remaining REF alleles passed strict normalization.
 
 COSMIC records with FILTER `.` are valid annotation input. Recurrence values
 remain associated with their catalogue and COSV identifier. Transcript rows

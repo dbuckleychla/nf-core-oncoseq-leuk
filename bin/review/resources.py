@@ -51,12 +51,12 @@ def validate(path):
     return result, manifest
 
 
-def prepare_vcf(source, fasta, output):
+def prepare_vcf(source, fasta, output, skip_masked_reference=False):
     """Rename only recognised primary contigs, then normalise, sort and index."""
     out = Path(output)
     out.parent.mkdir(parents=True, exist_ok=True)
     lengths = {line.split('\t')[0] for line in Path(str(fasta) + '.fai').read_text().splitlines()}
-    with pysam.VariantFile(source) as handle:
+    with open(source, 'rb') as stream, pysam.VariantFile(stream) as handle:
         mapping = {}
         for contig in handle.header.contigs:
             candidate = 'chr' + contig if contig in {str(i) for i in range(1, 23)} | {'X', 'Y'} else contig
@@ -65,19 +65,46 @@ def prepare_vcf(source, fasta, output):
             if candidate not in lengths:
                 raise ValueError('Annotation contig absent from FASTA: ' + contig)
             mapping[contig] = candidate
+    masked_count = 0
+    masked_contigs = {}
+    masked = out.with_name(out.name + '.masked-reference.vcf.gz')
+    filtered = out.with_name(out.name + '.unmasked.vcf.gz')
+    prepared_source = source
+    if skip_masked_reference:
+        with open(source, 'rb') as stream, pysam.VariantFile(stream) as handle, \
+                pysam.FastaFile(fasta) as reference, \
+                pysam.VariantFile(str(filtered), 'wz', header=handle.header) as accepted, \
+                pysam.VariantFile(str(masked), 'wz', header=handle.header) as excluded:
+            for record in handle:
+                sequence = reference.fetch(mapping[record.contig], record.start,
+                                           record.start + len(record.ref)).upper()
+                if 'N' in sequence:
+                    excluded.write(record)
+                    masked_count += 1
+                    masked_contigs[record.contig] = masked_contigs.get(record.contig, 0) + 1
+                else:
+                    accepted.write(record)
+        prepared_source = str(filtered)
     names = out.with_name(out.name + '.contigs.tsv')
     names.write_text(''.join(f'{a}\t{b}\n' for a, b in mapping.items()))
     renamed = out.with_name(out.name + '.renamed.vcf.gz')
     normal = out.with_name(out.name + '.normal.vcf.gz')
-    pysam.bcftools.annotate('--rename-chrs', str(names), '-Oz', '-o', str(renamed), source, catch_stdout=False)
+    pysam.bcftools.annotate('--rename-chrs', str(names), '-Oz', '-o', str(renamed), prepared_source, catch_stdout=False)
     pysam.bcftools.norm('-f', fasta, '-c', 'e', '-m', '-any', '-Oz', '-o', str(normal), str(renamed), catch_stdout=False)
     pysam.bcftools.sort('-Oz', '-o', str(out), str(normal), catch_stdout=False)
     pysam.tabix_index(str(out), preset='vcf', force=True)
     renamed.unlink()
     normal.unlink()
+    if skip_masked_reference:
+        filtered.unlink()
     audit = dict(schema_version=1, source=str(source), source_sha256=checksum(source),
                  fasta_sha256=checksum(fasta), contig_mapping=mapping,
                  output=str(out), sha256=checksum(out), index_sha256=checksum(str(out) + '.tbi'))
+    audit['masked_reference'] = dict(enabled=skip_masked_reference, records=masked_count,
+                                   contigs=masked_contigs)
+    if skip_masked_reference:
+        audit['masked_reference'].update(path=str(masked), sha256=checksum(masked),
+                                         policy='Exclude records whose reference span contains FASTA N bases; retain original records')
     out.with_name(out.name + '.preparation.json').write_text(json.dumps(audit, indent=2) + '\n')
     return audit
 

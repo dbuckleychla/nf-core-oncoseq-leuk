@@ -92,11 +92,19 @@ docker run --rm --platform linux/amd64 \
     bin/review_report.py prepare-vcf \
     --source "/cosmic-source/$(basename "$COSMIC_SOURCE")" \
     --fasta /ref/hg38/fasta/hg38.analysisSet.fa \
-    --output /ref/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz
+    --output /ref/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz \
+    --skip-masked-reference
 
 # Includes the VCF, index, and preparation audit. Keep the source archive locally.
 aws s3 sync "$LOCAL_REFS/hg38/cosmic/" "$ONCOSEQ_REF_ROOT/hg38/cosmic/" --only-show-errors
 ```
+
+The analysis-set FASTA masks some reference regions with `N` bases (including
+parts of chrY). `--skip-masked-reference` archives those original VCF records
+in `.masked-reference.vcf.gz` and excludes them from the derivative, recording
+counts by contig and checksums in the preparation audit. It still fails on REF
+mismatches at unmasked bases. Default preparation remains strict without this
+flag. A source index is unnecessary because preparation reads sequentially.
 
 The matching genome-screen product is optional. Prepare it separately and add
 another `cosmic_*` manifest entry if you obtain it; never substitute another
