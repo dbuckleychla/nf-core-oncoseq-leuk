@@ -1,0 +1,52 @@
+nextflow_process {
+    name "Combined classifier optional output contract"
+    script "modules/local/classifier_process/main.nf"
+    process "PARSE_JSON_COMBINED"
+    config "tests/config/local.config"
+
+    test("Accept pinned classifier output without Optic") {
+        when {
+            process {
+                """
+                input[0] = [[id:'synthetic'], file("${projectDir}/tests/modules/local/classifier_process/without_optic.json")]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.alma.size() == 1
+            assert process.out.marlin.size() == 1
+            assert process.out.nanomix.size() == 1
+            assert process.out.optic.size() == 0
+        }
+    }
+
+    test("Emit Optic when present") {
+        when {
+            process {
+                """
+                input[0] = [[id:'synthetic'], file("${projectDir}/tests/modules/local/classifier_process/with_optic.json")]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.optic.size() == 1
+            assert new File(process.out.optic[0][1].toString()).text.contains('Synthetic optic class')
+        }
+    }
+
+    test("Still reject missing required Alma output") {
+        when {
+            process {
+                """
+                input[0] = [[id:'synthetic'], file("${projectDir}/tests/modules/local/classifier_process/missing_alma.json")]
+                """
+            }
+        }
+        then {
+            assert process.failed
+            assert workflow.stdout.join("\n").contains("*alma.tsv")
+        }
+    }
+}
