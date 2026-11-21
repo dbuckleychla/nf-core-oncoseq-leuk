@@ -4,7 +4,7 @@ nextflow_process {
     process "PARSE_JSON_COMBINED"
     config "tests/config/local.config"
 
-    test("Reject incomplete classifier output without Optic") {
+    test("Accept complete supported classifier output without Optic") {
         when {
             process {
                 """
@@ -13,12 +13,15 @@ nextflow_process {
             }
         }
         then {
-            assert process.failed
-            assert workflow.stdout.join("\n").contains("*optic.tsv")
+            assert process.success
+            assert process.out.tucan.size() == 1
+            assert process.out.lamprey.size() == 1
+            assert process.out.sturgeon_general.size() == 1
+            assert process.out.sturgeon_brainstem.size() == 1
         }
     }
 
-    test("Emit Optic when present") {
+    test("Accept JSON with additional Optic results while report integration is disabled") {
         when {
             process {
                 """
@@ -28,8 +31,7 @@ nextflow_process {
         }
         then {
             assert process.success
-            assert process.out.optic.size() == 1
-            assert new File(process.out.optic[0][1].toString()).text.contains('Synthetic optic class')
+            assert process.out.alma.size() == 1
         }
     }
 

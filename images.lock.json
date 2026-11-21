@@ -88,8 +88,8 @@
             "image": "ghcr.io/chusj-pigu/clairsto@sha256:1b1eaa5ef7bdba4ad7579b95d51b05ee9a1ea3c9b7349e947972c27a1560dbfd",
             "processes": ["CLAIRS_TO_CALL"]
         },
-        "ghcr.io/chusj-pigu/classy-slim:sha-71c699b": {
-            "image": "ghcr.io/chusj-pigu/classy-slim@sha256:77c7e9379dfb624b00ccb76df5270f1b9b9b00322a2f583a06a1d9e9006997ef",
+        "ghcr.io/chusj-pigu/classy:sha-6a3f603": {
+            "image": "ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a",
             "processes": [
                 "CLASSY_ALMA",
                 "CLASSY_ALMA_PILEUP",

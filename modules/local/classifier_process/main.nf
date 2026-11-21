@@ -44,8 +44,9 @@ process PARSE_JSON_COMBINED {
     tuple val(meta),
         path("*tucan.tsv"),
         emit: tucan
-    tuple val(meta),
-        path("*optic.tsv"), emit: optic
+    // Optic disabled: the pinned full Classy image lacks Optic assets (TODO.md).
+    // tuple val(meta),
+    //     path("*optic.tsv"), emit: optic
     path "versions.yml",
         emit: versions
 

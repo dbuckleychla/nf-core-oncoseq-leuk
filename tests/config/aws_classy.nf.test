@@ -15,6 +15,7 @@ nextflow_process {
             assert process.success
             def values = process.out.settings[0].readLines()
             assert values[0..1] == ['bam-high', '32']
+            assert values[2] == 'ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a'
             assert values[3] == '64 GB'
             assert values[4] == '1d'
             assert values[5] == '8'
@@ -32,6 +33,7 @@ nextflow_process {
             assert process.success
             def values = process.out.settings[0].readLines()
             assert values[0..1] == ['bam-high', '32']
+            assert values[2] == 'ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a'
             assert values[3] == '192 GB'
             assert values[5] == '8'
         }

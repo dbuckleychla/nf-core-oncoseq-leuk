@@ -166,7 +166,7 @@ process DEEPSOMATIC_TUMORONLY {
 }
 
 process CLASSY_COMBINED {
-    container "${params.classy_container ?: 'ghcr.io/chusj-pigu/classy-slim:sha-71c699b'}"
+    container "${params.classy_container ?: 'ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a'}"
     label "classy"
     label "process_low"
     label "process_medium_cpu"
