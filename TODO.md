@@ -5,3 +5,8 @@ Optic classification and its report tables are temporarily disabled because the 
 Ask the primary Oncoseq authors to update their Dorado image and benchmark the
 current release with SUP v5.2.0 and its matching modification model. Tracked in
 Beads issue `oncoseq-4f7`.
+
+Before clinical launch, verify and pin all reference releases, S3 objects and
+SHA-256 checksums (including indexes), then replace the development mapping
+with a strict manifest. Validate analytical/annotation FASTA identity and
+representative clinical runs. Tracked in Beads issue `oncoseq-u7o`.

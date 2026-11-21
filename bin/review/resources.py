@@ -24,6 +24,7 @@ def validate(path):
     if manifest.get('schema_version') != 1 or manifest.get('assembly') != 'GRCh38':
         raise ValueError('Review references require schema_version 1 and assembly GRCh38')
     entries = manifest.get('resources', {})
+    development = manifest.get('pinning') == 'development'
     if set(REQUIRED) - entries.keys():
         raise ValueError('Missing review resources: ' + ', '.join(sorted(set(REQUIRED) - entries.keys())))
     result = {}
@@ -33,14 +34,16 @@ def validate(path):
         if not value.is_file():
             raise ValueError('Review reference must be staged locally: ' + name)
         expected = entry.get('sha256', '')
-        if not re.fullmatch('[0-9a-f]{64}', expected) or checksum(value) != expected:
+        if (expected or not development) and (not re.fullmatch('[0-9a-f]{64}', expected) or checksum(value) != expected):
             raise ValueError('Review reference checksum mismatch: ' + name)
         result[name] = str(value.resolve())
         if name.startswith(('gnomad', 'clinvar', 'cosmic')):
             index = entry.get('index', {})
             index_path = Path(index.get('path') or index.get('uri', ''))
             if not index_path.is_absolute():index_path=Path(path).parent/index_path
-            if not index_path.is_file() or checksum(index_path) != index.get('sha256'):
+            index_hash = index.get('sha256', '')
+            if not index_path.is_file() or ((index_hash or not development) and
+                    (not re.fullmatch('[0-9a-f]{64}', index_hash) or checksum(index_path) != index_hash)):
                 raise ValueError('Missing or invalid review VCF index: ' + name)
             with pysam.VariantFile(str(value), index_filename=str(index_path)) as handle:
                 first = next(iter(handle.header.contigs), None)

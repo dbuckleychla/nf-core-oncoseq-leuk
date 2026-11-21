@@ -148,7 +148,8 @@ This mode is functional but experimental. It is designed for cf-DNA analysis, an
 Use `--report_review --review_references review.references.json` to add an offline leukemia review report. See [report setup, reference preparation and retention controls](docs/review-report.md). The original report remains available.
 
 The clinical profile enables this report by default and selects the institutional
-auxiliary cache and S3 review manifest. Explicit parameters override these
+auxiliary cache and bundled unpinned development reference mapping. No uploaded
+checksum manifest is required during development. Explicit parameters override these
 defaults; use `--report_review false` to disable it.
 
 ## Usage

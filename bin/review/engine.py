@@ -123,6 +123,8 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
                   classification=classification, coverage=coverage(cov), cnv=cnv,
                   nasvar=native, figures=figures, references=manifest,
                   panel=panel_provenance(panel), warnings=[])
+    if manifest.get('pinning') == 'development':
+        result['warnings'].append('Development references are unpinned; reference checksums must be pinned before clinical launch.')
     write_json(out / 'review.json', result)
     write_json(out / 'manifest.json', dict(schema_version=1, sample=sample, assembly='GRCh38',
                                          policy_version=POLICY_VERSION, references=manifest, images=images, code_sha256=code_digest,

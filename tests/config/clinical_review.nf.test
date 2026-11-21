@@ -10,11 +10,12 @@ nextflow_process {
         }
         then {
             assert process.success
-            assert process.out.settings[0].readLines() == [
-                'true',
-                's3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/aux/',
-                's3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/review/review.references.json'
-            ]
+            def values = process.out.settings[0].readLines()
+            assert values[0..1] == ['true', 's3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/aux/']
+            assert values[2].endsWith('/assets/institutional_hg38.review.json')
+            def refs = new groovy.json.JsonSlurperClassic().parseText(file(values[2]).text)
+            assert refs.pinning == 'development'
+            assert refs.resources.values().every { !it.sha256 }
         }
     }
     test("Explicit settings override clinical defaults") {

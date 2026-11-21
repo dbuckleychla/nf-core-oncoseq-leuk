@@ -4,16 +4,18 @@ nextflow_workflow {
     workflow "CHECK_REVIEW"
     config "tests/subworkflows/local/report/local.config"
 
-    test("Native annotations and portable HTML") {
+    test("Unpinned development annotations and portable HTML") {
         when {
             params {
                 outdir = "${outputDir}/results"
+                review_references = new File("test_data/review/unpinned.references.json").absolutePath
             }
         }
         then {
             assert workflow.success
             assert workflow.out.html.size() == 1
             def data = new groovy.json.JsonSlurperClassic().parseText(file("${workflow.out.data[0][1]}/review.json").text)
+            assert data.warnings.any { it.contains("unpinned") }
             assert data.small_variants.total_records == 2
             assert data.small_variants.records.every { row -> row.exact_pass_agreement }
             assert data.classification[0].score == 0.9

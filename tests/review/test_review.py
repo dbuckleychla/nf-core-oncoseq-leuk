@@ -23,6 +23,29 @@ import sqlite3
 
 
 class ReviewTests(unittest.TestCase):
+    def test_development_checksums_optional_but_supplied_hashes_checked(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = make(Path(tmp) / 'refs')
+            path = root / 'references.json'
+            manifest = json.loads(path.read_text())
+            manifest['pinning'] = 'development'
+            for entry in manifest['resources'].values():
+                entry.pop('sha256')
+                if entry.get('index'):
+                    entry['index'].pop('sha256')
+            path.write_text(json.dumps(manifest))
+            refs, _ = validate(path)
+            self.assertTrue(Path(refs['fasta']).is_file())
+            manifest['resources']['fasta']['sha256'] = '0' * 64
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
+                validate(path)
+            manifest['resources']['fasta'].pop('sha256')
+            manifest.pop('pinning')
+            path.write_text(json.dumps(manifest))
+            with self.assertRaisesRegex(ValueError, 'checksum mismatch'):
+                validate(path)
+
     def test_masked_reference_preparation_remains_strict_elsewhere(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)

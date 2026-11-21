@@ -110,9 +110,13 @@ The matching genome-screen product is optional. Prepare it separately and add
 another `cosmic_*` manifest entry if you obtain it; never substitute another
 assembly or merge the products' recurrence counts.
 
-## Generate and upload the review manifest
+## Optional prelaunch checksum manifest
 
-This step hashes existing local reference files beneath `LOCAL_REFS`, using
+Skip this section for development runs: the clinical profile uses the bundled
+`assets/institutional_hg38.review.json` mapping and needs no uploaded manifest.
+Reference pinning before launch is tracked as `oncoseq-u7o`.
+
+This optional step hashes existing local reference files beneath `LOCAL_REFS`, using
 the same relative paths as the S3 objects. It does not download them. If you
 already have a checksum-pinned manifest for these exact bytes, update its URIs
 to the destination prefix instead of regenerating hashes.
@@ -161,8 +165,8 @@ aws s3 cp review.references.json \
 aws s3 ls "$ONCOSEQ_REF_ROOT/hg38/vep-cache/homo_sapiens/115_GRCh38/info.txt"
 ```
 
-The clinical profile reads the uploaded S3 manifest by default. A local
-manifest can be selected with `--review_references review.references.json`.
+The clinical profile reads the bundled unpinned development mapping by default.
+Select the strict manifest explicitly with `--review_references` once prepared.
 Keep a copy with validation results.
 The review preflight checks resource hashes, indexes and assembly compatibility
 before basecalling. Do not overwrite these references with newer catalogue
@@ -172,7 +176,7 @@ releases after approving the manifest.
 
 The institutional preset now points to the Oncoseq reference root. After all
 copies finish, the clinical profile supplies the auxiliary cache, review
-enablement and uploaded S3 manifest automatically. Use the preset:
+enablement and bundled development reference mapping automatically. Use the preset:
 
 ```bash
 -profile aws,clinical \

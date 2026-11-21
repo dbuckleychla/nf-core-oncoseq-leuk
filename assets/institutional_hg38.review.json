@@ -1,0 +1,58 @@
+{
+    "schema_version": 1,
+    "assembly": "GRCh38",
+    "pinning": "development",
+    "resources": {
+        "fasta": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/fasta/hg38.analysisSet.fa",
+            "release": "GRCh38-analysisSet"
+        },
+        "fai": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/fasta/hg38.analysisSet.fa.fai",
+            "release": "GRCh38-analysisSet"
+        },
+        "targets": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed",
+            "release": "GENCODE-v50-assay-targets"
+        },
+        "gff": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/nasvar/GCF_000001405.40_GRCh38.p14_genomic.gff",
+            "release": "GRCh38.p14"
+        },
+        "gnomad_genome": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz",
+            "release": "4.0-institutional-lite",
+            "index": {
+                "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/gnomad/genomes/gnomad_genome_4.0_lite.vcf.gz.tbi"
+            }
+        },
+        "gnomad_exome": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz",
+            "release": "4.0-institutional-lite",
+            "index": {
+                "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/gnomad/exomes/gnomad_exome_4.0_lite.vcf.gz.tbi"
+            }
+        },
+        "clinvar": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/clinvar/clinvar.hg38.vcf.gz",
+            "release": "institutional-unpinned",
+            "index": {
+                "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/clinvar/clinvar.hg38.vcf.gz.tbi"
+            }
+        },
+        "clinvar_common_pathogenic": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/hgnc/clinvar_pathogenic_common.vcf.gz",
+            "release": "institutional-unpinned",
+            "index": {
+                "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/hgnc/clinvar_pathogenic_common.vcf.gz.tbi"
+            }
+        },
+        "cosmic_targeted": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz",
+            "release": "v105",
+            "index": {
+                "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz.tbi"
+            }
+        }
+    }
+}

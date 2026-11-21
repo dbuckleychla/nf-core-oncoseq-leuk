@@ -60,7 +60,7 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Versioned JSON annotation resource manifest required by the review report."
+                    "description": "Optional JSON annotation resource mapping; clinical defaults use bundled unpinned development paths. Checksummed manifests remain supported."
                 },
                 "review_panel": {
                     "type": "string",
@@ -548,16 +548,5 @@
             "type": "string",
             "description": "Dedicated NVIDIA GPU AWS Batch queue for Dorado basecalling."
         }
-    },
-    "if": {
-        "properties": {
-            "report_review": {
-                "const": true
-            }
-        },
-        "required": ["report_review"]
-    },
-    "then": {
-        "required": ["review_references"]
     }
 }

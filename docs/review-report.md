@@ -29,14 +29,18 @@ nextflow run . \
 
 Use the actual filename of your Terraform-generated configuration in place of
 `aws.generated.config`. The review manifest accepts local files and S3 URIs.
-Clinical defaults use the institutional `hg38/aux/` prefix and
-`hg38/review/review.references.json` manifest under
-`s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/`. Explicit
+Clinical defaults use the institutional `hg38/aux/` prefix under
+`s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/` and the bundled
+`assets/institutional_hg38.review.json` development mapping. No uploaded
+manifest or operator-generated checksums are required during development. Explicit
 `--reference_aux_cache` and `--review_references` values override those defaults.
 Use `--report_review false` to disable the extra report.
 
-Batch stages the resources using the job role. References are checked before
-basecalling. The annotation and analytical FASTAs must have identical content.
+Batch stages the resources using the job role. Reference files and indexes are checked before
+basecalling. Supplied checksums are validated, but checksums may be omitted in
+the explicitly marked development mapping. Strict manifests also verify the
+analytical FASTA checksum. Pin and validate reference identity before launch
+(`oncoseq-u7o`); reports identify unpinned development inputs.
 
 VEP remains at release 115. Supply the existing matching cache. The report
 does not download annotation resources or models at runtime.
@@ -55,7 +59,10 @@ Use the authoritative unpadded assay BED for `targets`. Coverage shown in the
 report retains the existing workflow's native intervals. Reporting genes and
 preferred transcripts are controlled separately by `--review_panel`.
 
-Every reference has an assembly-compatible source, release and SHA-256. VCFs
+The clinical development mapping records reference paths and source labels
+without requiring SHA-256 checksums. Use the following strict manifest workflow
+when pinning references before launch; it is optional during development.
+Each pinned reference has an assembly-compatible source, release and SHA-256. VCFs
 require a matching adjacent `.tbi` or `.csi` index. Use the exact FASTA and its
 adjacent `<fasta>.fai`. Annotation chromosome names must match the FASTA.
 

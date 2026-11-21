@@ -68,8 +68,10 @@ process REVIEW_VEP {
     """
         : "gzip -c ${reviewShellQuote("${catalogue}/empty.vep.vcf")} > union.vep.vcf.gz"
     """
-    review_fasta_sha=\$(sha256sum < ${reviewShellQuote(fasta)})
-    test "\${review_fasta_sha:0:64}" = ${reviewShellQuote(fasta_sha256)} || { echo 'Analytical FASTA checksum mismatch' >&2; exit 1; }
+    if [ -n ${reviewShellQuote(fasta_sha256)} ]; then
+        review_fasta_sha=\$(sha256sum < ${reviewShellQuote(fasta)})
+        test "\${review_fasta_sha:0:64}" = ${reviewShellQuote(fasta_sha256)} || { echo 'Analytical FASTA checksum mismatch' >&2; exit 1; }
+    fi
     ${command}
     """
 }

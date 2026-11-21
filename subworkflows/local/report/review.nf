@@ -1,9 +1,7 @@
 include { REVIEW_PREPARE ; REVIEW_VEP ; REVIEW_COMPLETE ; REVIEW_FIGURES ; REVIEW_RENDER } from '../../../modules/local/review/prepare/main'
 
 def resolveReviewReferences(source) {
-    if (!source) {
-        throw new IllegalArgumentException('report_review requires review_references')
-    }
+    source = source ?: "${projectDir}/assets/institutional_hg38.review.json"
     def manifestFile = file(source, checkIfExists: true)
     def manifest = new groovy.json.JsonSlurperClassic().parseText(manifestFile.text)
     if (manifest.schema_version != 1 || manifest.assembly != 'GRCh38') {
@@ -74,7 +72,7 @@ workflow REVIEW_REPORT {
         def counts = new groovy.json.JsonSlurperClassic().parseText(file("${catalogue.toUriString()}/summary.json").text)
         tuple(meta + [review_candidates: counts.candidate_alleles], catalogue, payload)
     }
-    REVIEW_VEP(ch_prepared, reference, vep_cache, code, channel.value(resolved[0].resources.fasta.sha256))
+    REVIEW_VEP(ch_prepared, reference, vep_cache, code, channel.value(resolved[0].resources.fasta.sha256 ?: ''))
     REVIEW_COMPLETE(REVIEW_VEP.out.annotated, paths, refs, panel, known, channel.value(file("${projectDir}/images.lock.json")), code)
 
     ch_data = REVIEW_COMPLETE.out.data.branch { _meta, data ->

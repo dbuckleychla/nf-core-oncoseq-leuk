@@ -52,7 +52,7 @@ def main():
         prepare_vcf(**args)
     elif command == 'validate':
         _, manifest = validate(args['references'])
-        if args['analytical_fasta']:
+        if args['analytical_fasta'] and manifest['resources']['fasta'].get('sha256'):
             from resources import checksum
             if checksum(args['analytical_fasta']) != manifest['resources']['fasta']['sha256']:
                 raise ValueError('Analytical FASTA checksum mismatch')

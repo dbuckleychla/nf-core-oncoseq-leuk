@@ -1,0 +1,58 @@
+{
+    "schema_version": 1,
+    "assembly": "GRCh38",
+    "resources": {
+        "fasta": {
+            "uri": "genome.fa",
+            "release": "synthetic"
+        },
+        "fai": {
+            "uri": "genome.fa.fai",
+            "release": "synthetic"
+        },
+        "targets": {
+            "uri": "targets.bed",
+            "release": "synthetic"
+        },
+        "gff": {
+            "uri": "genes.gff",
+            "release": "synthetic"
+        },
+        "gnomad_genome": {
+            "uri": "gnomad_genome.vcf.gz",
+            "release": "synthetic",
+            "index": {
+                "uri": "gnomad_genome.vcf.gz.tbi"
+            }
+        },
+        "gnomad_exome": {
+            "uri": "gnomad_exome.vcf.gz",
+            "release": "synthetic",
+            "index": {
+                "uri": "gnomad_exome.vcf.gz.tbi"
+            }
+        },
+        "clinvar": {
+            "uri": "clinvar.vcf.gz",
+            "release": "synthetic",
+            "index": {
+                "uri": "clinvar.vcf.gz.tbi"
+            }
+        },
+        "clinvar_common_pathogenic": {
+            "uri": "rescue.vcf.gz",
+            "release": "synthetic",
+            "index": {
+                "uri": "rescue.vcf.gz.tbi"
+            }
+        },
+        "cosmic_targeted": {
+            "uri": "cosmic.vcf.gz",
+            "release": "synthetic",
+            "index": {
+                "uri": "cosmic.vcf.gz.tbi"
+            }
+        }
+    },
+    "pinning": "development"
+}
