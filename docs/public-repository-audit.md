@@ -49,8 +49,14 @@ Before pushing, inspect the staged changes and messages and run:
 
 ```bash
 python3 scripts/check_public_content.py --staged
-gitleaks git . --redact --ignore-gitleaks-allow --log-opts='--all'
+python3 scripts/check_outgoing_secrets.py
 ```
+
+The outgoing scan checks every new commit patch, not only the final diff; a
+secret introduced and then removed still blocks the push. Missing upstream
+tracking falls back to full history. Use `--full-history` for an explicit audit,
+tag/multi-branch pushes or a changed trust baseline. This avoids repeatedly
+scanning the already-audited thousand-commit history during routine fixes.
 
 Do not bypass the checks or use broad allowlists to conceal findings. The guard
 reports blob hashes and categories rather than sensitive values or filenames.

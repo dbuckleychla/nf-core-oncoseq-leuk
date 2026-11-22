@@ -16,7 +16,12 @@ the actual values are never allowed. Keep credentials in the standard AWS
 credential chain, environment or Secrets Manager, never in repository files.
 
 Before every commit/push, review staged content and run the public-content and
-Gitleaks checks configured in `.pre-commit-config.yaml`. Never bypass them or
+Gitleaks checks configured in `.pre-commit-config.yaml`. Before a routine
+current-branch push, run `python3 scripts/check_outgoing_secrets.py`: it scans
+every outgoing commit, including intermediate changes later removed. Use
+`--full-history` for audits, tag/multi-branch pushes, or changed trust baselines;
+a missing upstream automatically triggers a full-history scan. Do not rescan
+already-audited history on every routine push. Never bypass the checks or
 add broad exclusions to hide a finding. Inspect generated/binary assets and
 commit/issue text manually as well: automated scans cannot identify every form
 of PHI. If exposure is found, stop pushing, remove it from pending changes,
