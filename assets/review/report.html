@@ -494,6 +494,16 @@
         margin: 0;
         font-size: 13px;
       }
+      .reason-list {
+        min-width: 260px;
+        max-width: 380px;
+        margin: 0;
+        padding-left: 17px;
+        line-height: 1.4;
+      }
+      .reason-list li {
+        margin-bottom: 7px;
+      }
     </style>
   </head>
   <body>
@@ -625,20 +635,31 @@
             ),
           ];
           if (changes.length) content.append(el("p", changes.join("; "), "variant-change"));
-          const reasons = [
-            ...new Set(
-              selections
-                .map((s) => s.reason)
-                .filter(Boolean)
-                .map((reason) => (reason === "ClinVar P/LP" ? "ClinVar pathogenic / likely pathogenic" : reason)),
-            ),
-          ];
+          const reasons = reviewReasons(value);
           const reasonsBox = panel(content, "Why this variant is shown");
           for (const reason of reasons) reasonsBox.append(el("p", reason));
           if (value.exact_pass_agreement)
             reasonsBox.append(el("p", "ClairS-TO and DeepSomatic both passed this exact variant."));
           for (const warning of [...new Set(selections.flatMap((s) => s.gene_context?.warnings || []))])
             reasonsBox.append(el("p", warning, "warning"));
+          const vep = panel(content, "VEP annotation");
+          const primary = choice(value),
+            annotation = primary.gene_context?.transcript || {};
+          vep.append(
+            el(
+              "p",
+              "Selected transcript impact: " +
+                (value.presentation?.selected_impact || annotation.IMPACT || "Not available"),
+            ),
+            el("p", "Effect: " + annotationText(primary.consequence || annotation.Consequence)),
+          );
+          vep.append(
+            el(
+              "p",
+              "VEP impact predicts the consequence of a change; it is not a pathogenicity classification.",
+              "muted",
+            ),
+          );
           const clinical = panel(content, "ClinVar");
           const assertions = clinvar(value);
           if (!assertions.length) clinical.append(el("p", "No ClinVar assertion available.", "muted"));
@@ -692,7 +713,7 @@
               ),
             );
           } else cosmicBox.append(el("p", cosmic(value), "muted"));
-          const transcriptRows = [
+          const transcriptRows = value.presentation?.transcripts || [
             ...new Map(
               selections.map((s) => [JSON.stringify([s.gene, s.transcript, s.hgvsc, s.hgvsp, s.consequence]), s]),
             ).values(),
@@ -705,6 +726,8 @@
               { label: "Transcript", value: (r) => r.transcript },
               { label: "Change", value: (r) => decodeAnnotation(r.hgvsp || r.hgvsc || "") },
               { label: "Effect", value: (r) => annotationText(r.consequence) },
+              { label: "VEP impact", value: (r) => r.impact || "Not available" },
+              { label: "Used for", value: (r) => (r.roles || []).join(", ") },
             ]);
             content.append(transcripts);
           }
@@ -911,6 +934,7 @@
           body.replaceChildren();
           for (const r of selected.slice(page * 25, (page + 1) * 25)) {
             const row = el("tr");
+            if (callerOptions) row.dataset.variantKey = JSON.stringify(r.coordinates);
             for (const c of columns) {
               const cell = el("td", undefined, c.className);
               if (c.figure) {
@@ -1091,7 +1115,19 @@
         "supporting junctions",
       );
       function choice(r) {
-        return r.selections[0] || {};
+        return r.presentation?.primary_selection || r.selections[0] || {};
+      }
+      function reviewReasons(r) {
+        return (
+          r.presentation?.reasons || [
+            ...new Set(
+              r.selections
+                .flatMap((s) => s.inclusion_reasons || [s.reason])
+                .filter(Boolean)
+                .map((reason) => (reason === "ClinVar P/LP" ? "ClinVar pathogenic / likely pathogenic" : reason)),
+            ),
+          ]
+        );
       }
       function cosmic(r) {
         const hits = r.evidence.flatMap((e) => e.cosmic?.sources || []).flatMap((s) => s.identifiers || []);
@@ -1207,7 +1243,15 @@
           label: "Change",
           value: (r) => displayChange(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
         },
-        { label: "Reason for review", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
+        {
+          label: "Inclusion reason",
+          value: (r) => reviewReasons(r).join("; "),
+          render: (r) => {
+            const list = el("ul", undefined, "reason-list");
+            for (const reason of reviewReasons(r)) list.append(el("li", reason));
+            return list;
+          },
+        },
         {
           label: "PASS agreement",
           value: (r) => (r.exact_pass_agreement ? "ClairS-TO + DeepSomatic" : "No two-caller agreement"),
@@ -1255,13 +1299,25 @@
         { label: "COSMIC IDs", value: cosmic },
         { label: "Details", detail: true },
       ];
+      panel(
+        sections.small,
+        null,
+        "Each variant appears once, ordered by the strength of its annotation evidence: reviewed pathogenic / likely pathogenic, predicted loss of function, other potentially damaging changes, then conflicting, benign or common-population supporting findings. This order is not a probability of pathogenicity.",
+      );
       for (const [group, title] of [
         ["findings", "High priority small variants"],
         ["coding", "Additional potentially pathogenic small variants"],
-        ["supporting", "Supporting small variants"],
-        ["consensus_review", "Additional variants found by both callers"],
+        ["supporting", "Lower priority and supporting small variants"],
       ]) {
-        const rows = small.filter((r) => r.selections.some((s) => s.review_group === group));
+        const rows = small
+          .filter((r) => (r.presentation?.group || r.selections[0]?.review_group) === group)
+          .sort(
+            (a, b) =>
+              (a.presentation?.rank ?? 99) - (b.presentation?.rank ?? 99) ||
+              (b.presentation?.review_stars ?? 0) - (a.presentation?.review_stars ?? 0) ||
+              (choice(a).gene || "").localeCompare(choice(b).gene || "") ||
+              JSON.stringify(a.coordinates).localeCompare(JSON.stringify(b.coordinates)),
+          );
         if (rows.length || group === "findings") table(panel(sections.small, title), rows, scols, title);
       }
       panel(

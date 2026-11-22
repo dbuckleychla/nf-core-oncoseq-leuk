@@ -8,6 +8,8 @@ from adapters import classifiers, chromosome_key
 
 
 def enrich(data, root, results_root=None):
+    from variant_presentation import enrich_variants
+    enrich_variants(data)
     root = Path(root)
     native = root / 'classification.native.json'
     if native.exists():
