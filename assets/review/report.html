@@ -413,6 +413,38 @@
         margin-bottom: 12px;
         min-width: 210px;
       }
+      #small .gene-column {
+        min-width: 112px;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        font-weight: 650;
+      }
+      #small table {
+        font-size: 13px;
+      }
+      .filter-badge {
+        display: inline-block;
+        width: fit-content;
+        border: 1px solid;
+        border-radius: 4px;
+        padding: 2px 6px;
+        font-weight: 650;
+      }
+      .filter-pass {
+        color: #b7f7ce;
+        background: #173e29;
+        border-color: #458b61;
+      }
+      .filter-warning {
+        color: #ffec9b;
+        background: #493b15;
+        border-color: #9c8531;
+      }
+      .filter-missing {
+        color: #d1d5db;
+        background: #34383e;
+        border-color: #676d76;
+      }
     </style>
   </head>
   <body>
@@ -663,7 +695,7 @@
           sort = -1,
           direction = 1;
         columns.forEach((c, i) => {
-          const th = el("th");
+          const th = el("th", undefined, c.className);
           if (c.value) {
             const b = el("button", c.label);
             b.onclick = () => {
@@ -714,7 +746,7 @@
           for (const r of selected.slice(page * 25, (page + 1) * 25)) {
             const row = el("tr");
             for (const c of columns) {
-              const cell = el("td");
+              const cell = el("td", undefined, c.className);
               if (c.figure) {
                 const figure = data.figures.find((f) => f.event_id === r.id);
                 if (figure) {
@@ -935,8 +967,16 @@
         }
         return box;
       }
+      function filterBadge(status) {
+        const missing = !status || status === "NO CALL" || status === "NoCall";
+        return el(
+          "span",
+          status === "PASS" ? "Passed" : missing ? "Not reported" : status,
+          "filter-badge " + (status === "PASS" ? "filter-pass" : missing ? "filter-missing" : "filter-warning"),
+        );
+      }
       const scols = [
-        { label: "Gene", value: (r) => choice(r).gene },
+        { label: "Gene", className: "gene-column", value: (r) => choice(r).gene },
         {
           label: "Change",
           value: (r) => decodeURIComponent(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
@@ -958,21 +998,12 @@
               const evidence = r.evidence.filter((e) => e.caller === caller),
                 line = el("div", undefined, "caller-line");
               line.append(el("strong", name));
-              if (!evidence.length) line.append(el("span", "Not reported", "muted"));
+              if (!evidence.length) line.append(filterBadge(null));
               for (const e of evidence) {
                 const v = e.sample_evidence?.[caller] || {},
                   status = Array.isArray(e.filter) ? e.filter.join(", ") : e.filter;
                 const percent = typeof v.af === "number" ? (100 * v.af).toFixed(1) + "%" : "—";
-                line.append(
-                  el(
-                    "span",
-                    percent +
-                      " variant · " +
-                      fmt(v.depth) +
-                      " reads · " +
-                      (status === "PASS" ? "Passed" : status || "Unknown"),
-                  ),
-                );
+                line.append(el("span", percent + " variant · " + fmt(v.depth) + " reads"), filterBadge(status));
               }
               box.append(line);
             }
