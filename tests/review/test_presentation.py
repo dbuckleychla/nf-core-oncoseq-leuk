@@ -27,11 +27,14 @@ class PresentationTests(unittest.TestCase):
             self.assertEqual(data['coverage_genes'][0]['depth'], 25)
             cov = root/'coverage.tsv'; maf = root/'maf.tsv'; plot=root/'plot.svg'
             cov.write_text('chromosome\tbin_start\tbin_end\tn_reads\tn_reads_gc_adj\nchr2\t0\t1000000\t10\t12\nchr1\t0\t1000000\t8\t9\n')
-            maf.write_text('chrom\tpos\tref\talt\n1\t100\t15\t5\n2\t200\t1\t1\n')
-            genome_plot(cov, maf, plot)
+            maf.write_text('chrom\tpos\tref\talt\n1\t100\t15\t5\n1\t700000\t5\t15\n2\t200\t1\t1\n')
+            baf = genome_plot(cov, maf, plot)
             ET.fromstring(plot.read_text())
-            self.assertIn('depth ≥20', plot.read_text())
-            self.assertIn('BAF', plot.read_text())
-            cells = [e for e in ET.fromstring(plot.read_text()).iter() if e.tag.endswith('rect') and e.get('fill') == '#c084fc']
-            self.assertEqual(len(cells), 1)
+            self.assertIn('depth ≥20', baf.read_text())
+            self.assertIn('not log ratio', plot.read_text())
+            self.assertIn('1.00', baf.read_text())
+            cells = [e for e in ET.fromstring(baf.read_text()).iter() if e.tag.endswith('rect') and e.get('fill') == '#e9d5ff']
+            self.assertEqual(len(cells), 2)
+            self.assertLess(min(float(e.get('y')) for e in cells), 205)
+            self.assertGreater(max(float(e.get('y')) for e in cells), 205)
             self.assertTrue(data['qc_plots'])

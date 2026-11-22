@@ -406,6 +406,13 @@
         flex: 1;
         min-width: 150px;
       }
+      .caller-line {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 12px;
+        min-width: 210px;
+      }
     </style>
   </head>
   <body>
@@ -943,36 +950,32 @@
           label: "Caller support",
           render: (r) => {
             const box = el("div");
-            const t = el("table"),
-              head = el("tr");
-            for (const label of ["Caller", "Variant %", "Depth", "Status"]) head.append(el("th", label));
-            t.append(head);
             for (const [caller, name] of [
               ["clair3", "Clair3"],
               ["clairsto", "ClairS-TO"],
               ["deepsomatic", "DeepSomatic"],
             ]) {
-              const evidence = r.evidence.filter((e) => e.caller === caller);
-              if (!evidence.length) {
-                const row = el("tr");
-                row.append(el("td", name), el("td", "—"), el("td", "—"), el("td", "Not reported", "muted"));
-                t.append(row);
-              }
+              const evidence = r.evidence.filter((e) => e.caller === caller),
+                line = el("div", undefined, "caller-line");
+              line.append(el("strong", name));
+              if (!evidence.length) line.append(el("span", "Not reported", "muted"));
               for (const e of evidence) {
                 const v = e.sample_evidence?.[caller] || {},
-                  row = el("tr");
-                const fraction = typeof v.af === "number" ? (v.af * 100).toFixed(1) + "%" : "—";
-                const status = Array.isArray(e.filter) ? e.filter.join(", ") : e.filter;
-                row.append(
-                  el("td", name),
-                  el("td", fraction),
-                  el("td", fmt(v.depth)),
-                  el("td", status === "PASS" ? "Passed" : status || "Unknown"),
+                  status = Array.isArray(e.filter) ? e.filter.join(", ") : e.filter;
+                const percent = typeof v.af === "number" ? (100 * v.af).toFixed(1) + "%" : "—";
+                line.append(
+                  el(
+                    "span",
+                    percent +
+                      " variant · " +
+                      fmt(v.depth) +
+                      " reads · " +
+                      (status === "PASS" ? "Passed" : status || "Unknown"),
+                  ),
                 );
-                t.append(row);
               }
+              box.append(line);
             }
-            box.append(t);
             return box;
           },
           value: (r) =>
@@ -1150,6 +1153,11 @@
         box.append(svg);
       }
       for (const plot of data.qc_plots || []) qcChart(plot);
+      panel(
+        sections.qc,
+        "Read length distributions",
+        "Unavailable in these outputs. A read-level length histogram is required; N50 and mean length cannot reconstruct the distribution.",
+      );
       table(
         panel(
           sections.qc,
@@ -1273,7 +1281,10 @@
       }
       const cnOverview = el("div");
       sections.nasvar.prepend(cnOverview);
-      for (const item of data.figures.filter((f) => f.reformatted)) figurePanel(cnOverview, item);
+      for (const item of data.figures
+        .filter((f) => f.reformatted)
+        .sort((a, b) => (a.presentation_order || 0) - (b.presentation_order || 0)))
+        figurePanel(cnOverview, item);
       const chromosomePlots = data.figures.filter((f) => f.category === "chromosomes");
       if (chromosomePlots.length) {
         const box = panel(cnOverview, "Chromosome plots");

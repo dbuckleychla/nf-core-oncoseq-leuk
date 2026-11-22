@@ -64,17 +64,19 @@ def enrich(data, root, results_root=None):
     if coverage.exists() and maf.exists():
         plot = root / 'presentation' / 'nasvar.overview.svg'
         plot.parent.mkdir(exist_ok=True)
-        genome_plot(coverage, maf, plot)
-        data['figures'] = [f for f in data.get('figures', []) if f.get('name') != 'NASVAR genome coverage and folded allele fraction']
-        data['figures'].append(dict(category='copy_number', name='NASVAR genome coverage and folded allele fraction', path=str(plot.resolve()), reformatted=True))
+        baf = genome_plot(coverage, maf, plot)
+        data['figures'] = [f for f in data.get('figures', []) if f.get('name') not in ('NASVAR genome coverage and folded allele fraction', 'GC-corrected coverage', 'B-allele frequency (BAF)')]
+        data['figures'].append(dict(category='copy_number', name='GC-corrected coverage', path=str(plot.resolve()), reformatted=True, presentation_order=1))
+        data['figures'].append(dict(category='copy_number', name='B-allele frequency (BAF)', path=str(baf.resolve()), reformatted=True, presentation_order=2))
 
 
 def genome_plot(coverage, maf, output):
-    """Display native binned counts and folded allele fractions, not new CN calls."""
-    cov, alleles, lengths = [], defaultdict(lambda: [0.0, 0]), {}
+    """Separate raw GC-corrected counts and alternate allele fractions."""
+    import math
+    cov, alleles, lengths = [], defaultdict(int), {}
     with open(coverage) as stream:
         for row in csv.DictReader(stream, delimiter='\t'):
-            chrom = row['chromosome']
+            chrom = 'chr' + row['chromosome'].removeprefix('chr')
             if chromosome_key(chrom)[0] > 24:
                 continue
             start, end = int(row['bin_start']), int(row['bin_end'])
@@ -83,50 +85,53 @@ def genome_plot(coverage, maf, output):
             lengths[chrom] = max(lengths.get(chrom, 0), end)
     with open(maf) as stream:
         for row in csv.DictReader(stream, delimiter='\t'):
-            chrom = 'chr' + row['chrom'].removeprefix('chr'); pos = int(row['pos'])
+            chrom = 'chr' + row['chrom'].removeprefix('chr')
             ref, alt = int(row['ref']), int(row['alt'])
             if chrom not in lengths or ref + alt < 20:
                 continue
-            fraction = min(ref, alt) / (ref + alt)
-            bucket = (chrom, pos // 1000000, min(49, int(fraction * 100)))
-            alleles[bucket][1] += 1
+            fraction = alt / (ref + alt)
+            alleles[(chrom, int(row['pos']) // 1000000, min(99, int(fraction * 100)))] += 1
     chromosomes = sorted(lengths, key=chromosome_key)
     offsets = {}; total = 0
     for chrom in chromosomes:
         offsets[chrom] = total; total += lengths[chrom]
     if not total:
         raise ValueError('No canonical NASVAR coverage bins')
-    x = lambda chrom, pos: 80 + 1060 * (offsets[chrom] + pos) / total
+    x = lambda chrom, pos: 90 + 1050 * (offsets[chrom] + pos) / total
+    def canvas(title, unit, ticks, maximum):
+        parts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420"><rect width="1200" height="420" fill="#111827"/><g fill="#dbeafe" font-family="sans-serif" font-size="14">']
+        parts.append(f'<text x="30" y="27">{escape(title)}</text><text x="30" y="52">{escape(unit)}</text>')
+        for tick in ticks:
+            yp = 330 - 250 * tick / maximum
+            parts.append(f'<path d="M85 {yp:.1f}H1145" stroke="#334155"/><text x="80" y="{yp+5:.1f}" text-anchor="end">{tick:,.2f}</text>')
+        for chrom in chromosomes:
+            xp = x(chrom, 0)
+            parts.append(f'<path d="M{xp:.1f} 80V330" stroke="#334155"/><text x="{x(chrom,lengths[chrom]/2)-5:.1f}" y="355">{escape(chrom.removeprefix("chr"))}</text>')
+        return parts
     values = sorted(v for _, _, v in cov)
-    lower = min(0, values[int((len(values)-1)*.01)])
-    maximum = max(lower + 1, values[int((len(values)-1)*.99)])
-    parts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560"><rect width="1200" height="560" fill="#111827"/><g fill="#dbeafe" font-family="sans-serif" font-size="14">']
-    def text(xp, yp, value):
-        parts.append(f'<text x="{xp}" y="{yp}">{escape(str(value))}</text>')
-    text(30, 30, 'Coverage and allele balance across the genome')
-    text(30, 60, 'Coverage (GC corrected)')
-    text(30, 295, 'Minor allele fraction (BAF): brighter bands contain more sites; depth ≥20')
-    text(12, 90, round(maximum)); text(12, 245, round(lower)); text(35, 330, '0.5'); text(45, 470, 0)
-    for chrom in chromosomes:
-        xp = x(chrom, 0)
-        parts.append(f'<path d="M{xp:.1f} 75V480" stroke="#334155"/>')
-        text(x(chrom, lengths[chrom] / 2) - 5, 505, chrom.removeprefix('chr'))
+    upper = max(1, values[int((len(values)-1)*.99)])
+    magnitude = 10 ** math.floor(math.log10(upper))
+    upper = math.ceil(upper / magnitude) * magnitude
+    parts = canvas('GC-corrected coverage', 'Read counts per bin — not log ratio or copy number', [upper*i/4 for i in range(5)], upper)
     for chrom, pos, value in cov:
-        shown = max(lower, min(maximum, value))
+        shown = max(0, min(upper, value))
         color = '#f59e0b' if shown != value else '#38bdf8'
-        parts.append(f'<circle cx="{x(chrom,pos):.1f}" cy="{245-155*(shown-lower)/(maximum-lower):.1f}" r="1.7" fill="{color}"/>')
-    import math
-    peak = max((count for _, count in alleles.values()), default=1)
-    for (chrom, bucket, fraction_bin), (_, count) in alleles.items():
-        opacity = .2 + .8 * math.log1p(count) / math.log1p(peak)
-        width = max(.7, 1060 * 1000000 / total)
-        parts.append(f'<rect x="{x(chrom,bucket*1000000):.1f}" y="{470-280*(fraction_bin+.5)/100:.1f}" width="{width:.2f}" height="2.8" fill="#c084fc" opacity="{opacity:.3f}"/>')
-    if not alleles:
-        text(300, 390, 'No allele-count sites meet the depth requirement')
-    text(30, 528, 'Coverage scale excludes extreme outliers; amber points mark values outside the displayed range.')
-    text(30, 549, 'Chromosomes use observed coverage limits. BAF bands group sites by 1 Mb and 0.01 allele fraction.')
-    parts.append('</g></svg>')
+        parts.append(f'<circle cx="{x(chrom,pos):.1f}" cy="{330-250*shown/upper:.1f}" r="1.7" fill="{color}"/>')
+    parts.append('<text x="30" y="390">Amber points exceed the displayed coverage range. Original counts are unchanged.</text></g></svg>')
     Path(output).write_text(''.join(parts))
+    parts = canvas('B-allele frequency (BAF)', 'Alternate allele reads / total reads; depth ≥20', [0, .25, .5, .75, 1], 1)
+    parts.append('<path d="M90 205H1140" stroke="#f59e0b" stroke-dasharray="5 4"/>')
+    peak = max(alleles.values(), default=1)
+    for (chrom, bucket, fraction_bin), count in alleles.items():
+        opacity = .55 + .45 * math.log1p(count) / math.log1p(peak)
+        width = max(.7, 1050 * 1000000 / total)
+        parts.append(f'<rect x="{x(chrom,bucket*1000000):.1f}" y="{330-250*(fraction_bin+.5)/100:.1f}" width="{width:.2f}" height="2.5" fill="#e9d5ff" opacity="{opacity:.3f}"/>')
+    if not alleles:
+        parts.append('<text x="300" y="210">No sites meet the depth requirement.</text>')
+    parts.append('<text x="30" y="390">Brighter bands contain more sites. Display bins: 1 Mb × 0.01 allele fraction.</text></g></svg>')
+    baf = Path(output).with_name('nasvar.baf.svg')
+    baf.write_text(''.join(parts))
+    return baf
 
 
 def arm_plot(arms, output):

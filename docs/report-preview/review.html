@@ -406,6 +406,13 @@
         flex: 1;
         min-width: 150px;
       }
+      .caller-line {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        margin-bottom: 12px;
+        min-width: 210px;
+      }
     </style>
   </head>
   <body>
@@ -1782,17 +1789,27 @@
         "figures": [
           {
             "category": "copy_number",
-            "name": "NASVAR genome coverage and folded allele fraction",
-            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpi3xept8s/review/presentation/nasvar.overview.svg",
+            "name": "B-allele frequency (BAF)",
+            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmp1ok6n8po/review/presentation/nasvar.baf.svg",
             "reformatted": true,
-            "image_key": "82fdb0b10916f587e9b7806bb513d1f66aff4db12812e040e28c522c7c991aff",
-            "order": [27, "NASVAR genome coverage and folded allele fraction"]
+            "presentation_order": 2,
+            "image_key": "73677ddb0dac5aad41d07bf3afd90e33edfef659cdbaf7514f1565d8a586fc40",
+            "order": [27, "B-allele frequency (BAF)"]
+          },
+          {
+            "category": "copy_number",
+            "name": "GC-corrected coverage",
+            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmp1ok6n8po/review/presentation/nasvar.overview.svg",
+            "reformatted": true,
+            "presentation_order": 1,
+            "image_key": "e7da5edd6b36ca8ff51d373d4a8ed85f7f2065c72f8774915ed411c95194e761",
+            "order": [27, "GC-corrected coverage"]
           },
           {
             "category": "fusions",
             "generated": true,
             "event_id": "b6cf96d02bf1f8f39bc0333a",
-            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpi3xept8s/figures/illustrative.svg",
+            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmp1ok6n8po/figures/illustrative.svg",
             "name": "Illustrative RUNX1::RUNX1T1 junction",
             "image_key": "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf",
             "order": [27, "Illustrative RUNX1::RUNX1T1 junction"]
@@ -1905,7 +1922,8 @@
           }
         ],
         "images": {
-          "82fdb0b10916f587e9b7806bb513d1f66aff4db12812e040e28c522c7c991aff": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEyMDAgNTYwIj48bnMwOnJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNTYwIiBmaWxsPSIjMTExODI3IiAvPjxuczA6ZyBmaWxsPSIjZGJlYWZlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+PG5zMDp0ZXh0IHg9IjMwIiB5PSIzMCI+Q292ZXJhZ2UgYW5kIGFsbGVsZSBiYWxhbmNlIGFjcm9zcyB0aGUgZ2Vub21lPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMzAiIHk9IjYwIj5Db3ZlcmFnZSAoR0MgY29ycmVjdGVkKTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjMwIiB5PSIyOTUiPk1pbm9yIGFsbGVsZSBmcmFjdGlvbiAoQkFGKTogYnJpZ2h0ZXIgYmFuZHMgY29udGFpbiBtb3JlIHNpdGVzOyBkZXB0aCAmIzg4MDU7MjA8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIxMiIgeT0iOTAiPjEyPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTIiIHk9IjI0NSI+MDwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjM1IiB5PSIzMzAiPjAuNTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjQ1IiB5PSI0NzAiPjA8L25zMDp0ZXh0PjxuczA6cGF0aCBkPSJNODAuMCA3NVY0ODAiIHN0cm9rZT0iIzMzNDE1NSIgLz48bnMwOnRleHQgeD0iNjA1LjAiIHk9IjUwNSI+MTwvbnMwOnRleHQ+PG5zMDpjaXJjbGUgY3g9IjYxMC4wIiBjeT0iOTAuMCIgcj0iMS43IiBmaWxsPSIjMzhiZGY4IiAvPjxuczA6cmVjdCB4PSI4MC4wIiB5PSIzOTguNiIgd2lkdGg9IjEwNjAuMDAiIGhlaWdodD0iMi44IiBmaWxsPSIjYzA4NGZjIiBvcGFjaXR5PSIxLjAwMCIgLz48bnMwOnRleHQgeD0iMzAiIHk9IjUyOCI+Q292ZXJhZ2Ugc2NhbGUgZXhjbHVkZXMgZXh0cmVtZSBvdXRsaWVyczsgYW1iZXIgcG9pbnRzIG1hcmsgdmFsdWVzIG91dHNpZGUgdGhlIGRpc3BsYXllZCByYW5nZS48L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzMCIgeT0iNTQ5Ij5DaHJvbW9zb21lcyB1c2Ugb2JzZXJ2ZWQgY292ZXJhZ2UgbGltaXRzLiBCQUYgYmFuZHMgZ3JvdXAgc2l0ZXMgYnkgMSBNYiBhbmQgMC4wMSBhbGxlbGUgZnJhY3Rpb24uPC9uczA6dGV4dD48L25zMDpnPjwvbnMwOnN2Zz4=",
+          "e7da5edd6b36ca8ff51d373d4a8ed85f7f2065c72f8774915ed411c95194e761": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEyMDAgNDIwIj48bnMwOnJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNDIwIiBmaWxsPSIjMTExODI3IiAvPjxuczA6ZyBmaWxsPSIjZGJlYWZlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+PG5zMDp0ZXh0IHg9IjMwIiB5PSIyNyI+R0MtY29ycmVjdGVkIGNvdmVyYWdlPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMzAiIHk9IjUyIj5SZWFkIGNvdW50cyBwZXIgYmluICYjODIxMjsgbm90IGxvZyByYXRpbyBvciBjb3B5IG51bWJlcjwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAzMzAuMEgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIzMzUuMCIgdGV4dC1hbmNob3I9ImVuZCI+MC4wMDwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAyNjcuNUgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIyNzIuNSIgdGV4dC1hbmNob3I9ImVuZCI+NS4wMDwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAyMDUuMEgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIyMTAuMCIgdGV4dC1hbmNob3I9ImVuZCI+MTAuMDA8L25zMDp0ZXh0PjxuczA6cGF0aCBkPSJNODUgMTQyLjVIMTE0NSIgc3Ryb2tlPSIjMzM0MTU1IiAvPjxuczA6dGV4dCB4PSI4MCIgeT0iMTQ3LjUiIHRleHQtYW5jaG9yPSJlbmQiPjE1LjAwPC9uczA6dGV4dD48bnMwOnBhdGggZD0iTTg1IDgwLjBIMTE0NSIgc3Ryb2tlPSIjMzM0MTU1IiAvPjxuczA6dGV4dCB4PSI4MCIgeT0iODUuMCIgdGV4dC1hbmNob3I9ImVuZCI+MjAuMDA8L25zMDp0ZXh0PjxuczA6cGF0aCBkPSJNOTAuMCA4MFYzMzAiIHN0cm9rZT0iIzMzNDE1NSIgLz48bnMwOnRleHQgeD0iNjEwLjAiIHk9IjM1NSI+MTwvbnMwOnRleHQ+PG5zMDpjaXJjbGUgY3g9IjYxNS4wIiBjeT0iMTgwLjAiIHI9IjEuNyIgZmlsbD0iIzM4YmRmOCIgLz48bnMwOnRleHQgeD0iMzAiIHk9IjM5MCI+QW1iZXIgcG9pbnRzIGV4Y2VlZCB0aGUgZGlzcGxheWVkIGNvdmVyYWdlIHJhbmdlLiBPcmlnaW5hbCBjb3VudHMgYXJlIHVuY2hhbmdlZC48L25zMDp0ZXh0PjwvbnMwOmc+PC9uczA6c3ZnPg==",
+          "73677ddb0dac5aad41d07bf3afd90e33edfef659cdbaf7514f1565d8a586fc40": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEyMDAgNDIwIj48bnMwOnJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNDIwIiBmaWxsPSIjMTExODI3IiAvPjxuczA6ZyBmaWxsPSIjZGJlYWZlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+PG5zMDp0ZXh0IHg9IjMwIiB5PSIyNyI+Qi1hbGxlbGUgZnJlcXVlbmN5IChCQUYpPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMzAiIHk9IjUyIj5BbHRlcm5hdGUgYWxsZWxlIHJlYWRzIC8gdG90YWwgcmVhZHM7IGRlcHRoICYjODgwNTsyMDwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAzMzAuMEgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIzMzUuMCIgdGV4dC1hbmNob3I9ImVuZCI+MC4wMDwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAyNjcuNUgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIyNzIuNSIgdGV4dC1hbmNob3I9ImVuZCI+MC4yNTwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAyMDUuMEgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIyMTAuMCIgdGV4dC1hbmNob3I9ImVuZCI+MC41MDwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSAxNDIuNUgxMTQ1IiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjgwIiB5PSIxNDcuNSIgdGV4dC1hbmNob3I9ImVuZCI+MC43NTwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik04NSA4MC4wSDExNDUiIHN0cm9rZT0iIzMzNDE1NSIgLz48bnMwOnRleHQgeD0iODAiIHk9Ijg1LjAiIHRleHQtYW5jaG9yPSJlbmQiPjEuMDA8L25zMDp0ZXh0PjxuczA6cGF0aCBkPSJNOTAuMCA4MFYzMzAiIHN0cm9rZT0iIzMzNDE1NSIgLz48bnMwOnRleHQgeD0iNjEwLjAiIHk9IjM1NSI+MTwvbnMwOnRleHQ+PG5zMDpwYXRoIGQ9Ik05MCAyMDVIMTE0MCIgc3Ryb2tlPSIjZjU5ZTBiIiBzdHJva2UtZGFzaGFycmF5PSI1IDQiIC8+PG5zMDpyZWN0IHg9IjkwLjAiIHk9IjI2Ni4yIiB3aWR0aD0iMTA1MC4wMCIgaGVpZ2h0PSIyLjUiIGZpbGw9IiNlOWQ1ZmYiIG9wYWNpdHk9IjEuMDAwIiAvPjxuczA6dGV4dCB4PSIzMCIgeT0iMzkwIj5CcmlnaHRlciBiYW5kcyBjb250YWluIG1vcmUgc2l0ZXMuIERpc3BsYXkgYmluczogMSBNYiAmIzIxNTsgMC4wMSBhbGxlbGUgZnJhY3Rpb24uPC9uczA6dGV4dD48L25zMDpnPjwvbnMwOnN2Zz4=",
           "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiB2aWV3Qm94PSIwIDAgMTEwMCA0NDAiPgo8bnMwOnJlY3Qgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiBmaWxsPSJ3aGl0ZSIgLz48bnMwOnRleHQgeD0iMzUiIHk9IjM4IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzE3MmMzZCI+SWxsdXN0cmF0aXZlIGp1bmN0aW9uOiBSVU5YMSA6OiBSVU5YMVQxPC9uczA6dGV4dD4KPG5zMDp0ZXh0IHg9IjM1IiB5PSI3NiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1MjY3NzQiPlN5bnRoZXRpYyBjb3ZlcmFnZSBhbmQgc3BsaXQtcmVhZCB0cmFja3M8L25zMDp0ZXh0Pgo8bnMwOmcgc3Ryb2tlPSIjZDdlMGU2Ij48bnMwOnBhdGggZD0iTTEyMCAxMTBINTEwTTU5MCAxMTBIMTAxME0xMjAgMjIwSDUxME01OTAgMjIwSDEwMTBNMTIwIDM1MEg1MTBNNTkwIDM1MEgxMDEwIiAvPjwvbnMwOmc+CjxuczA6ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzE3MmMzZCI+PG5zMDp0ZXh0IHg9IjE1IiB5PSIxNTAiPkNvdmVyYWdlPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTUiIHk9IjI3MCI+U3BsaXQgcmVhZHM8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIxNSIgeT0iMzk1Ij5HZW5lczwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjI5MCIgeT0iNDIwIj5SVU5YMTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9Ijc2MCIgeT0iNDIwIj5SVU5YMVQxPC9uczA6dGV4dD48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzc0OGE5NiI+PG5zMDpwYXRoIGQ9Ik0xMzAgMjEwVjE1NUgxNjBWMTUwSDE5MFYxNDBIMjIwVjEzMEgyNTBWMTM1SDI4MFYxNDBIMzEwVjEzMEgzNDBWMTI1SDM3MFYxNDVINDAwVjEzMEg0MzBWMTM1SDQ2MFYxNDVINDkwVjIxMFoiIC8+PG5zMDpwYXRoIGQ9Ik02MTAgMjEwVjE0NUg2NDBWMTMwSDY3MFYxNDBINzAwVjEyNUg3MzBWMTM1SDc2MFYxMzBINzkwVjEyMEg4MjBWMTM1SDg1MFYxNDVIODgwVjE0MEg5MTBWMTM1SDk0MFYxNDVIOTcwVjE1MEgxMDAwVjIxMFoiIC8+PC9uczA6Zz4KPG5zMDpnIHN0cm9rZT0iIzA4NmY4MyIgc3Ryb2tlLXdpZHRoPSI2Ij48bnMwOnBhdGggZD0iTTE3MCAyNjBINDEwTTE2MCAyODBINDIwTTE4MCAzMDBINDAwTTcwMCAyNjBIOTQwTTcxMCAyODBIOTUwTTcwMCAzMDBIOTMwIiAvPjwvbnMwOmc+CjxuczA6ZyBzdHJva2U9IiM5NTU3MTUiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSI+PG5zMDpwYXRoIGQ9Ik00MTAgMjYwUTU1NSAyMjAgNzAwIDI2ME00MjAgMjgwUTU1MCAyNDAgNzEwIDI4ME00MDAgMzAwUTU1MCAyNjUgNzAwIDMwMCIgLz48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzA4NmY4MyI+PG5zMDpyZWN0IHg9IjIwMCIgeT0iMzc1IiB3aWR0aD0iNTUiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjMwMCIgeT0iMzc1IiB3aWR0aD0iNDAiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjQwNSIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iMjAiIC8+PC9uczA6Zz4KPG5zMDpnIGZpbGw9IiNiMTY4MzIiPjxuczA6cmVjdCB4PSI2MzAiIHk9IjM3NSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI3NDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI5MDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjwvbnMwOmc+CjwvbnMwOnN2Zz4="
         }
       }
@@ -2392,36 +2410,32 @@
           label: "Caller support",
           render: (r) => {
             const box = el("div");
-            const t = el("table"),
-              head = el("tr");
-            for (const label of ["Caller", "Variant %", "Depth", "Status"]) head.append(el("th", label));
-            t.append(head);
             for (const [caller, name] of [
               ["clair3", "Clair3"],
               ["clairsto", "ClairS-TO"],
               ["deepsomatic", "DeepSomatic"],
             ]) {
-              const evidence = r.evidence.filter((e) => e.caller === caller);
-              if (!evidence.length) {
-                const row = el("tr");
-                row.append(el("td", name), el("td", "—"), el("td", "—"), el("td", "Not reported", "muted"));
-                t.append(row);
-              }
+              const evidence = r.evidence.filter((e) => e.caller === caller),
+                line = el("div", undefined, "caller-line");
+              line.append(el("strong", name));
+              if (!evidence.length) line.append(el("span", "Not reported", "muted"));
               for (const e of evidence) {
                 const v = e.sample_evidence?.[caller] || {},
-                  row = el("tr");
-                const fraction = typeof v.af === "number" ? (v.af * 100).toFixed(1) + "%" : "—";
-                const status = Array.isArray(e.filter) ? e.filter.join(", ") : e.filter;
-                row.append(
-                  el("td", name),
-                  el("td", fraction),
-                  el("td", fmt(v.depth)),
-                  el("td", status === "PASS" ? "Passed" : status || "Unknown"),
+                  status = Array.isArray(e.filter) ? e.filter.join(", ") : e.filter;
+                const percent = typeof v.af === "number" ? (100 * v.af).toFixed(1) + "%" : "—";
+                line.append(
+                  el(
+                    "span",
+                    percent +
+                      " variant · " +
+                      fmt(v.depth) +
+                      " reads · " +
+                      (status === "PASS" ? "Passed" : status || "Unknown"),
+                  ),
                 );
-                t.append(row);
               }
+              box.append(line);
             }
-            box.append(t);
             return box;
           },
           value: (r) =>
@@ -2599,6 +2613,11 @@
         box.append(svg);
       }
       for (const plot of data.qc_plots || []) qcChart(plot);
+      panel(
+        sections.qc,
+        "Read length distributions",
+        "Unavailable in these outputs. A read-level length histogram is required; N50 and mean length cannot reconstruct the distribution.",
+      );
       table(
         panel(
           sections.qc,
@@ -2722,7 +2741,10 @@
       }
       const cnOverview = el("div");
       sections.nasvar.prepend(cnOverview);
-      for (const item of data.figures.filter((f) => f.reformatted)) figurePanel(cnOverview, item);
+      for (const item of data.figures
+        .filter((f) => f.reformatted)
+        .sort((a, b) => (a.presentation_order || 0) - (b.presentation_order || 0)))
+        figurePanel(cnOverview, item);
       const chromosomePlots = data.figures.filter((f) => f.category === "chromosomes");
       if (chromosomePlots.length) {
         const box = panel(cnOverview, "Chromosome plots");
