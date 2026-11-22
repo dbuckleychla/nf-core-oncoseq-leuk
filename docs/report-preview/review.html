@@ -1783,16 +1783,16 @@
           {
             "category": "copy_number",
             "name": "NASVAR genome coverage and folded allele fraction",
-            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpjmoz5ec1/review/presentation/nasvar.overview.svg",
+            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpi3xept8s/review/presentation/nasvar.overview.svg",
             "reformatted": true,
-            "image_key": "50ceea9ebeed41ef827acf29cc680f4c8b827676d258ee0d55c42d7fdae62100",
+            "image_key": "82fdb0b10916f587e9b7806bb513d1f66aff4db12812e040e28c522c7c991aff",
             "order": [27, "NASVAR genome coverage and folded allele fraction"]
           },
           {
             "category": "fusions",
             "generated": true,
             "event_id": "b6cf96d02bf1f8f39bc0333a",
-            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpjmoz5ec1/figures/illustrative.svg",
+            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpi3xept8s/figures/illustrative.svg",
             "name": "Illustrative RUNX1::RUNX1T1 junction",
             "image_key": "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf",
             "order": [27, "Illustrative RUNX1::RUNX1T1 junction"]
@@ -1877,14 +1877,35 @@
         "warnings": ["Synthetic records and an illustrative fusion figure are used to demonstrate the layout."],
         "coverage_genes": [{ "gene": "TP53", "depth": 80.0 }],
         "qc_summary": [
-          { "metric": "primary interval-weighted mean depth", "value": 80.0 },
-          { "metric": "mapq60 interval-weighted mean depth", "value": 60.0 },
-          { "metric": "nofilter interval-weighted mean depth", "value": 100.0 },
+          { "metric": "Mean target depth (primary alignments)", "value": 80.0 },
+          { "metric": "Mean target depth (high-confidence alignments)", "value": 60.0 },
+          { "metric": "Mean target depth (all alignments)", "value": 100.0 },
           { "metric": "Cramino Number of reads", "value": "1000" },
           { "metric": "Cramino N50", "value": "15000" }
         ],
+        "qc_plots": [
+          { "title": "Lowest-coverage genes", "unit": "Mean depth", "bars": [{ "label": "TP53", "value": 80.0 }] },
+          {
+            "title": "Target coverage distribution",
+            "unit": "Number of intervals",
+            "bars": [
+              { "label": "0\u20137\u00d7", "value": 0 },
+              { "label": "7\u201313\u00d7", "value": 0 },
+              { "label": "13\u201320\u00d7", "value": 0 },
+              { "label": "20\u201327\u00d7", "value": 0 },
+              { "label": "27\u201333\u00d7", "value": 0 },
+              { "label": "33\u201340\u00d7", "value": 0 },
+              { "label": "40\u201347\u00d7", "value": 0 },
+              { "label": "47\u201353\u00d7", "value": 0 },
+              { "label": "53\u201360\u00d7", "value": 0 },
+              { "label": "60\u201367\u00d7", "value": 0 },
+              { "label": "67\u201373\u00d7", "value": 0 },
+              { "label": "\u226573\u00d7", "value": 1 }
+            ]
+          }
+        ],
         "images": {
-          "50ceea9ebeed41ef827acf29cc680f4c8b827676d258ee0d55c42d7fdae62100": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEyMDAgNTYwIj48bnMwOnJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNTYwIiBmaWxsPSIjMTExODI3IiAvPjxuczA6ZyBmaWxsPSIjZGJlYWZlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+PG5zMDp0ZXh0IHg9IjMwIiB5PSIzMCI+TkFTVkFSIGdlbm9tZSBvdmVydmlldyAmIzgyMTI7IG5hdGl2ZSBtZWFzdXJlbWVudHM8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzMCIgeT0iNjAiPk5hdGl2ZSBHQy1hZGp1c3RlZCBiaW5uZWQgY292ZXJhZ2Ugc2lnbmFsIChub3QgYmFzZSBkZXB0aCBvciBpbmZlcnJlZCBjb3B5IG51bWJlcik8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzMCIgeT0iMjk1Ij5Gb2xkZWQgYWxsZWxlIGZyYWN0aW9uOiBtaW4ocmVmLCBhbHQpIC8gdG90YWw7IGRlcHRoICYjODgwNTsyMDsgMSBNYiBtZWFuIGZvciBkaXNwbGF5PC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTIiIHk9IjkwIj4xMjwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjEyIiB5PSIyNDUiPjA8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzNSIgeT0iMzMwIj4wLjU8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSI0NSIgeT0iNDcwIj4wPC9uczA6dGV4dD48bnMwOnBhdGggZD0iTTgwLjAgNzVWNDgwIiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjYwNS4wIiB5PSI1MDUiPjE8L25zMDp0ZXh0PjxuczA6Y2lyY2xlIGN4PSI2MTAuMCIgY3k9IjkwLjAiIHI9IjEuNyIgZmlsbD0iIzM4YmRmOCIgLz48bnMwOmNpcmNsZSBjeD0iNjEwLjAiIGN5PSI0MDAuMCIgcj0iMS41IiBmaWxsPSIjYzA4NGZjIiAvPjxuczA6dGV4dCB4PSIzMCIgeT0iNTI4Ij5Db3ZlcmFnZSBkaXNwbGF5OiAxc3QmIzgyMTE7OTl0aCBwZXJjZW50aWxlIHJhbmdlIGV4dGVuZGVkIHRvIHplcm87IGFtYmVyIHBvaW50cyBhcmUgY2xpcHBlZCBvdXRsaWVycy4gTmF0aXZlIHZhbHVlcyBhcmUgdW5jaGFuZ2VkLjwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjMwIiB5PSI1NDkiPkNocm9tb3NvbWUgd2lkdGhzOiBvYnNlcnZlZCBjb3ZlcmFnZS1iaW4gZXh0ZW50cy4gRGlzcGxheSBhZ2dyZWdhdGlvbiBkb2VzIG5vdCBjaGFuZ2UgbmF0aXZlIGNhbGxzLjwvbnMwOnRleHQ+PC9uczA6Zz48L25zMDpzdmc+",
+          "82fdb0b10916f587e9b7806bb513d1f66aff4db12812e040e28c522c7c991aff": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEyMDAgNTYwIj48bnMwOnJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNTYwIiBmaWxsPSIjMTExODI3IiAvPjxuczA6ZyBmaWxsPSIjZGJlYWZlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+PG5zMDp0ZXh0IHg9IjMwIiB5PSIzMCI+Q292ZXJhZ2UgYW5kIGFsbGVsZSBiYWxhbmNlIGFjcm9zcyB0aGUgZ2Vub21lPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMzAiIHk9IjYwIj5Db3ZlcmFnZSAoR0MgY29ycmVjdGVkKTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjMwIiB5PSIyOTUiPk1pbm9yIGFsbGVsZSBmcmFjdGlvbiAoQkFGKTogYnJpZ2h0ZXIgYmFuZHMgY29udGFpbiBtb3JlIHNpdGVzOyBkZXB0aCAmIzg4MDU7MjA8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIxMiIgeT0iOTAiPjEyPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTIiIHk9IjI0NSI+MDwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjM1IiB5PSIzMzAiPjAuNTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjQ1IiB5PSI0NzAiPjA8L25zMDp0ZXh0PjxuczA6cGF0aCBkPSJNODAuMCA3NVY0ODAiIHN0cm9rZT0iIzMzNDE1NSIgLz48bnMwOnRleHQgeD0iNjA1LjAiIHk9IjUwNSI+MTwvbnMwOnRleHQ+PG5zMDpjaXJjbGUgY3g9IjYxMC4wIiBjeT0iOTAuMCIgcj0iMS43IiBmaWxsPSIjMzhiZGY4IiAvPjxuczA6cmVjdCB4PSI4MC4wIiB5PSIzOTguNiIgd2lkdGg9IjEwNjAuMDAiIGhlaWdodD0iMi44IiBmaWxsPSIjYzA4NGZjIiBvcGFjaXR5PSIxLjAwMCIgLz48bnMwOnRleHQgeD0iMzAiIHk9IjUyOCI+Q292ZXJhZ2Ugc2NhbGUgZXhjbHVkZXMgZXh0cmVtZSBvdXRsaWVyczsgYW1iZXIgcG9pbnRzIG1hcmsgdmFsdWVzIG91dHNpZGUgdGhlIGRpc3BsYXllZCByYW5nZS48L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzMCIgeT0iNTQ5Ij5DaHJvbW9zb21lcyB1c2Ugb2JzZXJ2ZWQgY292ZXJhZ2UgbGltaXRzLiBCQUYgYmFuZHMgZ3JvdXAgc2l0ZXMgYnkgMSBNYiBhbmQgMC4wMSBhbGxlbGUgZnJhY3Rpb24uPC9uczA6dGV4dD48L25zMDpnPjwvbnMwOnN2Zz4=",
           "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiB2aWV3Qm94PSIwIDAgMTEwMCA0NDAiPgo8bnMwOnJlY3Qgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiBmaWxsPSJ3aGl0ZSIgLz48bnMwOnRleHQgeD0iMzUiIHk9IjM4IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzE3MmMzZCI+SWxsdXN0cmF0aXZlIGp1bmN0aW9uOiBSVU5YMSA6OiBSVU5YMVQxPC9uczA6dGV4dD4KPG5zMDp0ZXh0IHg9IjM1IiB5PSI3NiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1MjY3NzQiPlN5bnRoZXRpYyBjb3ZlcmFnZSBhbmQgc3BsaXQtcmVhZCB0cmFja3M8L25zMDp0ZXh0Pgo8bnMwOmcgc3Ryb2tlPSIjZDdlMGU2Ij48bnMwOnBhdGggZD0iTTEyMCAxMTBINTEwTTU5MCAxMTBIMTAxME0xMjAgMjIwSDUxME01OTAgMjIwSDEwMTBNMTIwIDM1MEg1MTBNNTkwIDM1MEgxMDEwIiAvPjwvbnMwOmc+CjxuczA6ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzE3MmMzZCI+PG5zMDp0ZXh0IHg9IjE1IiB5PSIxNTAiPkNvdmVyYWdlPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTUiIHk9IjI3MCI+U3BsaXQgcmVhZHM8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIxNSIgeT0iMzk1Ij5HZW5lczwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjI5MCIgeT0iNDIwIj5SVU5YMTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9Ijc2MCIgeT0iNDIwIj5SVU5YMVQxPC9uczA6dGV4dD48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzc0OGE5NiI+PG5zMDpwYXRoIGQ9Ik0xMzAgMjEwVjE1NUgxNjBWMTUwSDE5MFYxNDBIMjIwVjEzMEgyNTBWMTM1SDI4MFYxNDBIMzEwVjEzMEgzNDBWMTI1SDM3MFYxNDVINDAwVjEzMEg0MzBWMTM1SDQ2MFYxNDVINDkwVjIxMFoiIC8+PG5zMDpwYXRoIGQ9Ik02MTAgMjEwVjE0NUg2NDBWMTMwSDY3MFYxNDBINzAwVjEyNUg3MzBWMTM1SDc2MFYxMzBINzkwVjEyMEg4MjBWMTM1SDg1MFYxNDVIODgwVjE0MEg5MTBWMTM1SDk0MFYxNDVIOTcwVjE1MEgxMDAwVjIxMFoiIC8+PC9uczA6Zz4KPG5zMDpnIHN0cm9rZT0iIzA4NmY4MyIgc3Ryb2tlLXdpZHRoPSI2Ij48bnMwOnBhdGggZD0iTTE3MCAyNjBINDEwTTE2MCAyODBINDIwTTE4MCAzMDBINDAwTTcwMCAyNjBIOTQwTTcxMCAyODBIOTUwTTcwMCAzMDBIOTMwIiAvPjwvbnMwOmc+CjxuczA6ZyBzdHJva2U9IiM5NTU3MTUiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSI+PG5zMDpwYXRoIGQ9Ik00MTAgMjYwUTU1NSAyMjAgNzAwIDI2ME00MjAgMjgwUTU1MCAyNDAgNzEwIDI4ME00MDAgMzAwUTU1MCAyNjUgNzAwIDMwMCIgLz48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzA4NmY4MyI+PG5zMDpyZWN0IHg9IjIwMCIgeT0iMzc1IiB3aWR0aD0iNTUiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjMwMCIgeT0iMzc1IiB3aWR0aD0iNDAiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjQwNSIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iMjAiIC8+PC9uczA6Zz4KPG5zMDpnIGZpbGw9IiNiMTY4MzIiPjxuczA6cmVjdCB4PSI2MzAiIHk9IjM3NSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI3NDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI5MDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjwvbnMwOmc+CjwvbnMwOnN2Zz4="
         }
       }
@@ -1909,10 +1930,10 @@
         ["classification", "Classification"],
         ["fusions", "Fusions"],
         ["small", "Small variants"],
-        ["sv", "CNV and other SVs"],
+        ["sv", "Structural variants"],
         ["nasvar", "Copy number / NASVAR"],
+        ["targets", "Target genes"],
         ["qc", "Coverage and QC"],
-        ["targets", "Focal CN/SV loci"],
         ["methods", "Methods and files"],
       ];
       const sections = {};
@@ -1969,7 +1990,7 @@
                 [
                   { label: "ClinVar assertion", value: (r) => JSON.stringify(r.CLNSIG) },
                   { label: "Review status", value: (r) => JSON.stringify(r.CLNREVSTAT) },
-                  { label: "Disease context", value: (r) => JSON.stringify(r.CLNDN || null) },
+                  { label: "Reported conditions", value: (r) => JSON.stringify(r.CLNDN || null) },
                 ],
                 "ClinVar assertions",
               );
@@ -2177,7 +2198,7 @@
       for (const [label, value] of [
         ["Selected small variants", small.length],
         ["Fusion / gene-pair candidates", selected.length],
-        ["Corroborated junctions", selected.filter((e) => e.consensus).length],
+        ["Junctions found by multiple callers", selected.filter((e) => e.consensus).length],
         ["Reference assembly", data.assembly],
       ]) {
         const c = el("div", undefined, "card");
@@ -2196,8 +2217,8 @@
       for (const warning of data.warnings || []) sections.overview.append(el("p", warning, "warning"));
       panel(
         sections.overview,
-        "Review context",
-        "Selection identifies candidates for review. Caller agreement, predicted consequences and catalogue membership retain their source meaning. Coverage and negative findings require assay-specific interpretation.",
+        "About this report",
+        "This report highlights variants for review. Agreement between callers and database matches support interpretation, but do not establish a diagnosis.",
       );
       const status = panel(sections.overview, "Analysis status");
       table(
@@ -2209,7 +2230,11 @@
         ],
         "analysis status",
       );
-      const cc = el("div", undefined, "cards");
+      const cc = el("div", undefined, "cards"),
+        additionalCards = el("div", undefined, "cards"),
+        additionalClassifiers = el("details");
+      additionalClassifiers.append(el("summary", "Additional classifiers"), additionalCards);
+      const defaultClassifiers = new Set(["marlin", "alma", "lamprey", "tucan", "nanomix", "optic"]);
       for (const c of data.classification || []) {
         const evaluable = typeof c.score === "number" && typeof c.cutoff === "number";
         const box = el("div", undefined, "card" + (evaluable ? (c.score >= c.cutoff ? " above" : " below") : ""));
@@ -2226,7 +2251,7 @@
                 ? fmt(c.cutoff)
                 : c.interpretation === "mixture proportion"
                   ? "Not applicable"
-                  : "Not emitted"),
+                  : "Not available"),
           ),
           el(
             "p",
@@ -2234,7 +2259,7 @@
               ? c.score >= c.cutoff
                 ? "Above threshold"
                 : "Below threshold"
-              : c.reason || "No diagnostic threshold comparison available",
+              : c.reason || "No classification cutoff available",
             "muted",
           ),
         );
@@ -2254,16 +2279,17 @@
         const b = el("button", "Model evidence");
         b.onclick = () => showEvidence(c.name, c);
         box.append(b);
-        cc.append(box);
+        (defaultClassifiers.has(c.name.split(":")[0]) ? cc : additionalCards).append(box);
       }
       sections.classification.append(cc);
+      if (additionalCards.children.length) sections.classification.append(additionalClassifiers);
       if (!(data.classification || []).length)
         panel(sections.classification, null, "Classification was not run for this sample.");
       const fusionCols = [
         { label: "Gene pair", value: (r) => r.gene_pairs.map((p) => p.join("::")).join("; ") || "Unresolved" },
         {
           label: "Event",
-          value: (r) => r.representative?.[0] || r.evidence[0].evidence?.info?.SVTYPE || "Native junction",
+          value: (r) => r.representative?.[0] || r.evidence[0].evidence?.info?.SVTYPE || "Junction",
         },
         {
           label: "Loci",
@@ -2283,8 +2309,7 @@
         },
         {
           label: "Consensus",
-          value: (r) =>
-            r.consensus ? "Breakpoint agreement" : r.ambiguous ? "Ambiguous correspondence" : "Single caller",
+          value: (r) => (r.consensus ? "Callers agree" : r.ambiguous ? "Uncertain match" : "Single caller"),
         },
         { label: "Plot", figure: true },
         { label: "Details", detail: true },
@@ -2292,8 +2317,8 @@
       table(
         panel(
           sections.fusions,
-          "Prioritised gene-pair events",
-          "Curated pairs with applicable native filters and at least three supporting reads. Counts from different callers are not added.",
+          "Likely fusion candidates",
+          "Known gene pairs with at least three supporting reads and passing caller filters. Support is shown separately for each caller.",
         ),
         selected,
         fusionCols,
@@ -2302,8 +2327,8 @@
       table(
         panel(
           sections.fusions,
-          "Supporting junction evidence",
-          "Includes unselected, low-support, failed-filter and ambiguous junctions.",
+          "Other junctions",
+          "Other reported junctions, including those with low support or failed filters.",
         ),
         events.filter((e) => !e.selected),
         fusionCols,
@@ -2327,7 +2352,7 @@
         return [...new Map(assertions.map((a) => [JSON.stringify(a), a])).values()];
       }
       function annotationText(value) {
-        return (Array.isArray(value) ? value.join("; ") : value || "Not emitted").replaceAll("_", " ");
+        return (Array.isArray(value) ? value.join("; ") : value || "Not available").replaceAll("_", " ");
       }
       function clinvarCell(r) {
         const box = el("div"),
@@ -2358,26 +2383,45 @@
           label: "Change",
           value: (r) => decodeURIComponent(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
         },
-        { label: "Priority / context", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
+        { label: "Reason for review", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
         {
           label: "PASS agreement",
-          value: (r) => (r.exact_pass_agreement ? "ClairS-TO + DeepSomatic" : "Independent caller evidence"),
+          value: (r) => (r.exact_pass_agreement ? "ClairS-TO + DeepSomatic" : "No two-caller agreement"),
         },
         {
-          label: "AF / depth by caller",
+          label: "Caller support",
           render: (r) => {
             const box = el("div");
-            for (const caller of ["clair3", "clairsto", "deepsomatic"]) {
+            const t = el("table"),
+              head = el("tr");
+            for (const label of ["Caller", "Variant %", "Depth", "Status"]) head.append(el("th", label));
+            t.append(head);
+            for (const [caller, name] of [
+              ["clair3", "Clair3"],
+              ["clairsto", "ClairS-TO"],
+              ["deepsomatic", "DeepSomatic"],
+            ]) {
               const evidence = r.evidence.filter((e) => e.caller === caller);
               if (!evidence.length) {
-                box.append(el("p", caller + ": no allele evidence emitted", "muted"));
-                continue;
+                const row = el("tr");
+                row.append(el("td", name), el("td", "—"), el("td", "—"), el("td", "Not reported", "muted"));
+                t.append(row);
               }
               for (const e of evidence) {
-                const v = e.sample_evidence?.[caller] || {};
-                box.append(el("p", caller + ": AF " + fmt(v.af) + "; depth " + fmt(v.depth) + "; " + fmt(e.filter)));
+                const v = e.sample_evidence?.[caller] || {},
+                  row = el("tr");
+                const fraction = typeof v.af === "number" ? (v.af * 100).toFixed(1) + "%" : "—";
+                const status = Array.isArray(e.filter) ? e.filter.join(", ") : e.filter;
+                row.append(
+                  el("td", name),
+                  el("td", fraction),
+                  el("td", fmt(v.depth)),
+                  el("td", status === "PASS" ? "Passed" : status || "Unknown"),
+                );
+                t.append(row);
               }
             }
+            box.append(t);
             return box;
           },
           value: (r) =>
@@ -2404,7 +2448,7 @@
         ["findings", "Prioritised findings"],
         ["coding", "Additional coding review"],
         ["supporting", "Supporting small variants"],
-        ["consensus_review", "Broad consensus review"],
+        ["consensus_review", "Additional variants found by both callers"],
       ]) {
         const rows = small.filter((r) => r.selections.some((s) => s.review_group === group));
         if (rows.length || group === "findings") table(panel(sections.small, title), rows, scols, title);
@@ -2412,7 +2456,7 @@
       panel(
         sections.small,
         null,
-        "Population AF > 0.01 is excluded unless the exact allele is whitelisted. Predicted loss of function and COSMIC recurrence do not establish pathogenicity. COSMIC gene tier is a gene-level Cancer Gene Census property. Full annotation exports retain native filters.",
+        "Common variants (population frequency above 1%) are excluded unless specifically whitelisted. A ClinVar or COSMIC match is supporting information, not a diagnosis. Caller support shows each caller’s variant percentage and read depth; “Not reported” means no entry for that exact variant, rather than proof that it is absent.",
       );
       function collapsed(parent, title, description) {
         const d = el("details");
@@ -2423,30 +2467,30 @@
       const flow = panel(sections.small, "How variants reach this report");
       const steps = el("div", undefined, "flow");
       for (const text of [
-        "Native Clair3 / ClairS-TO / DeepSomatic calls →",
-        "Normalize and aggregate exact alleles; retain native failed-call evidence →",
-        "VEP consequence + population frequency + ClinVar + optional COSMIC →",
-        "Native PASS and population AF ≤0.01, unless exact allele whitelist; ClairS-TO + DeepSomatic PASS agreement →",
-        "Transcript / gene prioritization and review groups",
+        "Clair3 / ClairS-TO / DeepSomatic calls →",
+        "Group matching variants; keep failed calls for reference →",
+        "Annotate genes, population frequency, ClinVar and optional COSMIC →",
+        "Select passing calls and uncommon variants; apply the whitelist →",
+        "Prioritize variants for review",
       ])
         steps.append(el("span", text));
       flow.append(
         steps,
         el(
           "p",
-          "Clair3 does not vote in somatic PASS agreement. Caller AF and depth are never pooled. COSMIC matches do not rescue failed variants or establish pathogenicity.",
+          "Two-caller agreement means ClairS-TO and DeepSomatic both passed the same variant. Their percentages and read counts are shown separately. COSMIC matches do not override failed filters or establish a diagnosis.",
           "muted",
         ),
       );
       table(
-        collapsed(sections.nasvar, "Copy-number intervals", "Values retain their native caller representation."),
+        collapsed(sections.nasvar, "Copy-number intervals", "Detailed values reported by each caller."),
         data.cnv || [],
         [
           { label: "Source", value: (r) => r.source },
           { label: "Chromosome", value: (r) => r.chrom },
-          { label: "Native start", value: (r) => r.start },
-          { label: "Native end", value: (r) => r.end },
-          { label: "Native values", value: (r) => r.native_values.join(" | ") },
+          { label: "Start", value: (r) => r.start },
+          { label: "End", value: (r) => r.end },
+          { label: "Reported values", value: (r) => r.native_values.join(" | ") },
           { label: "Details", detail: true },
         ],
         "copy-number intervals",
@@ -2460,21 +2504,21 @@
       const nsnv = data.nasvar?.snv?.genes;
       if (nsnv)
         table(
-          panel(sections.nasvar, "Native genotypes"),
+          panel(sections.nasvar, "NASVAR gene results"),
           Object.entries(nsnv).map(([gene, value]) => ({ gene, ...value })),
           [
             { label: "Gene", value: (r) => r.gene },
             { label: "Genotype", value: (r) => r.genotype },
             { label: "Coverage", value: (r) => r.coverage },
             { label: "Amino acid changes", value: (r) => (r.aa_changes || []).join("; ") },
-            { label: "Mutations / native AF", value: (r) => JSON.stringify(r.mutations) },
+            { label: "Mutations / variant fraction", value: (r) => JSON.stringify(r.mutations) },
           ],
           "NASVAR genotypes",
         );
       const ncnv = data.nasvar?.cnv?.genes;
       if (ncnv)
         table(
-          collapsed(sections.nasvar, "Native gene copy estimates"),
+          collapsed(sections.nasvar, "Gene copy estimates"),
           Object.entries(ncnv).map(([gene, value]) => ({ gene, ...value })),
           [
             { label: "Gene", value: (r) => r.gene },
@@ -2486,7 +2530,7 @@
       const nk = data.nasvar?.karyotype?.karyotype;
       if (nk)
         table(
-          collapsed(sections.nasvar, "Native chromosome-arm estimates"),
+          collapsed(sections.nasvar, "Chromosome-arm estimates"),
           Object.entries(nk)
             .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
             .map(([arm, copies]) => ({ arm, copies })),
@@ -2501,8 +2545,8 @@
         table(
           panel(
             sections.nasvar,
-            "Native ITD scan",
-            "Event counts describe the native scan. They do not establish assay-level absence.",
+            "ITD results",
+            "These are NASVAR results. A negative result does not rule out an alteration.",
           ),
           Object.entries(nitd).map(([gene, events]) => ({ gene, events })),
           [
@@ -2514,17 +2558,52 @@
         );
       for (const key of ["qc", "karyotype", "cnv", "snv", "itd"])
         if (data.nasvar?.[key] !== undefined) {
-          const p = panel(sections.nasvar, key.toUpperCase() + " source"),
+          const p = panel(sections.nasvar, key.toUpperCase() + " details"),
             d = el("details"),
-            s = el("summary", "Native " + key + " results");
+            s = el("summary", "Detailed " + key + " results");
           d.append(s, el("pre", JSON.stringify(data.nasvar[key], null, 2)));
           p.append(d);
         }
+      function qcChart(plot) {
+        const box = panel(sections.qc, plot.title),
+          ns = "http://www.w3.org/2000/svg";
+        const svg = document.createElementNS(ns, "svg"),
+          height = 55 + plot.bars.length * 27;
+        svg.setAttribute("viewBox", "0 0 1000 " + height);
+        svg.setAttribute("role", "img");
+        svg.setAttribute("aria-label", plot.title + " (" + plot.unit + ")");
+        svg.style.width = "100%";
+        const maximum = Math.max(1, ...plot.bars.map((b) => b.value));
+        function text(x, y, value) {
+          const t = document.createElementNS(ns, "text");
+          t.setAttribute("x", x);
+          t.setAttribute("y", y);
+          t.setAttribute("fill", "#dbeafe");
+          t.setAttribute("font-size", "14");
+          t.textContent = value;
+          svg.append(t);
+        }
+        text(210, 22, plot.unit);
+        plot.bars.forEach((bar, index) => {
+          const y = 38 + index * 27,
+            rect = document.createElementNS(ns, "rect");
+          text(8, y + 15, bar.label);
+          rect.setAttribute("x", 210);
+          rect.setAttribute("y", y);
+          rect.setAttribute("width", (650 * bar.value) / maximum);
+          rect.setAttribute("height", 18);
+          rect.setAttribute("fill", "#38bdf8");
+          svg.append(rect);
+          text(875, y + 15, bar.value.toLocaleString(undefined, { maximumFractionDigits: 1 }));
+        });
+        box.append(svg);
+      }
+      for (const plot of data.qc_plots || []) qcChart(plot);
       table(
         panel(
           sections.qc,
           "Coverage and read quality summary",
-          "Interval-weighted depth uses the reported intervals; overlapping intervals may contribute more than once. No assay pass/fail thresholds are inferred.",
+          "Average target coverage and read quality. These measurements are not an assay pass/fail assessment.",
         ),
         data.qc_summary || [],
         [
@@ -2534,11 +2613,7 @@
         "QC metrics",
       );
       table(
-        panel(
-          sections.qc,
-          "Lowest-coverage genes",
-          "Up to 20 genes ordered by interval-weighted primary alignment depth.",
-        ),
+        panel(sections.qc, "Lowest-coverage genes", "The 20 genes with the lowest average coverage."),
         data.coverage_genes || [],
         [
           { label: "Gene", value: (r) => r.gene },
@@ -2549,7 +2624,7 @@
       const q = collapsed(
         sections.qc,
         "All coverage intervals",
-        "Mean interval depth. Alignment-filter strata are separate measurements. These summaries do not establish per-base depth thresholds or a copy-number diagnosis.",
+        "Coverage is shown for each target region. The measurements use different alignment filters.",
       );
       table(
         q,
@@ -2569,7 +2644,7 @@
       panel(
         sections.targets,
         null,
-        "Focal CN/SV locus plots show read-depth and structural evidence at configured genes. They are contextual views, not independent copy-number calls. Absence from a prioritised event list is not a negative molecular finding.",
+        "These plots show coverage and structural variants around selected genes. Use them to examine possible copy-number changes or rearrangements; an empty plot does not rule out an alteration.",
       );
       function showCoverage(row) {
         const dialog = document.getElementById("evidence"),
@@ -2603,11 +2678,7 @@
         });
         content.replaceChildren(
           svg,
-          el(
-            "p",
-            "Mean interval coverage. Filtered measurements are separate strata, not components of a stacked total.",
-            "muted",
-          ),
+          el("p", "Average coverage in this region, shown separately for each alignment filter.", "muted"),
         );
         dialog.showModal();
       }
@@ -2638,6 +2709,7 @@
       function figurePanel(parent, item) {
         const box = el("figure"),
           img = el("img");
+        img.loading = "lazy";
         img.src = data.images[item.image_key];
         img.alt = item.name;
         img.style.width = "100%";
@@ -2653,21 +2725,15 @@
       for (const item of data.figures.filter((f) => f.reformatted)) figurePanel(cnOverview, item);
       const chromosomePlots = data.figures.filter((f) => f.category === "chromosomes");
       if (chromosomePlots.length) {
-        const box = panel(cnOverview, "Per-chromosome copy-number and structural context"),
-          select = el("select"),
-          display = el("div");
-        chromosomePlots.forEach((f, i) => {
-          const option = el("option", f.name);
-          option.value = i;
-          select.append(option);
-        });
-        select.setAttribute("aria-label", "Chromosome plot");
-        select.onchange = () => {
-          display.replaceChildren();
-          figurePanel(display, chromosomePlots[Number(select.value)]);
-        };
-        box.append(select, display);
-        select.onchange();
+        const box = panel(cnOverview, "Chromosome plots");
+        for (const chrom of [...Array.from({ length: 22 }, (_, i) => String(i + 1)), "X", "Y"]) {
+          const row = el("div", undefined, "chromosome-row");
+          row.append(el("h3", "Chromosome " + chrom));
+          const matches = chromosomePlots.filter((item) => item.name.match(/chr([0-9]+|X|Y)(?:_|\.)/)?.[1] === chrom);
+          if (matches.length) for (const item of matches) figurePanel(row, item);
+          else row.append(el("p", "No plot available in the workflow output.", "muted"));
+          box.append(row);
+        }
       }
       const galleries = {};
       for (const item of data.figures || []) {
@@ -2702,7 +2768,7 @@
       }
       const methods = panel(sections.methods, "References and policy");
       const detail = el("details"),
-        summary = el("summary", "Resource provenance");
+        summary = el("summary", "Reference details");
       detail.append(
         summary,
         el(
@@ -2722,7 +2788,7 @@
         ),
       );
       methods.append(detail);
-      const files = panel(sections.methods, "Complete exports");
+      const files = panel(sections.methods, "Downloadable files");
       for (const name of [
         "small_variants.tsv.gz",
         "structural_events.tsv.gz",

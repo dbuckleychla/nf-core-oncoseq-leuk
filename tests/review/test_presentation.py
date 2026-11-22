@@ -27,8 +27,11 @@ class PresentationTests(unittest.TestCase):
             self.assertEqual(data['coverage_genes'][0]['depth'], 25)
             cov = root/'coverage.tsv'; maf = root/'maf.tsv'; plot=root/'plot.svg'
             cov.write_text('chromosome\tbin_start\tbin_end\tn_reads\tn_reads_gc_adj\nchr2\t0\t1000000\t10\t12\nchr1\t0\t1000000\t8\t9\n')
-            maf.write_text('chrom\tpos\tref\talt\nchr1\t100\t15\t5\nchr2\t200\t1\t1\n')
+            maf.write_text('chrom\tpos\tref\talt\n1\t100\t15\t5\n2\t200\t1\t1\n')
             genome_plot(cov, maf, plot)
             ET.fromstring(plot.read_text())
             self.assertIn('depth ≥20', plot.read_text())
-            self.assertIn('not base depth', plot.read_text())
+            self.assertIn('BAF', plot.read_text())
+            cells = [e for e in ET.fromstring(plot.read_text()).iter() if e.tag.endswith('rect') and e.get('fill') == '#c084fc']
+            self.assertEqual(len(cells), 1)
+            self.assertTrue(data['qc_plots'])

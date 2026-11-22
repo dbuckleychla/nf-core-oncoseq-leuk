@@ -18,7 +18,7 @@ def enrich(data, root, results_root=None):
         rows = [r for r in data.get('coverage', []) if isinstance(r.get(key), (int, float)) and r['end'] > r['start']]
         total = sum(r['end'] - r['start'] for r in rows)
         if total:
-            summaries.append(dict(metric=key + ' interval-weighted mean depth', value=round(sum(r[key] * (r['end'] - r['start']) for r in rows) / total, 2)))
+            summaries.append(dict(metric='Mean target depth (' + {'primary': 'primary alignments', 'mapq60': 'high-confidence alignments', 'nofilter': 'all alignments'}[key] + ')', value=round(sum(r[key] * (r['end'] - r['start']) for r in rows) / total, 2)))
     for r in data.get('coverage', []):
         if r.get('gene') and isinstance(r.get('primary'), (int, float)):
             length = r['end'] - r['start']
@@ -28,7 +28,7 @@ def enrich(data, root, results_root=None):
     qc = data.get('nasvar', {}).get('qc', {})
     for key in ('reads_aligned', 'reads_on_target', 'target_coverage', 'median_read_quality_enriched'):
         if isinstance(qc.get(key), (int, float)):
-            summaries.append(dict(metric='NASVAR ' + key.replace('_', ' '), value=qc[key]))
+            summaries.append(dict(metric={'reads_aligned':'Aligned reads', 'reads_on_target':'On-target reads', 'target_coverage':'Mean target depth (NASVAR)', 'median_read_quality_enriched':'Median read quality (NASVAR)'}[key], value=qc[key]))
     cramino = root / 'qc.cramino.tsv'
     seqkit = [('input', root / 'qc.seqkit.tsv')]
     if results_root:
@@ -46,8 +46,9 @@ def enrich(data, root, results_root=None):
                 for row in csv.DictReader(stream, delimiter='\t'):
                     for key in ('num_seqs', 'sum_len', 'N50', 'AvgQual', 'Q20(%)', 'Q30(%)'):
                         if key in row:
-                            summaries.append(dict(metric='Basecalling ' + scope + ' ' + key, value=row[key]))
+                            summaries.append(dict(metric=scope.capitalize() + ' reads: ' + {'num_seqs':'count', 'sum_len':'total bases', 'N50':'N50 length (bases)', 'AvgQual':'mean Phred quality', 'Q20(%)':'bases at Q20 (%)', 'Q30(%)':'bases at Q30 (%)'}[key], value=row[key]))
     data['qc_summary'] = summaries
+    data['qc_plots'] = qc_plots(data, seqkit)
     arms = data.get('nasvar', {}).get('karyotype', {}).get('karyotype', {})
     if arms:
         path = root / 'presentation' / 'nasvar.copy_estimates.svg'
@@ -82,12 +83,12 @@ def genome_plot(coverage, maf, output):
             lengths[chrom] = max(lengths.get(chrom, 0), end)
     with open(maf) as stream:
         for row in csv.DictReader(stream, delimiter='\t'):
-            chrom = row['chrom']; pos = int(row['pos'])
+            chrom = 'chr' + row['chrom'].removeprefix('chr'); pos = int(row['pos'])
             ref, alt = int(row['ref']), int(row['alt'])
             if chrom not in lengths or ref + alt < 20:
                 continue
-            bucket = (chrom, pos // 1000000)
-            alleles[bucket][0] += min(ref, alt) / (ref + alt)
+            fraction = min(ref, alt) / (ref + alt)
+            bucket = (chrom, pos // 1000000, min(49, int(fraction * 100)))
             alleles[bucket][1] += 1
     chromosomes = sorted(lengths, key=chromosome_key)
     offsets = {}; total = 0
@@ -102,9 +103,9 @@ def genome_plot(coverage, maf, output):
     parts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 560"><rect width="1200" height="560" fill="#111827"/><g fill="#dbeafe" font-family="sans-serif" font-size="14">']
     def text(xp, yp, value):
         parts.append(f'<text x="{xp}" y="{yp}">{escape(str(value))}</text>')
-    text(30, 30, 'NASVAR genome overview — native measurements')
-    text(30, 60, 'Native GC-adjusted binned coverage signal (not base depth or inferred copy number)')
-    text(30, 295, 'Folded allele fraction: min(ref, alt) / total; depth ≥20; 1 Mb mean for display')
+    text(30, 30, 'Coverage and allele balance across the genome')
+    text(30, 60, 'Coverage (GC corrected)')
+    text(30, 295, 'Minor allele fraction (BAF): brighter bands contain more sites; depth ≥20')
     text(12, 90, round(maximum)); text(12, 245, round(lower)); text(35, 330, '0.5'); text(45, 470, 0)
     for chrom in chromosomes:
         xp = x(chrom, 0)
@@ -114,10 +115,16 @@ def genome_plot(coverage, maf, output):
         shown = max(lower, min(maximum, value))
         color = '#f59e0b' if shown != value else '#38bdf8'
         parts.append(f'<circle cx="{x(chrom,pos):.1f}" cy="{245-155*(shown-lower)/(maximum-lower):.1f}" r="1.7" fill="{color}"/>')
-    for (chrom, bucket), (value, count) in alleles.items():
-        parts.append(f'<circle cx="{x(chrom,(bucket+.5)*1000000):.1f}" cy="{470-280*value/count:.1f}" r="1.5" fill="#c084fc"/>')
-    text(30, 528, 'Coverage display: 1st–99th percentile range extended to zero; amber points are clipped outliers. Native values are unchanged.')
-    text(30, 549, 'Chromosome widths: observed coverage-bin extents. Display aggregation does not change native calls.')
+    import math
+    peak = max((count for _, count in alleles.values()), default=1)
+    for (chrom, bucket, fraction_bin), (_, count) in alleles.items():
+        opacity = .2 + .8 * math.log1p(count) / math.log1p(peak)
+        width = max(.7, 1060 * 1000000 / total)
+        parts.append(f'<rect x="{x(chrom,bucket*1000000):.1f}" y="{470-280*(fraction_bin+.5)/100:.1f}" width="{width:.2f}" height="2.8" fill="#c084fc" opacity="{opacity:.3f}"/>')
+    if not alleles:
+        text(300, 390, 'No allele-count sites meet the depth requirement')
+    text(30, 528, 'Coverage scale excludes extreme outliers; amber points mark values outside the displayed range.')
+    text(30, 549, 'Chromosomes use observed coverage limits. BAF bands group sites by 1 Mb and 0.01 allele fraction.')
     parts.append('</g></svg>')
     Path(output).write_text(''.join(parts))
 
@@ -127,9 +134,9 @@ def arm_plot(arms, output):
     ordered = sorted(((k, v) for k, v in arms.items() if isinstance(v, (int, float))),
                      key=lambda r: (chromosome_key(re.sub('[pq]$', '', r[0])), r[0][-1]))
     maximum = max(4, max((v for _, v in ordered), default=4))
-    parts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360"><rect width="1200" height="360" fill="#111827"/><g fill="#dbeafe" font-family="sans-serif" font-size="13"><text x="30" y="28">NASVAR native chromosome-arm copy estimates</text>']
+    parts = ['<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 360"><rect width="1200" height="360" fill="#111827"/><g fill="#dbeafe" font-family="sans-serif" font-size="13"><text x="30" y="28">Estimated copies by chromosome arm</text>']
     y = lambda v: 285 - 230 * v / maximum
-    parts.append(f'<path d="M60 {y(2):.1f}H1170" stroke="#f59e0b" stroke-dasharray="6 4"/><text x="60" y="345">Amber line: two copies. Native estimates are retained without reinterpretation.</text>')
+    parts.append(f'<path d="M60 {y(2):.1f}H1170" stroke="#f59e0b" stroke-dasharray="6 4"/><text x="60" y="345">Amber line: two copies. Estimates are reported by NASVAR.</text>')
     for index, (arm, copies) in enumerate(ordered):
         x = 75 + index * 1090 / max(1, len(ordered))
         width = 850 / max(1, len(ordered))
@@ -138,3 +145,31 @@ def arm_plot(arms, output):
         parts.append(f'<text x="30" y="{y(value):.1f}">{value}</text>')
     parts.append('</g></svg>')
     Path(output).write_text(''.join(parts))
+
+
+def qc_plots(data, seqkit):
+    plots = []
+    genes = data.get('coverage_genes', [])
+    if genes:
+        plots.append(dict(title='Lowest-coverage genes', unit='Mean depth', bars=[dict(label=r['gene'], value=r['depth']) for r in genes]))
+    depths = sorted(r['primary'] for r in data.get('coverage', []) if isinstance(r.get('primary'), (int, float)) and r['primary'] >= 0)
+    if depths:
+        limit = max(1, depths[int((len(depths)-1)*.99)])
+        counts = [0] * 12
+        for depth in depths:
+            counts[min(11, int(depth / limit * 12))] += 1
+        plots.append(dict(title='Target coverage distribution', unit='Number of intervals', bars=[dict(label=(f'≥{11*limit/12:.0f}×' if i == 11 else f'{i*limit/12:.0f}–{(i+1)*limit/12:.0f}×'), value=count) for i, count in enumerate(counts)]))
+    for key, title, unit in [('num_seqs', 'Read counts', 'Reads'), ('N50', 'Read length N50', 'Bases'), ('AvgQual', 'Mean read quality', 'Phred score')]:
+        bars = []
+        for scope, path in seqkit:
+            if path.exists():
+                with path.open() as stream:
+                    for index, row in enumerate(csv.DictReader(stream, delimiter='\t')):
+                        try:
+                            value = float(row[key])
+                        except (KeyError, ValueError):
+                            continue
+                        bars.append(dict(label=scope.capitalize() + (f' {index+1}' if index else ''), value=value))
+        if bars:
+            plots.append(dict(title=title, unit=unit, bars=bars))
+    return plots
