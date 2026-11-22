@@ -233,3 +233,17 @@ counts, hits, oversized-window fallbacks and accounted memory. The cache budget
 is 16 MiB per reference, and existing CPU/RAM requests remain unchanged.
 [Local benchmarks](benchmarks/review-local.md) show substantial clustered-case
 gains while documenting sparse-case overhead and limits on extrapolation.
+
+## Resume and input ordering
+
+Review artifacts are ordered canonically by kind and source URI before task
+submission. This prevents asynchronous upstream arrival order from changing
+the preparation manifest and its task hash on resume. Adopting the ordering
+fix can invalidate a previous noncanonical review preparation once; subsequent
+runs with unchanged inputs and parameters should reuse it. Downstream review
+tasks rerun when their preparation output location changes.
+
+The regression check reverses synthetic artifact arrivals and confirms that
+Nextflow reuses the same REVIEW_PREPARE hash with `-resume`. This ordering fix
+does not change resource requests or add parallel jobs. Let an already-running
+analysis finish rather than cancelling it solely to install this fix.

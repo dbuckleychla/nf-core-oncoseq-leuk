@@ -1,3 +1,4 @@
+include { orderedReviewArtifacts } from './input_order'
 include { REVIEW_PREPARE ; REVIEW_VEP ; REVIEW_COMPLETE ; REVIEW_FIGURES ; REVIEW_RENDER } from '../../../modules/local/review/prepare/main'
 
 def resolveReviewReferences(source) {
@@ -63,8 +64,8 @@ workflow REVIEW_REPORT {
     ch_samples = artifacts
         .groupTuple()
         .map { sample, kinds, files ->
-            def indexes = (0..<kinds.size()).findAll { index -> kinds[index] != 'sample' }
-            tuple([id: sample], indexes.collect { index -> kinds[index] }, indexes.collect { index -> files[index] })
+            def ordered = orderedReviewArtifacts(kinds, files)
+            tuple([id: sample], ordered[0], ordered[1])
         }
 
     REVIEW_PREPARE(ch_samples, paths, refs, panel, code)
