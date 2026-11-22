@@ -468,6 +468,32 @@
         font-weight: 600;
         overflow-wrap: anywhere;
       }
+      .caller-controls {
+        display: flex;
+        gap: 14px;
+        align-items: center;
+        flex-wrap: wrap;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        margin: 10px 0 14px;
+        padding: 12px;
+      }
+      .caller-controls legend {
+        font-weight: 650;
+      }
+      .caller-choice {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .caller-controls label {
+        white-space: nowrap;
+      }
+      .caller-controls p {
+        flex-basis: 100%;
+        margin: 0;
+        font-size: 13px;
+      }
     </style>
   </head>
   <body>
@@ -718,6 +744,22 @@
         buttons[i].click();
         e.preventDefault();
       };
+      function matchesCallers(row, options, rule) {
+        const selected = options.filter((c) => c.checked);
+        if (selected.length === 3 && selected.every((c) => c.mode === "ANY") && rule === "ANY") return true;
+        if (!selected.length) return false;
+        const matches = (option) => {
+          const evidence = (row.evidence || []).filter((e) => e.caller === option.caller);
+          const agreement = row.exact_pass_agreement && ["clairsto", "deepsomatic"].includes(option.caller);
+          return option.mode === "PASS"
+            ? evidence.some(
+                (e) =>
+                  e.filter === "PASS" || (Array.isArray(e.filter) && e.filter.length === 1 && e.filter[0] === "PASS"),
+              ) || agreement
+            : evidence.length > 0 || agreement;
+        };
+        return rule === "ALL" ? selected.every(matches) : selected.some(matches);
+      }
       function table(parent, rows, columns, title) {
         const box = el("div");
         const controls = el("div", undefined, "controls");
@@ -729,20 +771,82 @@
           next = el("button", "Next"),
           count = el("span", undefined, "muted");
         controls.append(search, prev, next, count);
-        let cosmicOnly = null;
+        box.append(controls);
+        let callerOptions = null,
+          matchRule = null;
         if (columns.some((c) => c.label === "COSMIC IDs")) {
-          const label = el("label"),
-            check = el("input");
-          check.type = "checkbox";
-          check.onchange = () => {
+          const callers = el("fieldset", undefined, "caller-controls");
+          callers.append(el("legend", "Called by"));
+          callerOptions = [];
+          for (const [key, name] of [
+            ["clair3", "Clair3"],
+            ["clairsto", "ClairS-TO"],
+            ["deepsomatic", "DeepSomatic"],
+          ]) {
+            const choice = el("div", undefined, "caller-choice"),
+              label = el("label"),
+              check = el("input"),
+              mode = el("select");
+            check.type = "checkbox";
+            check.checked = true;
+            check.dataset.callerFilter = key;
+            label.append(check, document.createTextNode(" " + name));
+            mode.dataset.callerMode = key;
+            mode.setAttribute("aria-label", name + " filter for " + title);
+            for (const [value, text] of [
+              ["ANY", "Any filter"],
+              ["PASS", "PASS only"],
+            ]) {
+              const option = el("option", text);
+              option.value = value;
+              mode.append(option);
+            }
+            callerOptions.push({ key, check, mode });
+            choice.append(label, mode);
+            callers.append(choice);
+            check.onchange = mode.onchange = () => {
+              page = 0;
+              draw();
+            };
+          }
+          const matchLabel = el("label", "Match ");
+          matchRule = el("select");
+          matchRule.dataset.callerMatch = "";
+          matchRule.setAttribute("aria-label", "Caller matching for " + title);
+          for (const [value, text] of [
+            ["ANY", "At least one checked caller"],
+            ["ALL", "Every checked caller"],
+          ]) {
+            const option = el("option", text);
+            option.value = value;
+            matchRule.append(option);
+          }
+          matchLabel.append(matchRule);
+          callers.append(matchLabel);
+          matchRule.onchange = () => {
             page = 0;
             draw();
           };
-          label.append(check, document.createTextNode(" COSMIC matches only"));
-          controls.append(label);
-          cosmicOnly = check;
+          const reset = el("button", "Reset caller filters");
+          reset.onclick = () => {
+            for (const c of callerOptions) {
+              c.check.checked = true;
+              c.mode.value = "ANY";
+            }
+            matchRule.value = "ANY";
+            page = 0;
+            draw();
+          };
+          callers.append(reset);
+          callers.append(
+            el(
+              "p",
+              "Filters apply to the variants already selected for review; they do not add other VCF records.",
+              "muted",
+            ),
+          );
+          box.append(callers);
         }
-        box.append(controls);
         const wrap = el("div", undefined, "table-scroll"),
           t = el("table"),
           head = el("thead"),
@@ -785,7 +889,12 @@
         function draw() {
           let selected = rows.filter(
             (r) =>
-              (!cosmicOnly?.checked || (r.evidence || []).some((e) => e.cosmic?.status === "matched")) &&
+              (!callerOptions ||
+                matchesCallers(
+                  r,
+                  callerOptions.map((c) => ({ caller: c.key, checked: c.check.checked, mode: c.mode.value })),
+                  matchRule.value,
+                )) &&
               JSON.stringify(r).toLowerCase().includes(search.value.toLowerCase()),
           );
           if (sort >= 0)
@@ -1147,8 +1256,8 @@
         { label: "Details", detail: true },
       ];
       for (const [group, title] of [
-        ["findings", "Prioritised findings"],
-        ["coding", "Additional coding review"],
+        ["findings", "High priority small variants"],
+        ["coding", "Additional potentially pathogenic small variants"],
         ["supporting", "Supporting small variants"],
         ["consensus_review", "Additional variants found by both callers"],
       ]) {
