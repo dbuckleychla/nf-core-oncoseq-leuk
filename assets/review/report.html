@@ -171,7 +171,8 @@
         border-bottom: 1px solid var(--line);
       }
       td {
-        overflow-wrap: anywhere;
+        overflow-wrap: normal;
+        word-break: normal;
       }
       th button {
         border: 0;
@@ -445,6 +446,28 @@
         background: #34383e;
         border-color: #676d76;
       }
+      button,
+      summary,
+      .filter-badge {
+        word-break: normal;
+        overflow-wrap: normal;
+        white-space: nowrap;
+      }
+      .clinvar-assertion {
+        padding: 12px 0;
+        border-bottom: 1px solid var(--line);
+      }
+      .clinvar-assertion h4 {
+        margin: 8px 0 4px;
+      }
+      .clinvar-assertion ul {
+        margin: 4px 0 10px;
+        padding-left: 22px;
+      }
+      .variant-change {
+        font-weight: 600;
+        overflow-wrap: anywhere;
+      }
     </style>
   </head>
   <body>
@@ -563,41 +586,52 @@
         content.replaceChildren();
         document.getElementById("dialog-title").textContent = title;
         if (value.coordinates) {
-          content.append(el("h3", value.coordinates.join(":")));
-          for (const selection of value.selections || []) {
-            content.append(
-              el(
-                "p",
-                (selection.gene || "") + " | " + (selection.hgvsp || selection.hgvsc || "") + " | " + selection.reason,
-              ),
-            );
-            if (selection.gene_context?.warnings?.length)
-              content.append(el("p", selection.gene_context.warnings.join("; "), "warning"));
-            if (selection.clinvar?.length)
-              table(
-                content,
-                selection.clinvar,
-                [
-                  { label: "ClinVar assertion", value: (r) => JSON.stringify(r.CLNSIG) },
-                  { label: "Review status", value: (r) => JSON.stringify(r.CLNREVSTAT) },
-                  { label: "Reported conditions", value: (r) => JSON.stringify(r.CLNDN || null) },
-                ],
-                "ClinVar assertions",
-              );
-          }
+          document.getElementById("dialog-title").textContent = "Variant evidence";
+          const selections = value.selections || [],
+            genes = [...new Set(selections.map((s) => s.gene).filter(Boolean))];
+          content.append(el("h3", (genes.join(", ") || "Variant") + " · " + value.coordinates.join(":")));
+          const changes = [
+            ...new Set(
+              selections
+                .map((s) => s.hgvsp || s.hgvsc)
+                .filter(Boolean)
+                .map(displayChange),
+            ),
+          ];
+          if (changes.length) content.append(el("p", changes.join("; "), "variant-change"));
+          const reasons = [
+            ...new Set(
+              selections
+                .map((s) => s.reason)
+                .filter(Boolean)
+                .map((reason) => (reason === "ClinVar P/LP" ? "ClinVar pathogenic / likely pathogenic" : reason)),
+            ),
+          ];
+          const reasonsBox = panel(content, "Why this variant is shown");
+          for (const reason of reasons) reasonsBox.append(el("p", reason));
+          if (value.exact_pass_agreement)
+            reasonsBox.append(el("p", "ClairS-TO and DeepSomatic both passed this exact variant."));
+          for (const warning of [...new Set(selections.flatMap((s) => s.gene_context?.warnings || []))])
+            reasonsBox.append(el("p", warning, "warning"));
+          const clinical = panel(content, "ClinVar");
+          const assertions = clinvar(value);
+          if (!assertions.length) clinical.append(el("p", "No ClinVar assertion available.", "muted"));
+          for (const assertion of assertions) clinical.append(clinvarAssertion(assertion));
           const evidence = (value.evidence || []).filter((r) => r.caller !== "consensus");
-          table(
-            content,
-            evidence,
-            [
-              { label: "Caller", value: (r) => r.caller },
-              { label: "Filter", value: (r) => r.filter },
-              { label: "Depth", value: (r) => r.sample_evidence[r.caller]?.depth },
-              { label: "Allele fraction", value: (r) => r.sample_evidence[r.caller]?.af },
-              { label: "ALT support", value: (r) => r.sample_evidence[r.caller]?.supporting_reads },
-            ],
-            "native caller evidence",
-          );
+          const callerNames = { clair3: "Clair3", clairsto: "ClairS-TO", deepsomatic: "DeepSomatic" };
+          simpleTable(panel(content, "Caller support"), evidence, [
+            { label: "Caller", value: (r) => callerNames[r.caller] || r.caller },
+            { label: "Status", render: (r) => filterBadge(Array.isArray(r.filter) ? r.filter.join(", ") : r.filter) },
+            {
+              label: "Variant %",
+              value: (r) => {
+                const af = r.sample_evidence?.[r.caller]?.af;
+                return typeof af === "number" ? (af * 100).toFixed(1) + "%" : "Not available";
+              },
+            },
+            { label: "Total reads", value: (r) => r.sample_evidence?.[r.caller]?.depth },
+            { label: "Variant reads", value: (r) => r.sample_evidence?.[r.caller]?.supporting_reads },
+          ]);
           const cosmicRows = [];
           for (const row of evidence)
             for (const source of row.cosmic?.sources || [])
@@ -610,21 +644,44 @@
                     id: recurrence.identifier,
                     values: recurrence.values.join(" / "),
                     inconsistent: recurrence.inconsistent,
-                    tier: [...new Set(source.observations.map((r) => r.info.TIER).filter(Boolean))].join(", "),
+                    tier: [...new Set((source.observations || []).map((r) => r.info?.TIER).filter(Boolean))].join(", "),
                   });
               }
-          if (cosmicRows.length)
-            table(
-              content,
-              cosmicRows,
-              [
-                { label: "COSMIC ID", value: (r) => r.id },
-                { label: "Catalogue", value: (r) => r.source },
-                { label: "Recurrence values", value: (r) => r.values + (r.inconsistent ? " (inconsistent)" : "") },
-                { label: "Gene Census tier", value: (r) => r.tier || "Not available" },
-              ],
-              "COSMIC annotations",
+          const cosmicBox = panel(content, "COSMIC");
+          if (cosmicRows.length) {
+            simpleTable(cosmicBox, cosmicRows, [
+              { label: "COSMIC ID", value: (r) => r.id },
+              { label: "Catalogue", value: (r) => r.source },
+              {
+                label: "Reported recurrence",
+                value: (r) => r.values + (r.inconsistent ? " (conflicting values)" : ""),
+              },
+              { label: "Gene Census tier", value: (r) => r.tier || "Not available" },
+            ]);
+            cosmicBox.append(
+              el(
+                "p",
+                "Recurrence values describe catalogue reports, not this sample’s read support. Gene Census tier describes the gene, not the pathogenicity of this variant.",
+                "muted",
+              ),
             );
+          } else cosmicBox.append(el("p", cosmic(value), "muted"));
+          const transcriptRows = [
+            ...new Map(
+              selections.map((s) => [JSON.stringify([s.gene, s.transcript, s.hgvsc, s.hgvsp, s.consequence]), s]),
+            ).values(),
+          ];
+          if (transcriptRows.length) {
+            const transcripts = el("details");
+            transcripts.append(el("summary", "Transcript annotations (" + transcriptRows.length + ")"));
+            simpleTable(transcripts, transcriptRows, [
+              { label: "Gene", value: (r) => r.gene },
+              { label: "Transcript", value: (r) => r.transcript },
+              { label: "Change", value: (r) => decodeAnnotation(r.hgvsp || r.hgvsc || "") },
+              { label: "Effect", value: (r) => annotationText(r.consequence) },
+            ]);
+            content.append(transcripts);
+          }
         } else if (value.evidence && value.callers) {
           table(
             content,
@@ -934,38 +991,98 @@
           ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Not configured")
         );
       }
+      function decodeAnnotation(value) {
+        try {
+          return decodeURIComponent(value);
+        } catch {
+          return value;
+        }
+      }
+      function displayChange(value) {
+        return decodeAnnotation(value).replace(/^[^:]+:(?=[pcgmn]\.)/, "");
+      }
       function clinvar(r) {
         const assertions = [
-          ...r.selections.flatMap((s) => s.clinvar || []),
-          ...r.evidence.flatMap((e) => e.clinvar || []),
+          ...(r.selections || []).flatMap((s) => s.clinvar || []),
+          ...(r.evidence || []).flatMap((e) => e.clinvar || []),
         ];
-        return [...new Map(assertions.map((a) => [JSON.stringify(a), a])).values()];
+        const key = (a) =>
+          JSON.stringify(
+            Object.keys(a)
+              .sort()
+              .map((k) => [k, a[k]]),
+          );
+        return [...new Map(assertions.map((a) => [key(a), a])).values()];
       }
       function annotationText(value) {
-        return (Array.isArray(value) ? value.join("; ") : value || "Not available").replaceAll("_", " ");
+        const text = Array.isArray(value) ? value.join(", ") : value;
+        return text === null || text === undefined || text === ""
+          ? "Not available"
+          : String(text).replaceAll("_", " ").replace(/\s+/g, " ").trim();
+      }
+      function clinvarAssertion(a) {
+        const article = el("article", undefined, "clinvar-assertion");
+        article.append(
+          el("strong", annotationText(a.CLNSIG)),
+          el("p", "Review status: " + annotationText(a.CLNREVSTAT)),
+        );
+        article.append(el("h4", "Reported conditions"));
+        const conditions = annotationText(a.CLNDN)
+            .split("|")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          list = el("ul");
+        for (const condition of [...new Set(conditions)])
+          list.append(el("li", condition === "not provided" ? "Condition not provided" : condition));
+        article.append(list);
+        if (a.CLNSIGCONF) article.append(el("p", "Conflicting assertions: " + annotationText(a.CLNSIGCONF)));
+        if (/^\d+$/.test(String(a.record_id))) {
+          const link = el("a", "ClinVar record " + a.record_id);
+          link.href = "https://www.ncbi.nlm.nih.gov/clinvar/variation/" + a.record_id + "/";
+          article.append(link);
+        }
+        return article;
       }
       function clinvarCell(r) {
         const box = el("div"),
           assertions = clinvar(r);
         if (!assertions.length) box.append(el("span", "No ClinVar assertion"));
         for (const a of assertions) {
-          const article = el("article");
-          article.append(el("strong", annotationText(a.CLNSIG)), el("p", annotationText(a.CLNREVSTAT), "muted"));
+          box.append(el("strong", annotationText(a.CLNSIG)), el("p", annotationText(a.CLNREVSTAT), "muted"));
           const d = el("details");
-          d.append(
-            el("summary", "Conditions and assertion details"),
-            el("p", annotationText(a.CLNDN)),
-            el("p", "Conflicts: " + annotationText(a.CLNSIGCONF)),
-          );
-          if (/^\d+$/.test(String(a.record_id))) {
-            const link = el("a", "ClinVar " + a.record_id);
-            link.href = "https://www.ncbi.nlm.nih.gov/clinvar/variation/" + a.record_id + "/";
-            d.append(link);
-          }
-          article.append(d);
-          box.append(article);
+          d.append(el("summary", "Assertion details"), clinvarAssertion(a));
+          box.append(d);
         }
         return box;
+      }
+      function simpleTable(parent, rows, columns) {
+        const wrap = el("div", undefined, "table-scroll"),
+          t = el("table"),
+          head = el("thead"),
+          tr = el("tr"),
+          body = el("tbody");
+        for (const c of columns) tr.append(el("th", c.label));
+        head.append(tr);
+        t.append(head, body);
+        for (const row of rows) {
+          const line = el("tr");
+          for (const c of columns) {
+            const cell = el("td");
+            if (c.render) cell.append(c.render(row));
+            else cell.textContent = fmt(c.value(row));
+            line.append(cell);
+          }
+          body.append(line);
+        }
+        if (!rows.length) {
+          const row = el("tr"),
+            cell = el("td", "No caller evidence available.", "muted");
+          cell.colSpan = columns.length;
+          row.append(cell);
+          body.append(row);
+        }
+        wrap.append(t);
+        parent.append(wrap);
       }
       function filterBadge(status) {
         const missing = !status || status === "NO CALL" || status === "NoCall";
@@ -979,7 +1096,7 @@
         { label: "Gene", className: "gene-column", value: (r) => choice(r).gene },
         {
           label: "Change",
-          value: (r) => decodeURIComponent(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
+          value: (r) => displayChange(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
         },
         { label: "Reason for review", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
         {
