@@ -1,0 +1,15 @@
+{
+    "schema_version": 1,
+    "sample": "SYNTHETIC",
+    "assembly": "GRCh38",
+    "figures": [{ "category": "targets", "path": "figures/native.svg", "name": "Synthetic native plot" }],
+    "warnings": [],
+    "small_variants": { "records": [] },
+    "structural_events": [],
+    "classification": [],
+    "coverage": [],
+    "cnv": [],
+    "nasvar": {},
+    "references": {},
+    "statuses": {}
+}

@@ -1,0 +1,31 @@
+nextflow_process {
+    name "Review rendering with separately staged generated figures"
+    script "modules/local/review/prepare/main.nf"
+    process "REVIEW_RENDER"
+
+    test("Embed native and generated figures from their respective input directories") {
+        when {
+            process {
+                """
+                input[0] = [[id: 'SYNTHETIC'],
+                    file('${projectDir}/test_data/review/render_data'),
+                    file('${projectDir}/test_data/review/render_figures')]
+                input[1] = file('${projectDir}/assets/review/report.html')
+                input[2] = 'fixture-code'
+                """
+            }
+        }
+        then {
+            assert process.success
+            def html = file(process.out.html[0][1]).text
+            def match = html =~ /(?s)<script type="application\/json" id="review-data">(.*?)<\/script>/
+            assert match.find()
+            def data = new groovy.json.JsonSlurperClassic().parseText(match.group(1))
+            assert data.figures.size() == 2
+            assert data.images.size() == 2
+            assert data.images.values().any { it.startsWith('data:image/svg+xml;base64,') }
+            assert data.images.values().any { it.startsWith('data:image/webp;base64,') }
+            assert data.figures.find { it.generated }.name == 'Synthetic generated junction'
+        }
+    }
+}

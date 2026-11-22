@@ -125,7 +125,8 @@ process REVIEW_RENDER {
 
     script:
     def output = reviewShellQuote("${meta.id}.review.html")
-    def additional = figures ? "--figures ${reviewShellQuote(figures)}" : ''
+    // Anchor generated figures to the task directory, not the review JSON parent.
+    def additional = figures ? "--figures \"\$(pwd)/\"${reviewShellQuote(figures)}" : ''
     """
     review_report.py render --input ${reviewShellQuote("${data}/review.json")} --output ${output} --template ${reviewShellQuote(template)} ${additional}
     """

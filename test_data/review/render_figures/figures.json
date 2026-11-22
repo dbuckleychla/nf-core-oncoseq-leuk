@@ -1,0 +1,9 @@
+[
+    {
+        "category": "fusions",
+        "path": "generated.png",
+        "generated": true,
+        "event_id": "SYNTHETIC_EVENT",
+        "name": "Synthetic generated junction"
+    }
+]
