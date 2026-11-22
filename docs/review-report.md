@@ -218,3 +218,18 @@ The implementation is tested with synthetic references and native record
 fixtures. Production acceptance requires the staged reference manifest and
 representative runs. Do not use the synthetic `test_data/review` references for
 analysis. The design and evaluation are in [report-redesign-plan.md](report-redesign-plan.md).
+
+## Completion performance and progress
+
+Review completion uses bounded adaptive exact-allele reference caches and
+indexed structural-junction matching. Unknown orientation remains unknown,
+including when a VCF omits the optional STRANDS header. Scientific selection,
+native evidence and output contracts are preserved. No files are split and no
+additional parallel jobs or tool threads are introduced.
+
+Count-only logs identify annotation, export and structural stages; annotation
+and export counters appear every 10,000 records. Cache statistics report fetch
+counts, hits, oversized-window fallbacks and accounted memory. The cache budget
+is 16 MiB per reference, and existing CPU/RAM requests remain unchanged.
+[Local benchmarks](benchmarks/review-local.md) show substantial clustered-case
+gains while documenting sparse-case overhead and limits on extrapolation.

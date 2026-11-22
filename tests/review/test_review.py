@@ -14,6 +14,8 @@ from structural_consensus import consolidate, junction
 from render import render
 from annotate_structural_variants import endpoint
 from resources import validate, prepare_vcf
+from indexed_reference import IndexedReference
+from structural_consensus import compatibility_edges, compatible
 from adapters import nasvar_events
 from structural_consensus import support
 from annotate_structural_variants import annotate as annotate_sv
@@ -23,6 +25,47 @@ import sqlite3
 
 
 class ReviewTests(unittest.TestCase):
+    def test_cached_lookups_match_direct_queries_and_respect_budget(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = make(Path(tmp) / 'refs')
+            path = root / 'cosmic.vcf.gz'
+            for budget in (16 * 1024 * 1024, 1):
+                cache = IndexedReference(path, window=128, budget_bytes=budget, max_windows=1)
+                with pysam.VariantFile(str(path)) as direct:
+                    queries = [(149, 'A', 'C'), (149, 'A', 'C'), (199, 'A', 'T'),
+                               (149, 'A', 'C'), (899, 'A', 'G'), (149, 'A', 'G')]
+                    for start, ref, alt in queries:
+                        query = direct.header.new_record(contig='chr1', start=start, alleles=(ref, alt))
+                        expected = [str(r) for r in direct.fetch('chr1', start, start + 1)
+                                    if r.pos == query.pos and r.ref == ref and r.alts == (alt,)]
+                        self.assertEqual([str(r) for r in cache.exact(query)], expected)
+                        self.assertLessEqual(cache.cached_bytes, budget)
+                    self.assertEqual(cache.exact(direct.header.new_record(contig='chr2', start=9, alleles=('A', 'C'))), [])
+                if budget == 1:
+                    self.assertGreater(cache.oversized_windows, 0)
+                cache.close()
+
+    def test_indexed_junction_graph_matches_all_pairs(self):
+        import random
+        rng = random.Random(217)
+        rows = []
+        for i in range(120):
+            rows.append(dict(id='SYNTHETIC_' + str(i), sample='SYNTHETIC',
+                             caller=rng.choice(['sniffles', 'severus', 'NASVAR']),
+                             chrom=rng.choice(['chr1', 'chr2']), pos=rng.randrange(100, 600),
+                             partner=dict(chrom=rng.choice(['chr1', 'chr2']), pos=rng.randrange(100, 600),
+                                          local_side=rng.choice(['left', 'right', None]),
+                                          remote_side=rng.choice(['left', 'right', None])),
+                             evidence=dict(info=dict(SVTYPE=rng.choice(['BND', 'TRA', 'DEL', 'DUP:TANDEM'])), format={})))
+        for distance in (0, 50, 100):
+            expected = {i: set() for i in range(len(rows))}
+            for i, row in enumerate(rows):
+                for j in range(i + 1, len(rows)):
+                    if compatible(row, rows[j], distance):
+                        expected[i].add(j)
+                        expected[j].add(i)
+            self.assertEqual(compatibility_edges(rows, distance), expected)
+
     def test_symbolic_sv_without_strands_header(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = make(Path(tmp) / 'refs')

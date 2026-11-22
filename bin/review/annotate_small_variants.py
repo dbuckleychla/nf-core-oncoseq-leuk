@@ -13,6 +13,8 @@ import pysam
 import pysam.bcftools
 from somatic_consensus import target_intervals, in_targets
 from check_reference import contigs
+from indexed_reference import IndexedReference
+from progress import progress
 
 
 def key(rec):
@@ -75,6 +77,7 @@ def prepare(sources, fasta, targets, output):
 
 
 def exact_records(vcf, rec):
+    if isinstance(vcf, IndexedReference):return vcf.exact(rec)
     if rec.contig not in vcf.header.contigs:return []
     return [r for r in vcf.fetch(rec.contig,rec.start,rec.start+1) if r.pos==rec.pos and r.ref==rec.ref and r.alts==rec.alts]
 
@@ -149,11 +152,14 @@ def finish(catalog, vep, resources, sample, output, panel=None):
     from report_prioritization import small_candidate, consensus_candidate, sample_evidence, POLICY_VERSION, bound_candidates
     cat=Path(catalog);out=Path(output);out.mkdir(parents=True,exist_ok=True)
     db=sqlite3.connect(cat/'catalog.sqlite')
-    handles={k:pysam.VariantFile(v) for k,v in resources.items() if k in ['gnomad_genome','gnomad_exome','clinvar','clinvar_common_pathogenic'] or k.startswith('cosmic')}
+    handles={k:IndexedReference(v) for k,v in resources.items() if k in ['gnomad_genome','gnomad_exome','clinvar','clinvar_common_pathogenic'] or k.startswith('cosmic')}
     for name,h in handles.items():
         required=['GENE','TRANSCRIPT'] if name.startswith('cosmic') else ['AC','AN'] if name.startswith('gnomad') else ['clinvar_cmn_path'] if name=='clinvar_common_pathogenic' else ['CLNSIG','CLNREVSTAT']
         if any(k not in h.header.info for k in required):raise ValueError('Missing annotation fields in '+name)
     validate_annotation_contigs(handles,[r[0] for r in db.execute('SELECT DISTINCT chrom FROM alleles WHERE candidate=1')])
+    expected = db.execute('SELECT COUNT(*) FROM alleles WHERE candidate=1').fetchone()[0]
+    processed = 0
+    progress(f'Reference annotation started: {expected} unique alleles')
     with open(vep,'rb') as vep_stream,pysam.VariantFile(vep_stream) as vf:
         if 'CSQ' not in vf.header.info:raise ValueError('VEP did not produce CSQ header')
         fields=vf.header.info['CSQ'].description.split('Format: ')[-1].split('|')
@@ -169,11 +175,16 @@ def finish(catalog, vep, resources, sample, output, panel=None):
             ann['cosmic']=cosmic_annotate(handles,rec)
             ann['review_group']=review_group(ann)
             db.execute('UPDATE alleles SET annotation=? WHERE key=?',(json.dumps(ann),k))
+            processed += 1
+            if processed % 10000 == 0:progress(f'Reference annotation: {processed}/{expected}')
     db.commit()
     if db.execute('SELECT COUNT(*) FROM alleles WHERE candidate=1 AND annotation IS NULL').fetchone()[0]:raise ValueError('VEP omitted candidate alleles')
+    progress(f'Reference annotation finished: {processed}/{expected}')
+    for name, handle in handles.items():progress('Cache ' + name + ': ' + json.dumps(handle.statistics(), sort_keys=True))
     sources=json.loads((cat/'sources.json').read_text())
     for i,source in enumerate(sources):
         caller=source['caller'];kind=source['kind'];dest=out/caller;dest.mkdir(exist_ok=True)
+        progress('Writing annotated exports: ' + caller)
         prefix=f'{sample}.{caller}.{kind}.targets'
         header=pysam.VariantFile(cat/f'{i}.header.vcf').header.copy()
         header.add_record(csq_header)
@@ -212,6 +223,7 @@ def finish(catalog, vep, resources, sample, output, panel=None):
                             if original not in native:native.append(original)
                     writer.writerow([k,caller,kind,','.join(rec.filter) or '.',pop['status'],serialized,text.strip(),json.dumps(native)])
                     total+=1
+                    if total % 10000 == 0:progress(f'Export {caller}: {total} records')
                     if caller=='consensus':
                         selected_review=consensus_candidate(ann,list(rec.filter),panel)
                         if selected_review:
@@ -237,6 +249,7 @@ def finish(catalog, vep, resources, sample, output, panel=None):
         (dest/(prefix+'.annotation.json')).write_text(json.dumps(summary,indent=2)+'\n')
     for h in handles.values():h.close()
     db.close()
+    progress('Consolidating small-variant review evidence')
     from small_variant_review import build
     build(sample,list(out.glob('*/*.annotation.tsv.gz')),out/'annotation'/(sample+'.small_variant_review.json'),panel_path)
 

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Local synthetic benchmarks of unchanged review code versus contained prototypes.
+"""Local synthetic benchmarks of direct/all-pairs baselines versus review optimizations.
 
-No clinical inputs or AWS calls. Candidate implementations live only here;
-production review code and resource requests are not modified.
+No clinical inputs or AWS calls. Includes production adaptive caching and
+indexed consensus, plus fixed-window prototypes. Resource requests are unchanged.
 """
 import argparse
 from collections import OrderedDict, defaultdict
@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin/review'))
 import pysam
 import annotate_small_variants as small
 import structural_consensus as structural
+from indexed_reference import IndexedReference
 
 
 class WindowLookup:
@@ -73,14 +74,24 @@ def indexed_edges(rows, distance):
     return edges
 
 
-def indexed_consolidate():
+def all_pairs_edges(rows, distance):
+    edges = {i: set() for i in range(len(rows))}
+    for i, row in enumerate(rows):
+        for j in range(i + 1, len(rows)):
+            if structural.compatible(row, rows[j], distance):
+                edges[i].add(j)
+                edges[j].add(i)
+    return edges
+
+
+def indexed_consolidate(builder=indexed_edges):
     # Reuse the exact existing event/ambiguity/selection code. Replace only the
     # all-pairs edge-building block in the trusted repository function source.
     source = inspect.getsource(structural.consolidate)
     start = source.index('    edges = ')
     end = source.index('    seen, events = ', start)
     source = source[:start] + '    edges = indexed_edges(rows, distance)\n' + source[end:]
-    namespace = dict(vars(structural), indexed_edges=indexed_edges)
+    namespace = dict(vars(structural), indexed_edges=builder)
     exec(compile(source, '<synthetic-indexed-consensus-prototype>', 'exec'), namespace)
     return namespace['consolidate']
 
@@ -115,7 +126,7 @@ def make_vcf(root, records):
 
 def lookup_worker(path, pattern, count, window):
     with pysam.VariantFile(str(path)) as handle:
-        cache = WindowLookup(handle, window) if window else None
+        cache = IndexedReference(path) if window == 'production' else WindowLookup(handle, window) if window else None
         digest = hashlib.sha256()
         found = 0
         began = time.perf_counter()
@@ -130,7 +141,7 @@ def lookup_worker(path, pattern, count, window):
         elapsed = time.perf_counter() - began
         peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
         return dict(seconds=elapsed, queries=count, matched_records=found,
-                    indexed_fetches=cache.fetches if cache else count,
+                    indexed_fetches=(cache.direct_fetches + cache.window_fetches) if isinstance(cache, IndexedReference) else cache.fetches if cache else count,
                     logical_digest=digest.hexdigest(),
                     peak_rss_mib=peak / (1024 * 1024 if sys.platform == 'darwin' else 1024))
 
@@ -155,7 +166,7 @@ def make_junctions(count, dense=False):
 
 def structural_worker(count, method, dense):
     rows = make_junctions(count, dense)
-    function = structural.consolidate if method == 'baseline' else indexed_consolidate()
+    function = indexed_consolidate(all_pairs_edges) if method == 'baseline' else structural.consolidate if method == 'production' else indexed_consolidate()
     began = time.perf_counter()
     events = function(rows, {('GENE_A', 'GENE_B')}, 100)
     elapsed = time.perf_counter() - began
@@ -175,13 +186,13 @@ def invoke(*args):
 def benchmark(output):
     report = dict(environment=dict(python=platform.python_version(), machine=platform.machine(),
                                    system=platform.system(), pysam=pysam.__version__),
-                  synthetic=True, production_changed=False, lookup=[], junctions=[])
+                  synthetic=True, production_changed=True, lookup=[], junctions=[])
     with tempfile.TemporaryDirectory(prefix='oncoseq-synthetic-benchmark-') as tmp:
         path = make_vcf(Path(tmp), 30000)
         report['reference_compressed_mib'] = path.stat().st_size / 2**20
         for pattern, count in [('dense', 20000), ('sparse', 300)]:
             expected = None
-            for window in [0, 128, 512, 1024]:
+            for window in [0, 128, 512, 1024, 'production']:
                 # Each case gets its own process for comparable peak RSS.
                 result = invoke('lookup', path, pattern, count, window)
                 result.update(pattern=pattern, window_bp=window)
@@ -195,7 +206,7 @@ def benchmark(output):
                       'seconds;', round(result['speedup'], 2), 'x', flush=True)
         for count, dense in [(600, False), (1800, False), (3600, False), (180, True)]:
             baseline = invoke('junction', count, 'baseline', int(dense))
-            candidate = invoke('junction', count, 'indexed', int(dense))
+            candidate = invoke('junction', count, 'production', int(dense))
             assert baseline['logical_digest'] == candidate['logical_digest'], 'Consensus decisions changed'
             row = dict(count=count, dense_collisions=dense, baseline=baseline, indexed=candidate,
                        speedup=baseline['seconds'] / candidate['seconds'])
@@ -210,7 +221,7 @@ def benchmark(output):
 if __name__ == '__main__':
     if len(sys.argv) > 1 and sys.argv[1] == '--worker':
         kind, *args = sys.argv[2:]
-        result = (lookup_worker(Path(args[0]), args[1], int(args[2]), int(args[3]))
+        result = (lookup_worker(Path(args[0]), args[1], int(args[2]), args[3] if args[3] == 'production' else int(args[3]))
                   if kind == 'lookup' else structural_worker(int(args[0]), args[1], bool(int(args[2]))))
         print(json.dumps(result))
     else:

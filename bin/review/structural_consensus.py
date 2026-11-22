@@ -50,16 +50,35 @@ def compatible(a, b, distance):
                         for x, y in zip(ja[1:], jb[1:])))
 
 
+def compatibility_edges(rows, distance):
+    """Build the same graph using type/orientation partitions and a position window."""
+    from collections import defaultdict
+    groups = defaultdict(list)
+    edges = {i: set() for i in range(len(rows))}
+    for index, row in enumerate(rows):
+        value = junction(row)
+        if value:
+            kind, left, right = value
+            groups[(kind, left[0], left[2], right[0], right[2])].append((left[1], right[1], index))
+    for values in groups.values():
+        values.sort()
+        first = 0
+        for current, (left, right, index) in enumerate(values):
+            while first < current and left - values[first][0] > distance:
+                first += 1
+            for previous in range(first, current):
+                _, other_right, other = values[previous]
+                if rows[index]['caller'] != rows[other]['caller'] and abs(right - other_right) <= distance:
+                    edges[index].add(other)
+                    edges[other].add(index)
+    return edges
+
+
 def consolidate(rows, known_pairs, distance=100):
     if distance < 0:
         raise ValueError('Fusion distance must be nonnegative')
     rows = sorted(rows, key=lambda r: (str(junction(r)), r['caller'], r['id']))
-    edges = {i: set() for i in range(len(rows))}
-    for i, a in enumerate(rows):
-        for j in range(i + 1, len(rows)):
-            if compatible(a, rows[j], distance):
-                edges[i].add(j)
-                edges[j].add(i)
+    edges = compatibility_edges(rows, distance)
     seen, events = set(), []
     for i in range(len(rows)):
         if i in seen:

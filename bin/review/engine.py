@@ -15,6 +15,7 @@ from report_prioritization import fusion_pairs, POLICY_VERSION
 from resources import validate
 from structural_consensus import consolidate
 from transcript_selection import panel_provenance
+from progress import progress
 
 
 def write_json(path, value):
@@ -58,6 +59,7 @@ def prepare(sample, inputs, references, panel, output, payload):
 
 def complete(sample, catalogue, payload, vep, references, panel, known_fusions, distance, output, image_lock=None, code_digest=None):
     csv.field_size_limit(100_000_000)
+    progress('Review completion started; validating reference files')
     refs, manifest = validate(references)
     out = Path(output)
     out.mkdir(parents=True, exist_ok=True)
@@ -74,6 +76,7 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
     from breakpoint_annotation import gene_index
     gene_path=out/'.genes.sqlite'
     gene_db=sqlite3.connect(gene_path)
+    progress('Building structural gene index')
     gene_audit=gene_index(refs['gff'],refs['fai'],gene_db)
     gene_db.close()
     statuses = {}
@@ -84,6 +87,7 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
         elif kind.startswith('sv:'):
             caller = kind.split(':')[1]
             folder = out / caller
+            progress('Annotating structural source: ' + caller)
             annotate_sv(sample, caller, path, refs['gff'], refs['fai'], folder, (gene_path,gene_audit))
             for f in folder.glob('*.evidence.tsv.gz'):
                 with gzip.open(f, 'rt') as stream:
@@ -112,7 +116,9 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
             figures.append(dict(category=kind.split(':')[1], path='figures/'+path.name,
                                 name=item.get('name', path.name)))
     gene_path.unlink()
+    progress(f'Consolidating structural junctions: {len(events)} records')
     structural = consolidate(events, fusion_pairs(known_fusions), distance)
+    progress(f'Structural consolidation finished: {len(structural)} events')
     for name in ('small:clair3', 'small:clairsto', 'small:deepsomatic',
                  'sv:sniffles', 'sv:severus', 'sv:stellerator', 'classification', 'nasvar'):
         statuses.setdefault(name, 'not_run')
@@ -125,6 +131,7 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
                   panel=panel_provenance(panel), warnings=[])
     if manifest.get('pinning') == 'development':
         result['warnings'].append('Development references are unpinned; reference checksums must be pinned before clinical launch.')
+    progress('Writing final review data and provenance')
     write_json(out / 'review.json', result)
     write_json(out / 'manifest.json', dict(schema_version=1, sample=sample, assembly='GRCh38',
                                          policy_version=POLICY_VERSION, references=manifest, images=images, code_sha256=code_digest,
@@ -148,6 +155,7 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
         writer.writerow(['allele', 'caller_evidence_json'])
         for row in small['records']:
             writer.writerow([json.dumps(row['coordinates']), json.dumps(row['evidence'])])
+    progress('Review completion finished')
     return result
 
 
