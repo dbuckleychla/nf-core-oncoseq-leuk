@@ -44,11 +44,13 @@ def image_uri(path):
     return 'data:' + mime + ';base64,' + base64.b64encode(raw).decode()
 
 
-def render(input, output, template, figures=None):
+def render(input, output, template, figures=None, results_root=None):
     source = Path(input)
     data = json.loads(source.read_text())
     if data.get('schema_version') != 1 or not data.get('sample'):
         raise ValueError('Unsupported or incomplete review data')
+    from presentation import enrich
+    enrich(data, source.parent, results_root)
     assets = list(data.get('figures', []))
     if figures:
         root = Path(figures)

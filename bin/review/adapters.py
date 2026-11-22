@@ -11,33 +11,47 @@ def open_text(path):
 
 
 def classifiers(data):
+    """Keep class-score cutoffs distinct from input methylation thresholds."""
+    import math
+    def number(value):
+        return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)
+    def label(row):
+        if not isinstance(row, dict):
+            return row if isinstance(row, str) else None
+        return next((row[k] for k in ('name', 'Methylation.Class.Name', 'class', 'class_name', 'label', 'tissue')
+                     if isinstance(row.get(k), str)), None)
     result = []
-    order = ('marlin', 'alma', 'lamprey', 'crossnn', 'mpact', 'sturgeon', 'tucan', 'nanomix')
-    for name in order:
+    for name in ('marlin', 'alma', 'lamprey', 'crossnn', 'mpact', 'sturgeon', 'tucan', 'nanomix'):
         root = data.get(name)
         if not isinstance(root, dict):
+            result.append(dict(name=name, status='unavailable', reason='No native result emitted'))
             continue
-        models = root.get('models', [root])
-        for model in models:
-            inference = model.get('inference', {})
-            values = next((v for v in (model.get('probabilities'),
-                                       inference.get('annotated_probabilities'),
-                                       model.get('predictions'), model.get('votes'))
-                           if isinstance(v, list) and v and isinstance(v[0], dict)), [])
+        for index, model in enumerate(root.get('models', [root])):
+            inference = model.get('inference') or {}
+            values = next((v for v in (model.get('probabilities'), inference.get('annotated_probabilities'),
+                          model.get('averaged_scores'), model.get('scores'), model.get('predictions'), model.get('votes'))
+                          if isinstance(v, list) and v and isinstance(v[0], dict)), [])
             scores = []
             for row in values:
-                score = row.get('probability', row.get('score'))
-                label = row.get('class', row.get('class_name', row.get('label')))
-                if isinstance(score, (int, float)) and label:
-                    scores.append(dict(label=label, score=score))
+                score = next((row[k] for k in ('probability', 'score', 'proportion') if number(row.get(k))), None)
+                if score is not None and label(row):
+                    scores.append(dict(label=label(row), score=score))
             scores.sort(key=lambda r: (-r['score'], r['label']))
-            top = model.get('top_class') or (scores[0]['label'] if scores else None)
-            score = model.get('diagnostic_confidence', scores[0]['score'] if scores else None)
-            thresholds = {k:model[k] for k in ('diagnostic_threshold','threshold','cutoff') if isinstance(model.get(k),(int,float))}
-            cutoff = thresholds.get('diagnostic_threshold',next(iter(thresholds.values())) if len(thresholds)==1 else None)
-            result.append(dict(name=name + (':' + model['training_set'] if model.get('training_set') else ''),
-                               status='completed', label=top, score=score, cutoff=cutoff, thresholds=thresholds,
-                               scores=scores, target_coverage=model.get('target_coverage'),
+            top = model.get('top_class') or model.get('top_tissue')
+            score = model.get('diagnostic_confidence')
+            if not number(score) and isinstance(top, dict):
+                score = next((top[k] for k in ('probability', 'score', 'proportion') if number(top.get(k))), None)
+            if not number(score):
+                score = scores[0]['score'] if scores else None
+            thresholds = {k: model[k] for k in ('diagnostic_threshold', 'threshold', 'cutoff') if number(model.get(k))}
+            cutoff = thresholds.get('diagnostic_threshold', thresholds.get('cutoff'))
+            if name == 'nanomix':
+                cutoff = None
+            suffix = model.get('training_set') or (Path(str(model.get('model_root', ''))).name if len(root.get('models', [])) > 1 else '')
+            result.append(dict(name=name + (':' + (suffix or str(index + 1)) if len(root.get('models', [])) > 1 else ''),
+                               status='completed', label=label(top) or (scores[0]['label'] if scores else None),
+                               score=score, cutoff=cutoff, thresholds=thresholds, scores=scores,
+                               interpretation='mixture proportion' if name == 'nanomix' else 'classification score',
                                model=model.get('model_label', model.get('model_path', model.get('model_root')))))
     result.append(dict(name='optic', status='disabled', reason='Model assets unavailable in pinned image'))
     return result

@@ -845,6 +845,8 @@ workflow ONCOSEQ {
         ch_review = ch_bam_for_calling
             .map { meta, _bam, _bai -> tuple(meta.id, 'sample', []) }
             .mix(COVERAGE_SEPARATE.out.review_coverage)
+            .mix(MAPPING.out.coverage.map { meta, path -> tuple(meta.id, 'qc:cramino', path) })
+            .mix(MAPPING.out.seqkit.map { meta, path -> tuple(meta.id, 'qc:seqkit', path) })
             .mix(CNV_CALLING.out.qdnaseq_bed.map { meta, path -> tuple(meta.id, 'cnv:qdnaseq', path) })
             .mix(CNV_CALLING.out.delly_segs.map { meta, path -> tuple(meta.id, 'cnv:delly', path) })
             .mix(
@@ -886,6 +888,8 @@ workflow ONCOSEQ {
             ch_review = ch_review.mix(CLASSY.out.json.map { meta, path -> tuple(meta.id, 'classification', path) })
         }
         if (genome != 'hg19') {
+            ch_review = ch_review.mix(NASVAR.out.coverage.map { meta, path -> tuple(meta.id, 'nasvar:coverage', path) })
+            ch_review = ch_review.mix(NASVAR.out.maf.map { meta, path -> tuple(meta.id, 'nasvar:maf', path) })
             ch_review = ch_review.mix(ch_kar_out.map { meta, path -> tuple(meta.id, 'nasvar', path) })
         }
         REVIEW_REPORT(ch_review, ch_bam_for_calling, ch_ref, vep_cache)

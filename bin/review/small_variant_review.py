@@ -64,7 +64,7 @@ def build(sample, paths, output, panel=None):
             ann=json.loads(entry['annotation'])
             row=dict(caller=meta['caller'],kind=meta['kind'],filter=entry['filter'],
                      sample_evidence=sample_evidence(entry.get('source_record',''),meta['caller']),source_record=entry.get('source_record'),
-                     population=ann.get('population',{}),cosmic=ann.get('cosmic',{}),native_records=json.loads(entry.get('native_records','[]')),file=path.name)
+                     clinvar=ann.get('clinvar',[]),population=ann.get('population',{}),cosmic=ann.get('cosmic',{}),native_records=json.loads(entry.get('native_records','[]')),file=path.name)
             if row not in evidence[allele]:evidence[allele].append(row)
     rows=[dict(coordinates=list(key),selections=selections,evidence=evidence[key],
                exact_pass_agreement={'clairsto','deepsomatic'} <= {e['caller'] for e in evidence[key] if e['filter']=='PASS'})

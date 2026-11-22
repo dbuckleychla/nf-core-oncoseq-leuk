@@ -359,6 +359,53 @@
           display: block !important;
         }
       }
+
+      .scorebar {
+        position: relative;
+        height: 12px;
+        overflow: visible;
+      }
+      .threshold-marker {
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        width: 3px;
+        background: #ef4444;
+      }
+      .card.above {
+        border-color: #34d399;
+      }
+      .card.below {
+        border-color: #f59e0b;
+      }
+      dialog.full-view {
+        max-width: 100vw;
+        max-height: 100vh;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      .zoom-scroll img {
+        width: 100%;
+        height: 65vh;
+        object-fit: contain;
+      }
+      dialog.full-view .zoom-scroll img {
+        height: calc(100vh - 140px);
+      }
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .flow span {
+        padding: 15px;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 150px;
+      }
     </style>
   </head>
   <body>
@@ -477,6 +524,10 @@
               "image": "community.wave.seqera.io/library/minimap2_samtools@sha256:a46a2b8c93894d01d1e32ed4fee123c2fc1e9febbe2a513526f19b66c2338c66",
               "processes": ["MINIMAP2_ALIGN"]
             },
+            "community.wave.seqera.io/library/oncoseq_review_1_0_0:3b0426ad5a1884bf": {
+              "image": "community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5",
+              "processes": ["REVIEW_VALIDATE", "REVIEW_PREPARE", "REVIEW_COMPLETE", "REVIEW_RENDER"]
+            },
             "community.wave.seqera.io/library/pharmcat3:3.2.0--5126bb296d1e59ac": {
               "image": "community.wave.seqera.io/library/pharmcat3@sha256:58adeb930ff3b6280b70129f4d0a3df835b702621077a3745922076786a2c7a2",
               "processes": ["PHARMCAT_MATCHER", "PHARMCAT_PHENOTYPER", "PHARMCAT_REPORTER", "PHARMCAT_VCFPREPROCESSOR"]
@@ -529,16 +580,6 @@
             "ghcr.io/chusj-pigu/delly:4c07465cd477798fc6fe0b06d941dbe8acdba7bb": {
               "image": "ghcr.io/chusj-pigu/delly@sha256:7009e0aebca9dd703fc0958738cb1fa3d547b7cc05086f7feab6436aa015e831",
               "processes": ["DELLY_CNV"]
-            },
-            "ghcr.io/chusj-pigu/dorado:851b0a37ecbff6b3b952c811b31dad48ca6bf995": {
-              "image": "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785",
-              "processes": [
-                "DORADO_BASECALL",
-                "DORADO_DEMULTIPLEX",
-                "DORADO_DOWNLOAD_LIST",
-                "DORADO_DOWNLOAD_MODEL",
-                "DORADO_TRIM"
-              ]
             },
             "ghcr.io/chusj-pigu/figeno:e42833528621000fed543c5a6d999262ab751bcf": {
               "image": "ghcr.io/chusj-pigu/figeno@sha256:e9a90169d979043902f3584990cc05d989e229b60fb90a019e7c65724503e98c",
@@ -596,6 +637,16 @@
                 "SV_PROCESS"
               ]
             },
+            "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785": {
+              "image": "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785",
+              "processes": [
+                "DORADO_BASECALL",
+                "DORADO_DEMULTIPLEX",
+                "DORADO_DOWNLOAD_LIST",
+                "DORADO_DOWNLOAD_MODEL",
+                "DORADO_TRIM"
+              ]
+            },
             "quay.io/biocontainers/cramino:1.1.0--h3dc2dae_0": {
               "image": "quay.io/biocontainers/cramino@sha256:a0ed72cbb52240e6cb0085bea16f5356b3d790621281dd11cecc2f5173e5f791",
               "processes": ["CRAMINO"]
@@ -607,10 +658,6 @@
             "quay.io/biocontainers/whatshap:2.8--py39h2de1943_0": {
               "image": "quay.io/biocontainers/whatshap@sha256:d63cdf64c29f99016ace7f8a4ace72d7a1dbbec262831e65d1a97d6a57960a30",
               "processes": ["WHATSHAP_STATS"]
-            },
-            "community.wave.seqera.io/library/oncoseq_review_1_0_0:3b0426ad5a1884bf": {
-              "image": "community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5",
-              "processes": ["REVIEW_VALIDATE", "REVIEW_PREPARE", "REVIEW_COMPLETE", "REVIEW_RENDER"]
             }
           }
         },
@@ -906,6 +953,9 @@
                     }
                   },
                   "source_record": "chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -967,6 +1017,9 @@
                     }
                   },
                   "source_record": "chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1023,6 +1076,9 @@
                     "clairsto": { "depth": 100, "af": 0.3, "af_source": "consensus native caller INFO" }
                   },
                   "source_record": "chr1\t150\t.\tA\tT\t.\tPASS\tCS_DP=100;CS_AF=0.3;DS_DP=100;DS_AF=0.3",
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1084,6 +1140,9 @@
                     }
                   },
                   "source_record": "chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1440,6 +1499,7 @@
                     }
                   },
                   "source_record": "chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "clinvar": [],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1470,6 +1530,7 @@
                     }
                   },
                   "source_record": "chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "clinvar": [],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1495,6 +1556,7 @@
                     "clairsto": { "depth": 100, "af": 0.3, "af_source": "consensus native caller INFO" }
                   },
                   "source_record": "chr1\t160\t.\tA\tAT\t.\tPASS\tCS_DP=100;CS_AF=0.3;DS_DP=100;DS_AF=0.3",
+                  "clinvar": [],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1525,6 +1587,7 @@
                     }
                   },
                   "source_record": "chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3",
+                  "clinvar": [],
                   "population": {
                     "genome": { "ac": 1, "an": 1000, "af": 0.001 },
                     "exome": { "ac": 1, "an": 1000, "af": 0.001 },
@@ -1691,9 +1754,16 @@
             "cutoff": 0.8,
             "thresholds": { "cutoff": 0.8 },
             "scores": [{ "label": "Synthetic model class", "score": 0.9 }],
-            "target_coverage": null,
+            "interpretation": "classification score",
             "model": null
           },
+          { "name": "alma", "status": "unavailable", "reason": "No native result emitted" },
+          { "name": "lamprey", "status": "unavailable", "reason": "No native result emitted" },
+          { "name": "crossnn", "status": "unavailable", "reason": "No native result emitted" },
+          { "name": "mpact", "status": "unavailable", "reason": "No native result emitted" },
+          { "name": "sturgeon", "status": "unavailable", "reason": "No native result emitted" },
+          { "name": "tucan", "status": "unavailable", "reason": "No native result emitted" },
+          { "name": "nanomix", "status": "unavailable", "reason": "No native result emitted" },
           { "name": "optic", "status": "disabled", "reason": "Model assets unavailable in pinned image" }
         ],
         "coverage": [
@@ -1711,10 +1781,18 @@
         "nasvar": { "version": "synthetic", "fusions": { "fusions": [] }, "qc": { "mean_depth": 100 } },
         "figures": [
           {
+            "category": "copy_number",
+            "name": "NASVAR genome coverage and folded allele fraction",
+            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpjmoz5ec1/review/presentation/nasvar.overview.svg",
+            "reformatted": true,
+            "image_key": "50ceea9ebeed41ef827acf29cc680f4c8b827676d258ee0d55c42d7fdae62100",
+            "order": [27, "NASVAR genome coverage and folded allele fraction"]
+          },
+          {
             "category": "fusions",
             "generated": true,
             "event_id": "b6cf96d02bf1f8f39bc0333a",
-            "path": "/tmp/tmpc0d_6f9s/figures/illustrative.svg",
+            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpjmoz5ec1/figures/illustrative.svg",
             "name": "Illustrative RUNX1::RUNX1T1 junction",
             "image_key": "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf",
             "order": [27, "Illustrative RUNX1::RUNX1T1 junction"]
@@ -1747,25 +1825,25 @@
             "gnomad_genome": {
               "uri": "gnomad_genome.vcf.gz",
               "release": "synthetic",
-              "sha256": "7704af0d09962809f679495223e55c62277583ac8e3be001039334d7a6cd8691",
+              "sha256": "de8ab59726aa986c85f800febea385d6ed275af9bca4c6a2365f692440f527c3",
               "index": {
                 "uri": "gnomad_genome.vcf.gz.tbi",
-                "sha256": "1fc6ab58a6270513ee6f3f5e871074190a6b711e3fa3307870500f231f28e224"
+                "sha256": "7351dc5f300e89367e879ad31f48956b09addcb3ee01f692f803059f676a7589"
               }
             },
             "gnomad_exome": {
               "uri": "gnomad_exome.vcf.gz",
               "release": "synthetic",
-              "sha256": "7704af0d09962809f679495223e55c62277583ac8e3be001039334d7a6cd8691",
+              "sha256": "de8ab59726aa986c85f800febea385d6ed275af9bca4c6a2365f692440f527c3",
               "index": {
                 "uri": "gnomad_exome.vcf.gz.tbi",
-                "sha256": "1fc6ab58a6270513ee6f3f5e871074190a6b711e3fa3307870500f231f28e224"
+                "sha256": "7351dc5f300e89367e879ad31f48956b09addcb3ee01f692f803059f676a7589"
               }
             },
             "clinvar": {
               "uri": "clinvar.vcf.gz",
               "release": "synthetic",
-              "sha256": "c428eefc419f4432c2d5563365d474437a9dc3542eb611f497bbaac619c6e2e9",
+              "sha256": "c6294a80c0b581b1ceca2509d33ac14ffc05812052a73e90ee4824b4bb19d8ba",
               "index": {
                 "uri": "clinvar.vcf.gz.tbi",
                 "sha256": "d2ee5ddf8a563f4df413434d82ec48a1ef67beff7e3e9eccd285abb0870e0efd"
@@ -1774,7 +1852,7 @@
             "clinvar_common_pathogenic": {
               "uri": "rescue.vcf.gz",
               "release": "synthetic",
-              "sha256": "6cbf6724ec076e95137baa19d0b6393b636343d700c89821dd7f7b7bd888853c",
+              "sha256": "b05a09b4f7145801964051aa094121a73cc244762ebca89e97528bf40402eccd",
               "index": {
                 "uri": "rescue.vcf.gz.tbi",
                 "sha256": "5c9e74e847b0ca3ca72ab2bcc803ac43efaff23fa701271af7d9208df054c08e"
@@ -1797,7 +1875,16 @@
           "genes": { "TP53": "NM_TEST.1" }
         },
         "warnings": ["Synthetic records and an illustrative fusion figure are used to demonstrate the layout."],
+        "coverage_genes": [{ "gene": "TP53", "depth": 80.0 }],
+        "qc_summary": [
+          { "metric": "primary interval-weighted mean depth", "value": 80.0 },
+          { "metric": "mapq60 interval-weighted mean depth", "value": 60.0 },
+          { "metric": "nofilter interval-weighted mean depth", "value": 100.0 },
+          { "metric": "Cramino Number of reads", "value": "1000" },
+          { "metric": "Cramino N50", "value": "15000" }
+        ],
         "images": {
+          "50ceea9ebeed41ef827acf29cc680f4c8b827676d258ee0d55c42d7fdae62100": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEyMDAgNTYwIj48bnMwOnJlY3Qgd2lkdGg9IjEyMDAiIGhlaWdodD0iNTYwIiBmaWxsPSIjMTExODI3IiAvPjxuczA6ZyBmaWxsPSIjZGJlYWZlIiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCI+PG5zMDp0ZXh0IHg9IjMwIiB5PSIzMCI+TkFTVkFSIGdlbm9tZSBvdmVydmlldyAmIzgyMTI7IG5hdGl2ZSBtZWFzdXJlbWVudHM8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzMCIgeT0iNjAiPk5hdGl2ZSBHQy1hZGp1c3RlZCBiaW5uZWQgY292ZXJhZ2Ugc2lnbmFsIChub3QgYmFzZSBkZXB0aCBvciBpbmZlcnJlZCBjb3B5IG51bWJlcik8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzMCIgeT0iMjk1Ij5Gb2xkZWQgYWxsZWxlIGZyYWN0aW9uOiBtaW4ocmVmLCBhbHQpIC8gdG90YWw7IGRlcHRoICYjODgwNTsyMDsgMSBNYiBtZWFuIGZvciBkaXNwbGF5PC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTIiIHk9IjkwIj4xMjwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjEyIiB5PSIyNDUiPjA8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIzNSIgeT0iMzMwIj4wLjU8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSI0NSIgeT0iNDcwIj4wPC9uczA6dGV4dD48bnMwOnBhdGggZD0iTTgwLjAgNzVWNDgwIiBzdHJva2U9IiMzMzQxNTUiIC8+PG5zMDp0ZXh0IHg9IjYwNS4wIiB5PSI1MDUiPjE8L25zMDp0ZXh0PjxuczA6Y2lyY2xlIGN4PSI2MTAuMCIgY3k9IjkwLjAiIHI9IjEuNyIgZmlsbD0iIzM4YmRmOCIgLz48bnMwOmNpcmNsZSBjeD0iNjEwLjAiIGN5PSI0MDAuMCIgcj0iMS41IiBmaWxsPSIjYzA4NGZjIiAvPjxuczA6dGV4dCB4PSIzMCIgeT0iNTI4Ij5Db3ZlcmFnZSBkaXNwbGF5OiAxc3QmIzgyMTE7OTl0aCBwZXJjZW50aWxlIHJhbmdlIGV4dGVuZGVkIHRvIHplcm87IGFtYmVyIHBvaW50cyBhcmUgY2xpcHBlZCBvdXRsaWVycy4gTmF0aXZlIHZhbHVlcyBhcmUgdW5jaGFuZ2VkLjwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjMwIiB5PSI1NDkiPkNocm9tb3NvbWUgd2lkdGhzOiBvYnNlcnZlZCBjb3ZlcmFnZS1iaW4gZXh0ZW50cy4gRGlzcGxheSBhZ2dyZWdhdGlvbiBkb2VzIG5vdCBjaGFuZ2UgbmF0aXZlIGNhbGxzLjwvbnMwOnRleHQ+PC9uczA6Zz48L25zMDpzdmc+",
           "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf": "data:image/svg+xml;base64,PG5zMDpzdmcgeG1sbnM6bnMwPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiB2aWV3Qm94PSIwIDAgMTEwMCA0NDAiPgo8bnMwOnJlY3Qgd2lkdGg9IjExMDAiIGhlaWdodD0iNDQwIiBmaWxsPSJ3aGl0ZSIgLz48bnMwOnRleHQgeD0iMzUiIHk9IjM4IiBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIyMiIgZmlsbD0iIzE3MmMzZCI+SWxsdXN0cmF0aXZlIGp1bmN0aW9uOiBSVU5YMSA6OiBSVU5YMVQxPC9uczA6dGV4dD4KPG5zMDp0ZXh0IHg9IjM1IiB5PSI3NiIgZm9udC1mYW1pbHk9InNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM1MjY3NzQiPlN5bnRoZXRpYyBjb3ZlcmFnZSBhbmQgc3BsaXQtcmVhZCB0cmFja3M8L25zMDp0ZXh0Pgo8bnMwOmcgc3Ryb2tlPSIjZDdlMGU2Ij48bnMwOnBhdGggZD0iTTEyMCAxMTBINTEwTTU5MCAxMTBIMTAxME0xMjAgMjIwSDUxME01OTAgMjIwSDEwMTBNMTIwIDM1MEg1MTBNNTkwIDM1MEgxMDEwIiAvPjwvbnMwOmc+CjxuczA6ZyBmb250LWZhbWlseT0ic2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzE3MmMzZCI+PG5zMDp0ZXh0IHg9IjE1IiB5PSIxNTAiPkNvdmVyYWdlPC9uczA6dGV4dD48bnMwOnRleHQgeD0iMTUiIHk9IjI3MCI+U3BsaXQgcmVhZHM8L25zMDp0ZXh0PjxuczA6dGV4dCB4PSIxNSIgeT0iMzk1Ij5HZW5lczwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9IjI5MCIgeT0iNDIwIj5SVU5YMTwvbnMwOnRleHQ+PG5zMDp0ZXh0IHg9Ijc2MCIgeT0iNDIwIj5SVU5YMVQxPC9uczA6dGV4dD48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzc0OGE5NiI+PG5zMDpwYXRoIGQ9Ik0xMzAgMjEwVjE1NUgxNjBWMTUwSDE5MFYxNDBIMjIwVjEzMEgyNTBWMTM1SDI4MFYxNDBIMzEwVjEzMEgzNDBWMTI1SDM3MFYxNDVINDAwVjEzMEg0MzBWMTM1SDQ2MFYxNDVINDkwVjIxMFoiIC8+PG5zMDpwYXRoIGQ9Ik02MTAgMjEwVjE0NUg2NDBWMTMwSDY3MFYxNDBINzAwVjEyNUg3MzBWMTM1SDc2MFYxMzBINzkwVjEyMEg4MjBWMTM1SDg1MFYxNDVIODgwVjE0MEg5MTBWMTM1SDk0MFYxNDVIOTcwVjE1MEgxMDAwVjIxMFoiIC8+PC9uczA6Zz4KPG5zMDpnIHN0cm9rZT0iIzA4NmY4MyIgc3Ryb2tlLXdpZHRoPSI2Ij48bnMwOnBhdGggZD0iTTE3MCAyNjBINDEwTTE2MCAyODBINDIwTTE4MCAzMDBINDAwTTcwMCAyNjBIOTQwTTcxMCAyODBIOTUwTTcwMCAzMDBIOTMwIiAvPjwvbnMwOmc+CjxuczA6ZyBzdHJva2U9IiM5NTU3MTUiIHN0cm9rZS13aWR0aD0iMiIgZmlsbD0ibm9uZSI+PG5zMDpwYXRoIGQ9Ik00MTAgMjYwUTU1NSAyMjAgNzAwIDI2ME00MjAgMjgwUTU1MCAyNDAgNzEwIDI4ME00MDAgMzAwUTU1MCAyNjUgNzAwIDMwMCIgLz48L25zMDpnPgo8bnMwOmcgZmlsbD0iIzA4NmY4MyI+PG5zMDpyZWN0IHg9IjIwMCIgeT0iMzc1IiB3aWR0aD0iNTUiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjMwMCIgeT0iMzc1IiB3aWR0aD0iNDAiIGhlaWdodD0iMjAiIC8+PG5zMDpyZWN0IHg9IjQwNSIgeT0iMzc1IiB3aWR0aD0iNjAiIGhlaWdodD0iMjAiIC8+PC9uczA6Zz4KPG5zMDpnIGZpbGw9IiNiMTY4MzIiPjxuczA6cmVjdCB4PSI2MzAiIHk9IjM3NSIgd2lkdGg9IjQ1IiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI3NDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjxuczA6cmVjdCB4PSI5MDUiIHk9IjM3NSIgd2lkdGg9IjYwIiBoZWlnaHQ9IjIwIiAvPjwvbnMwOmc+CjwvbnMwOnN2Zz4="
         }
       }
@@ -1823,9 +1910,9 @@
         ["fusions", "Fusions"],
         ["small", "Small variants"],
         ["sv", "CNV and other SVs"],
-        ["nasvar", "NASVAR"],
+        ["nasvar", "Copy number / NASVAR"],
         ["qc", "Coverage and QC"],
-        ["targets", "Target loci"],
+        ["targets", "Focal CN/SV loci"],
         ["methods", "Methods and files"],
       ];
       const sections = {};
@@ -2064,7 +2151,8 @@
                 const b = el("button", "Evidence");
                 b.onclick = () => showEvidence(title, r);
                 cell.append(b);
-              } else cell.textContent = fmt(c.value(r));
+              } else if (c.render) cell.append(c.render(r));
+              else cell.textContent = fmt(c.value(r));
               row.append(cell);
             }
             body.append(row);
@@ -2123,18 +2211,30 @@
       );
       const cc = el("div", undefined, "cards");
       for (const c of data.classification || []) {
-        const box = el("div", undefined, "card");
+        const evaluable = typeof c.score === "number" && typeof c.cutoff === "number";
+        const box = el("div", undefined, "card" + (evaluable ? (c.score >= c.cutoff ? " above" : " below") : ""));
         box.append(
           el("h3", c.name),
           el("strong", c.label || c.status),
           el(
             "p",
-            "Score: " +
+            (c.interpretation || "Score") +
+              ": " +
               fmt(c.score) +
-              " | Threshold metadata: " +
-              Object.entries(c.thresholds || {})
-                .map(([k, v]) => k + ": " + fmt(v))
-                .join("; "),
+              " | Decision threshold: " +
+              (typeof c.cutoff === "number"
+                ? fmt(c.cutoff)
+                : c.interpretation === "mixture proportion"
+                  ? "Not applicable"
+                  : "Not emitted"),
+          ),
+          el(
+            "p",
+            evaluable
+              ? c.score >= c.cutoff
+                ? "Above threshold"
+                : "Below threshold"
+              : c.reason || "No diagnostic threshold comparison available",
             "muted",
           ),
         );
@@ -2143,6 +2243,12 @@
             fill = el("span");
           fill.style.width = Math.max(0, Math.min(100, c.score * 100)) + "%";
           bar.append(fill);
+          if (typeof c.cutoff === "number") {
+            const marker = el("i", undefined, "threshold-marker");
+            marker.style.left = Math.max(0, Math.min(100, c.cutoff * 100)) + "%";
+            marker.title = "Decision threshold: " + fmt(c.cutoff);
+            bar.append(marker);
+          }
           box.append(bar);
         }
         const b = el("button", "Model evidence");
@@ -2213,19 +2319,67 @@
           ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Not configured")
         );
       }
+      function clinvar(r) {
+        const assertions = [
+          ...r.selections.flatMap((s) => s.clinvar || []),
+          ...r.evidence.flatMap((e) => e.clinvar || []),
+        ];
+        return [...new Map(assertions.map((a) => [JSON.stringify(a), a])).values()];
+      }
+      function annotationText(value) {
+        return (Array.isArray(value) ? value.join("; ") : value || "Not emitted").replaceAll("_", " ");
+      }
+      function clinvarCell(r) {
+        const box = el("div"),
+          assertions = clinvar(r);
+        if (!assertions.length) box.append(el("span", "No ClinVar assertion"));
+        for (const a of assertions) {
+          const article = el("article");
+          article.append(el("strong", annotationText(a.CLNSIG)), el("p", annotationText(a.CLNREVSTAT), "muted"));
+          const d = el("details");
+          d.append(
+            el("summary", "Conditions and assertion details"),
+            el("p", annotationText(a.CLNDN)),
+            el("p", "Conflicts: " + annotationText(a.CLNSIGCONF)),
+          );
+          if (/^\d+$/.test(String(a.record_id))) {
+            const link = el("a", "ClinVar " + a.record_id);
+            link.href = "https://www.ncbi.nlm.nih.gov/clinvar/variation/" + a.record_id + "/";
+            d.append(link);
+          }
+          article.append(d);
+          box.append(article);
+        }
+        return box;
+      }
       const scols = [
         { label: "Gene", value: (r) => choice(r).gene },
         {
           label: "Change",
           value: (r) => decodeURIComponent(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
         },
-        { label: "Reason", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
+        { label: "Priority / context", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
         {
           label: "PASS agreement",
           value: (r) => (r.exact_pass_agreement ? "ClairS-TO + DeepSomatic" : "Independent caller evidence"),
         },
         {
           label: "AF / depth by caller",
+          render: (r) => {
+            const box = el("div");
+            for (const caller of ["clair3", "clairsto", "deepsomatic"]) {
+              const evidence = r.evidence.filter((e) => e.caller === caller);
+              if (!evidence.length) {
+                box.append(el("p", caller + ": no allele evidence emitted", "muted"));
+                continue;
+              }
+              for (const e of evidence) {
+                const v = e.sample_evidence?.[caller] || {};
+                box.append(el("p", caller + ": AF " + fmt(v.af) + "; depth " + fmt(v.depth) + "; " + fmt(e.filter)));
+              }
+            }
+            return box;
+          },
           value: (r) =>
             r.evidence
               .filter((e) => e.caller !== "consensus")
@@ -2234,6 +2388,14 @@
                 return `${e.caller}: ${fmt(s.af)} / ${fmt(s.depth)} (${e.filter})`;
               })
               .join("; "),
+        },
+        {
+          label: "ClinVar",
+          value: (r) =>
+            clinvar(r)
+              .map((a) => annotationText(a.CLNSIG))
+              .join("; "),
+          render: clinvarCell,
         },
         { label: "COSMIC IDs", value: cosmic },
         { label: "Details", detail: true },
@@ -2252,8 +2414,32 @@
         null,
         "Population AF > 0.01 is excluded unless the exact allele is whitelisted. Predicted loss of function and COSMIC recurrence do not establish pathogenicity. COSMIC gene tier is a gene-level Cancer Gene Census property. Full annotation exports retain native filters.",
       );
+      function collapsed(parent, title, description) {
+        const d = el("details");
+        d.append(el("summary", title));
+        parent.append(d);
+        return panel(d, null, description);
+      }
+      const flow = panel(sections.small, "How variants reach this report");
+      const steps = el("div", undefined, "flow");
+      for (const text of [
+        "Native Clair3 / ClairS-TO / DeepSomatic calls →",
+        "Normalize and aggregate exact alleles; retain native failed-call evidence →",
+        "VEP consequence + population frequency + ClinVar + optional COSMIC →",
+        "Native PASS and population AF ≤0.01, unless exact allele whitelist; ClairS-TO + DeepSomatic PASS agreement →",
+        "Transcript / gene prioritization and review groups",
+      ])
+        steps.append(el("span", text));
+      flow.append(
+        steps,
+        el(
+          "p",
+          "Clair3 does not vote in somatic PASS agreement. Caller AF and depth are never pooled. COSMIC matches do not rescue failed variants or establish pathogenicity.",
+          "muted",
+        ),
+      );
       table(
-        panel(sections.sv, "Copy-number intervals", "Values retain their native caller representation."),
+        collapsed(sections.nasvar, "Copy-number intervals", "Values retain their native caller representation."),
         data.cnv || [],
         [
           { label: "Source", value: (r) => r.source },
@@ -2288,7 +2474,7 @@
       const ncnv = data.nasvar?.cnv?.genes;
       if (ncnv)
         table(
-          panel(sections.nasvar, "Native gene copy estimates"),
+          collapsed(sections.nasvar, "Native gene copy estimates"),
           Object.entries(ncnv).map(([gene, value]) => ({ gene, ...value })),
           [
             { label: "Gene", value: (r) => r.gene },
@@ -2300,7 +2486,7 @@
       const nk = data.nasvar?.karyotype?.karyotype;
       if (nk)
         table(
-          panel(sections.nasvar, "Native chromosome-arm estimates"),
+          collapsed(sections.nasvar, "Native chromosome-arm estimates"),
           Object.entries(nk)
             .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
             .map(([arm, copies]) => ({ arm, copies })),
@@ -2334,9 +2520,35 @@
           d.append(s, el("pre", JSON.stringify(data.nasvar[key], null, 2)));
           p.append(d);
         }
-      const q = panel(
+      table(
+        panel(
+          sections.qc,
+          "Coverage and read quality summary",
+          "Interval-weighted depth uses the reported intervals; overlapping intervals may contribute more than once. No assay pass/fail thresholds are inferred.",
+        ),
+        data.qc_summary || [],
+        [
+          { label: "Metric", value: (r) => r.metric },
+          { label: "Value", value: (r) => r.value },
+        ],
+        "QC metrics",
+      );
+      table(
+        panel(
+          sections.qc,
+          "Lowest-coverage genes",
+          "Up to 20 genes ordered by interval-weighted primary alignment depth.",
+        ),
+        data.coverage_genes || [],
+        [
+          { label: "Gene", value: (r) => r.gene },
+          { label: "Primary mean depth", value: (r) => r.depth },
+        ],
+        "gene coverage",
+      );
+      const q = collapsed(
         sections.qc,
-        "Region coverage",
+        "All coverage intervals",
         "Mean interval depth. Alignment-filter strata are separate measurements. These summaries do not establish per-base depth thresholds or a copy-number diagnosis.",
       );
       table(
@@ -2357,7 +2569,7 @@
       panel(
         sections.targets,
         null,
-        "Target-locus figures show the configured loci and selected evidence. Absence from a prioritised event list is not a negative molecular finding.",
+        "Focal CN/SV locus plots show read-depth and structural evidence at configured genes. They are contextual views, not independent copy-number calls. Absence from a prioritised event list is not a negative molecular finding.",
       );
       function showCoverage(row) {
         const dialog = document.getElementById("evidence"),
@@ -2407,25 +2619,59 @@
           content = document.getElementById("dialog-content");
         document.getElementById("dialog-title").textContent = item.name;
         content.replaceChildren();
-        const scale = el("input");
-        scale.type = "range";
-        scale.min = 50;
-        scale.max = 200;
-        scale.value = 100;
-        scale.setAttribute("aria-label", "Figure zoom");
+        dialog.classList.remove("full-view");
+        const toggle = el("button", "Full screen view");
+        toggle.onclick = () => {
+          const active = dialog.classList.toggle("full-view");
+          toggle.textContent = active ? "Exit full screen view" : "Full screen view";
+          toggle.setAttribute("aria-pressed", String(active));
+        };
+        dialog.addEventListener("close", () => dialog.classList.remove("full-view"), { once: true });
         const viewport = el("div", undefined, "zoom-scroll"),
           img = el("img");
         img.src = data.images[item.image_key];
         img.alt = item.name;
-        img.style.width = "100%";
-        scale.oninput = () => (img.style.width = scale.value + "%");
         viewport.append(img);
-        content.append(scale, viewport);
+        content.append(toggle, viewport);
         dialog.showModal();
+      }
+      function figurePanel(parent, item) {
+        const box = el("figure"),
+          img = el("img");
+        img.src = data.images[item.image_key];
+        img.alt = item.name;
+        img.style.width = "100%";
+        img.style.maxHeight = "720px";
+        img.style.objectFit = "contain";
+        const b = el("button", "Open full view");
+        b.onclick = () => zoom(item);
+        box.append(img, b);
+        parent.append(box);
+      }
+      const cnOverview = el("div");
+      sections.nasvar.prepend(cnOverview);
+      for (const item of data.figures.filter((f) => f.reformatted)) figurePanel(cnOverview, item);
+      const chromosomePlots = data.figures.filter((f) => f.category === "chromosomes");
+      if (chromosomePlots.length) {
+        const box = panel(cnOverview, "Per-chromosome copy-number and structural context"),
+          select = el("select"),
+          display = el("div");
+        chromosomePlots.forEach((f, i) => {
+          const option = el("option", f.name);
+          option.value = i;
+          select.append(option);
+        });
+        select.setAttribute("aria-label", "Chromosome plot");
+        select.onchange = () => {
+          display.replaceChildren();
+          figurePanel(display, chromosomePlots[Number(select.value)]);
+        };
+        box.append(select, display);
+        select.onchange();
       }
       const galleries = {};
       for (const item of data.figures || []) {
-        if (item.generated) continue;
+        if (item.generated || item.reformatted || item.category === "chromosomes") continue;
         const id =
           item.category === "fusions"
             ? "fusions"

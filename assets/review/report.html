@@ -359,6 +359,53 @@
           display: block !important;
         }
       }
+
+      .scorebar {
+        position: relative;
+        height: 12px;
+        overflow: visible;
+      }
+      .threshold-marker {
+        position: absolute;
+        top: -5px;
+        bottom: -5px;
+        width: 3px;
+        background: #ef4444;
+      }
+      .card.above {
+        border-color: #34d399;
+      }
+      .card.below {
+        border-color: #f59e0b;
+      }
+      dialog.full-view {
+        max-width: 100vw;
+        max-height: 100vh;
+        width: 100vw;
+        height: 100vh;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      .zoom-scroll img {
+        width: 100%;
+        height: 65vh;
+        object-fit: contain;
+      }
+      dialog.full-view .zoom-scroll img {
+        height: calc(100vh - 140px);
+      }
+      .flow {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+      .flow span {
+        padding: 15px;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        flex: 1;
+        min-width: 150px;
+      }
     </style>
   </head>
   <body>
@@ -435,9 +482,9 @@
         ["fusions", "Fusions"],
         ["small", "Small variants"],
         ["sv", "CNV and other SVs"],
-        ["nasvar", "NASVAR"],
+        ["nasvar", "Copy number / NASVAR"],
         ["qc", "Coverage and QC"],
-        ["targets", "Target loci"],
+        ["targets", "Focal CN/SV loci"],
         ["methods", "Methods and files"],
       ];
       const sections = {};
@@ -676,7 +723,8 @@
                 const b = el("button", "Evidence");
                 b.onclick = () => showEvidence(title, r);
                 cell.append(b);
-              } else cell.textContent = fmt(c.value(r));
+              } else if (c.render) cell.append(c.render(r));
+              else cell.textContent = fmt(c.value(r));
               row.append(cell);
             }
             body.append(row);
@@ -735,18 +783,30 @@
       );
       const cc = el("div", undefined, "cards");
       for (const c of data.classification || []) {
-        const box = el("div", undefined, "card");
+        const evaluable = typeof c.score === "number" && typeof c.cutoff === "number";
+        const box = el("div", undefined, "card" + (evaluable ? (c.score >= c.cutoff ? " above" : " below") : ""));
         box.append(
           el("h3", c.name),
           el("strong", c.label || c.status),
           el(
             "p",
-            "Score: " +
+            (c.interpretation || "Score") +
+              ": " +
               fmt(c.score) +
-              " | Threshold metadata: " +
-              Object.entries(c.thresholds || {})
-                .map(([k, v]) => k + ": " + fmt(v))
-                .join("; "),
+              " | Decision threshold: " +
+              (typeof c.cutoff === "number"
+                ? fmt(c.cutoff)
+                : c.interpretation === "mixture proportion"
+                  ? "Not applicable"
+                  : "Not emitted"),
+          ),
+          el(
+            "p",
+            evaluable
+              ? c.score >= c.cutoff
+                ? "Above threshold"
+                : "Below threshold"
+              : c.reason || "No diagnostic threshold comparison available",
             "muted",
           ),
         );
@@ -755,6 +815,12 @@
             fill = el("span");
           fill.style.width = Math.max(0, Math.min(100, c.score * 100)) + "%";
           bar.append(fill);
+          if (typeof c.cutoff === "number") {
+            const marker = el("i", undefined, "threshold-marker");
+            marker.style.left = Math.max(0, Math.min(100, c.cutoff * 100)) + "%";
+            marker.title = "Decision threshold: " + fmt(c.cutoff);
+            bar.append(marker);
+          }
           box.append(bar);
         }
         const b = el("button", "Model evidence");
@@ -825,19 +891,67 @@
           ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Not configured")
         );
       }
+      function clinvar(r) {
+        const assertions = [
+          ...r.selections.flatMap((s) => s.clinvar || []),
+          ...r.evidence.flatMap((e) => e.clinvar || []),
+        ];
+        return [...new Map(assertions.map((a) => [JSON.stringify(a), a])).values()];
+      }
+      function annotationText(value) {
+        return (Array.isArray(value) ? value.join("; ") : value || "Not emitted").replaceAll("_", " ");
+      }
+      function clinvarCell(r) {
+        const box = el("div"),
+          assertions = clinvar(r);
+        if (!assertions.length) box.append(el("span", "No ClinVar assertion"));
+        for (const a of assertions) {
+          const article = el("article");
+          article.append(el("strong", annotationText(a.CLNSIG)), el("p", annotationText(a.CLNREVSTAT), "muted"));
+          const d = el("details");
+          d.append(
+            el("summary", "Conditions and assertion details"),
+            el("p", annotationText(a.CLNDN)),
+            el("p", "Conflicts: " + annotationText(a.CLNSIGCONF)),
+          );
+          if (/^\d+$/.test(String(a.record_id))) {
+            const link = el("a", "ClinVar " + a.record_id);
+            link.href = "https://www.ncbi.nlm.nih.gov/clinvar/variation/" + a.record_id + "/";
+            d.append(link);
+          }
+          article.append(d);
+          box.append(article);
+        }
+        return box;
+      }
       const scols = [
         { label: "Gene", value: (r) => choice(r).gene },
         {
           label: "Change",
           value: (r) => decodeURIComponent(choice(r).hgvsp || choice(r).hgvsc || r.coordinates.slice(1).join(":")),
         },
-        { label: "Reason", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
+        { label: "Priority / context", value: (r) => [...new Set(r.selections.map((s) => s.reason))].join("; ") },
         {
           label: "PASS agreement",
           value: (r) => (r.exact_pass_agreement ? "ClairS-TO + DeepSomatic" : "Independent caller evidence"),
         },
         {
           label: "AF / depth by caller",
+          render: (r) => {
+            const box = el("div");
+            for (const caller of ["clair3", "clairsto", "deepsomatic"]) {
+              const evidence = r.evidence.filter((e) => e.caller === caller);
+              if (!evidence.length) {
+                box.append(el("p", caller + ": no allele evidence emitted", "muted"));
+                continue;
+              }
+              for (const e of evidence) {
+                const v = e.sample_evidence?.[caller] || {};
+                box.append(el("p", caller + ": AF " + fmt(v.af) + "; depth " + fmt(v.depth) + "; " + fmt(e.filter)));
+              }
+            }
+            return box;
+          },
           value: (r) =>
             r.evidence
               .filter((e) => e.caller !== "consensus")
@@ -846,6 +960,14 @@
                 return `${e.caller}: ${fmt(s.af)} / ${fmt(s.depth)} (${e.filter})`;
               })
               .join("; "),
+        },
+        {
+          label: "ClinVar",
+          value: (r) =>
+            clinvar(r)
+              .map((a) => annotationText(a.CLNSIG))
+              .join("; "),
+          render: clinvarCell,
         },
         { label: "COSMIC IDs", value: cosmic },
         { label: "Details", detail: true },
@@ -864,8 +986,32 @@
         null,
         "Population AF > 0.01 is excluded unless the exact allele is whitelisted. Predicted loss of function and COSMIC recurrence do not establish pathogenicity. COSMIC gene tier is a gene-level Cancer Gene Census property. Full annotation exports retain native filters.",
       );
+      function collapsed(parent, title, description) {
+        const d = el("details");
+        d.append(el("summary", title));
+        parent.append(d);
+        return panel(d, null, description);
+      }
+      const flow = panel(sections.small, "How variants reach this report");
+      const steps = el("div", undefined, "flow");
+      for (const text of [
+        "Native Clair3 / ClairS-TO / DeepSomatic calls →",
+        "Normalize and aggregate exact alleles; retain native failed-call evidence →",
+        "VEP consequence + population frequency + ClinVar + optional COSMIC →",
+        "Native PASS and population AF ≤0.01, unless exact allele whitelist; ClairS-TO + DeepSomatic PASS agreement →",
+        "Transcript / gene prioritization and review groups",
+      ])
+        steps.append(el("span", text));
+      flow.append(
+        steps,
+        el(
+          "p",
+          "Clair3 does not vote in somatic PASS agreement. Caller AF and depth are never pooled. COSMIC matches do not rescue failed variants or establish pathogenicity.",
+          "muted",
+        ),
+      );
       table(
-        panel(sections.sv, "Copy-number intervals", "Values retain their native caller representation."),
+        collapsed(sections.nasvar, "Copy-number intervals", "Values retain their native caller representation."),
         data.cnv || [],
         [
           { label: "Source", value: (r) => r.source },
@@ -900,7 +1046,7 @@
       const ncnv = data.nasvar?.cnv?.genes;
       if (ncnv)
         table(
-          panel(sections.nasvar, "Native gene copy estimates"),
+          collapsed(sections.nasvar, "Native gene copy estimates"),
           Object.entries(ncnv).map(([gene, value]) => ({ gene, ...value })),
           [
             { label: "Gene", value: (r) => r.gene },
@@ -912,7 +1058,7 @@
       const nk = data.nasvar?.karyotype?.karyotype;
       if (nk)
         table(
-          panel(sections.nasvar, "Native chromosome-arm estimates"),
+          collapsed(sections.nasvar, "Native chromosome-arm estimates"),
           Object.entries(nk)
             .sort((a, b) => a[0].localeCompare(b[0], undefined, { numeric: true }))
             .map(([arm, copies]) => ({ arm, copies })),
@@ -946,9 +1092,35 @@
           d.append(s, el("pre", JSON.stringify(data.nasvar[key], null, 2)));
           p.append(d);
         }
-      const q = panel(
+      table(
+        panel(
+          sections.qc,
+          "Coverage and read quality summary",
+          "Interval-weighted depth uses the reported intervals; overlapping intervals may contribute more than once. No assay pass/fail thresholds are inferred.",
+        ),
+        data.qc_summary || [],
+        [
+          { label: "Metric", value: (r) => r.metric },
+          { label: "Value", value: (r) => r.value },
+        ],
+        "QC metrics",
+      );
+      table(
+        panel(
+          sections.qc,
+          "Lowest-coverage genes",
+          "Up to 20 genes ordered by interval-weighted primary alignment depth.",
+        ),
+        data.coverage_genes || [],
+        [
+          { label: "Gene", value: (r) => r.gene },
+          { label: "Primary mean depth", value: (r) => r.depth },
+        ],
+        "gene coverage",
+      );
+      const q = collapsed(
         sections.qc,
-        "Region coverage",
+        "All coverage intervals",
         "Mean interval depth. Alignment-filter strata are separate measurements. These summaries do not establish per-base depth thresholds or a copy-number diagnosis.",
       );
       table(
@@ -969,7 +1141,7 @@
       panel(
         sections.targets,
         null,
-        "Target-locus figures show the configured loci and selected evidence. Absence from a prioritised event list is not a negative molecular finding.",
+        "Focal CN/SV locus plots show read-depth and structural evidence at configured genes. They are contextual views, not independent copy-number calls. Absence from a prioritised event list is not a negative molecular finding.",
       );
       function showCoverage(row) {
         const dialog = document.getElementById("evidence"),
@@ -1019,25 +1191,59 @@
           content = document.getElementById("dialog-content");
         document.getElementById("dialog-title").textContent = item.name;
         content.replaceChildren();
-        const scale = el("input");
-        scale.type = "range";
-        scale.min = 50;
-        scale.max = 200;
-        scale.value = 100;
-        scale.setAttribute("aria-label", "Figure zoom");
+        dialog.classList.remove("full-view");
+        const toggle = el("button", "Full screen view");
+        toggle.onclick = () => {
+          const active = dialog.classList.toggle("full-view");
+          toggle.textContent = active ? "Exit full screen view" : "Full screen view";
+          toggle.setAttribute("aria-pressed", String(active));
+        };
+        dialog.addEventListener("close", () => dialog.classList.remove("full-view"), { once: true });
         const viewport = el("div", undefined, "zoom-scroll"),
           img = el("img");
         img.src = data.images[item.image_key];
         img.alt = item.name;
-        img.style.width = "100%";
-        scale.oninput = () => (img.style.width = scale.value + "%");
         viewport.append(img);
-        content.append(scale, viewport);
+        content.append(toggle, viewport);
         dialog.showModal();
+      }
+      function figurePanel(parent, item) {
+        const box = el("figure"),
+          img = el("img");
+        img.src = data.images[item.image_key];
+        img.alt = item.name;
+        img.style.width = "100%";
+        img.style.maxHeight = "720px";
+        img.style.objectFit = "contain";
+        const b = el("button", "Open full view");
+        b.onclick = () => zoom(item);
+        box.append(img, b);
+        parent.append(box);
+      }
+      const cnOverview = el("div");
+      sections.nasvar.prepend(cnOverview);
+      for (const item of data.figures.filter((f) => f.reformatted)) figurePanel(cnOverview, item);
+      const chromosomePlots = data.figures.filter((f) => f.category === "chromosomes");
+      if (chromosomePlots.length) {
+        const box = panel(cnOverview, "Per-chromosome copy-number and structural context"),
+          select = el("select"),
+          display = el("div");
+        chromosomePlots.forEach((f, i) => {
+          const option = el("option", f.name);
+          option.value = i;
+          select.append(option);
+        });
+        select.setAttribute("aria-label", "Chromosome plot");
+        select.onchange = () => {
+          display.replaceChildren();
+          figurePanel(display, chromosomePlots[Number(select.value)]);
+        };
+        box.append(select, display);
+        select.onchange();
       }
       const galleries = {};
       for (const item of data.figures || []) {
-        if (item.generated) continue;
+        if (item.generated || item.reformatted || item.category === "chromosomes") continue;
         const id =
           item.category === "fusions"
             ? "fusions"

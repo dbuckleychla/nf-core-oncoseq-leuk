@@ -44,6 +44,7 @@ def main():
     p.add_argument('--output', required=True)
     p.add_argument('--template', default=str(Path(__file__).resolve().parents[1] / 'assets/review/report.html'))
     p.add_argument('--figures')
+    p.add_argument('--results-root', help='Optional existing local output directory for presentation-only QC and NASVAR plots')
     args = vars(parser.parse_args())
     command = args.pop('command')
     if command == 'import':
