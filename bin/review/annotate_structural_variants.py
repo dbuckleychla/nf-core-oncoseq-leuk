@@ -23,7 +23,8 @@ def endpoint(rec):
     pos=rec.info['POS2'] if 'POS2' in rec.info else None
     if isinstance(chrom,tuple):chrom=chrom[0]
     if isinstance(pos,tuple):pos=pos[0]
-    strands = rec.info.get('STRANDS')
+    # Optional tags may be undeclared; pysam.get() raises for an unknown header ID.
+    strands = rec.info['STRANDS'] if 'STRANDS' in rec.info else None
     if isinstance(strands,tuple):strands=strands[0] if len(strands)==1 else None
     strands=str(strands).split(':')[0] if strands is not None else ''
     local_side='right' if strands[:1]=='+' else 'left' if strands[:1]=='-' else None

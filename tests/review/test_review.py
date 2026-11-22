@@ -23,6 +23,36 @@ import sqlite3
 
 
 class ReviewTests(unittest.TestCase):
+    def test_symbolic_sv_without_strands_header(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = make(Path(tmp) / 'refs')
+            source = root / 'symbolic.vcf'
+            header = pysam.VariantHeader()
+            header.contigs.add('chr1', length=1000)
+            header.info.add('END', 1, 'Integer', 'End position')
+            header.info.add('SVTYPE', 1, 'String', 'Variant type')
+            header.formats.add('GT', 1, 'String', 'Genotype')
+            header.add_sample('SYNTHETIC')
+            record = header.new_record(contig='chr1', start=149, stop=250,
+                                       alleles=('A', '<DEL>'), id='SYNTHETIC_DEL')
+            record.info['SVTYPE'] = 'DEL'
+            record.samples['SYNTHETIC']['GT'] = (0, 1)
+            result = endpoint(record)
+            self.assertEqual(result['pos'], 250)
+            self.assertIsNone(result['local_side'])
+            self.assertIsNone(result['remote_side'])
+            with pysam.VariantFile(str(source), 'w', header=header) as writer:
+                writer.write(record)
+            summary = annotate_sv('SYNTHETIC', 'sniffles', source, root / 'genes.gff',
+                                  root / 'genome.fa.fai', root / 'sv-output')
+            self.assertEqual(summary['status'], 'completed')
+            output = root / 'sv-output/SYNTHETIC.sniffles.structural.annotated.vcf.gz'
+            with pysam.VariantFile(str(output)) as handle:
+                annotated = next(iter(handle))
+                self.assertEqual(annotated.samples['SYNTHETIC']['GT'], (0, 1))
+                self.assertEqual(annotated.stop, 250)
+                self.assertNotIn('STRANDS', annotated.info)
+
     def test_development_checksums_optional_but_supplied_hashes_checked(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = make(Path(tmp) / 'refs')
