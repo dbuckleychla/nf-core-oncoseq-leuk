@@ -26,6 +26,7 @@ This mode is designed for targeted sequencing experiments using ONT's adaptive s
 - **Coverage Separation**: Separates on-target and off-target reads for quality assessment
 
 **Key Parameters:**
+
 - `--bed`: BED file defining regions of interest for adaptive sampling
 - `--adaptive_samplesheet`: Optional samplesheet specifying BED files per sample
 - `--time_series`: Enable time-series analysis for tracking sequencing progress
@@ -268,15 +269,15 @@ nextflow run nf-core/oncoseq -profile docker -params-file params.yaml
 with:
 
 ```yaml title="params.yaml"
-input: './samplesheet.csv'
-outdir: './results/'
+input: "./samplesheet.csv"
+outdir: "./results/"
 adaptive: true
-bed: './target_regions.bed'
+bed: "./target_regions.bed"
 time_series: true
-time_points: '1,2,4,8,12,24'
-clairsto_model: 'ont_r10_dorado_sup_5khz_ssrs'
-basecall_model: 'sup'
-max_memory: '32.GB'
+time_points: "1,2,4,8,12,24"
+clairsto_model: "ont_r10_dorado_sup_5khz_ssrs"
+basecall_model: "sup"
+max_memory: "32.GB"
 max_cpus: 8
 ```
 
@@ -287,18 +288,21 @@ max_cpus: 8
 The pipeline provides comprehensive variant analysis capabilities:
 
 **Small Variant Calling:**
+
 - **ClairS-TO**: Somatic variant calling optimized for tumor samples
 - **Clair3**: Germline variant calling for constitutional variants
 - **Quality Filtering**: Configurable quality thresholds and filters
 - **Clinical Annotation**: Integration with ClinVar and other databases
 
 **Structural Variant Detection:**
+
 - **Sniffles2**: Long-read optimized SV calling
 - **Large Deletions, Insertions**: Detection of major genomic rearrangements
 - **Copy Number Variations**: Both targeted and genome-wide CNV analysis
 - **Breakpoint Resolution**: Single-nucleotide resolution for many SVs
 
 **Variant Phasing:**
+
 - **WhatsHap**: Statistical phasing of heterozygous variants
 - **Haplotype-resolved Analysis**: Separates maternal and paternal variants
 - **Long-range Phasing**: Leverages long-read advantages for extended phasing
@@ -306,12 +310,14 @@ The pipeline provides comprehensive variant analysis capabilities:
 ### Coverage and Quality Analysis
 
 **Adaptive Sampling Specific:**
+
 - **On/Off-target Analysis**: Quantifies enrichment efficiency
 - **Time-series Tracking**: Monitors coverage accumulation over time
 - **Region-specific Metrics**: Per-gene and per-exon coverage statistics
 - **Adaptive Efficiency**: Measures real-time selection performance
 
 **General Coverage Metrics:**
+
 - **Depth Distribution**: Coverage histograms and statistics
 - **Uniformity Assessment**: Coefficient of variation across regions
 - **Quality Metrics**: Read quality, mapping quality, and alignment statistics
@@ -319,12 +325,14 @@ The pipeline provides comprehensive variant analysis capabilities:
 ### Specialized Analysis Modes
 
 **Cell-free DNA Analysis:**
+
 - **Low-input Optimization**: Adapted algorithms for cfDNA characteristics
 - **Fragment Analysis**: Size distribution and fragmentation patterns
 - **CNV Detection**: Optimized for detecting circulating tumor DNA
 - **Quality Control**: cfDNA-specific QC metrics and thresholds
 
 **Time-series Analysis:**
+
 - **Progressive Coverage**: Tracks sequencing progress over defined time points
 - **Adaptive Efficiency**: Measures on-target enrichment over time
 - **Stopping Criteria**: Supports analysis of optimal sequencing duration
@@ -449,3 +457,7 @@ We recommend adding the following line to your environment to limit this (typica
 ```bash
 NXF_OPTS='-Xms1g -Xmx4g'
 ```
+
+### Unaligned BAM input
+
+Use `--input_ubam` with a sample-separated `.bam` in the samplesheet input column. The first 1,000 reads are checked for required tags before streamed alignment. See [uBAM input](ubam-input.md) for required tags, quality filtering and an invocation example.

@@ -10,7 +10,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MINIMAP2_ALIGN                         } from '../../../modules/nf-core/minimap2/align/main'         // minimap2 alignment
+include { MINIMAP2_ALIGN                         } from '../../../modules/local/clinical_threads/minimap2_align/main'         // minimap2 alignment
 include { SAMTOOLS_INDEX                         } from '../../../modules/nf-core/samtools/index/main'         // Index BAM
 include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_CHUNK } from '../../../modules/nf-core/samtools/merge/main'         // Merge BAMs
 include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_FINAL } from '../../../modules/nf-core/samtools/merge/main'         // Merge BAMs
@@ -38,7 +38,7 @@ workflow MAPPING {
     main:
 
     // Only expand in_ch if skip_basecalling is true
-    if (params.skip_basecalling) {
+    if (params.skip_basecalling && !params.input_ubam) {
         in_ch
             .map { meta, reads ->
                 // Ensure 'reads' is a list and flatten it

@@ -1,0 +1,63 @@
+nextflow_process {
+    name "uBAM sampling boundaries and FASTQ compatibility"
+    script "modules/local/clinical_threads/minimap2_align/main.nf"
+    process "MINIMAP2_ALIGN"
+    config "tests/config/ubam_local.config"
+
+    test("Do not inspect tags after the first 1000 reads") {
+        when {
+            params { input_ubam=true; ubam_min_qscore=10; time_series=false; realtime=null }
+            process {
+                """
+                input[0] = [[id:'SYNTHETIC'],file('${projectDir}/test_data/ubam/missing_after_sample.bam')]
+                input[1] = [[id:'reference'],file('${projectDir}/test_data/ubam/reference.fa')]
+                input[2] = true
+                input[3] = 'bai'
+                input[4] = false
+                input[5] = false
+                """
+            }
+        }
+        then {
+            assert process.success
+            def validation = new groovy.json.JsonSlurperClassic().parseText(file(process.out.ubam_validation[0][1]).text)
+            assert validation.checked_reads == 1000
+            assert validation.remaining_reads_assumed_tagged
+            assert !file(process.out.bam[0][1]).parentFile.listFiles().any { it.name.endsWith('.fq') || it.name.endsWith('.fastq') }
+        }
+    }
+
+    test("Require timing tags for realtime uBAM input") {
+        when {
+            params { input_ubam=true; ubam_min_qscore=10; realtime=1 }
+            process {
+                """
+                input[0] = [[id:'SYNTHETIC'],file('${projectDir}/test_data/ubam/missing_st.bam')]
+                input[1] = [[id:'reference'],file('${projectDir}/test_data/ubam/reference.fa')]
+                input[2] = true
+                input[3] = 'bai'
+                input[4] = false
+                input[5] = false
+                """
+            }
+        }
+        then { assert process.failed; assert process.stdout.join('\n').contains('lacks required tag st') }
+    }
+
+    test("Retain the existing FASTQ alignment path") {
+        when {
+            params { input_ubam=false }
+            process {
+                """
+                input[0] = [[id:'SYNTHETIC'],file('${projectDir}/test_data/ubam/reads.fastq')]
+                input[1] = [[id:'reference'],file('${projectDir}/test_data/ubam/reference.fa')]
+                input[2] = true
+                input[3] = 'bai'
+                input[4] = false
+                input[5] = false
+                """
+            }
+        }
+        then { assert process.success; assert process.out.ubam_validation.size() == 0; assert process.out.bam.size() == 1 }
+    }
+}

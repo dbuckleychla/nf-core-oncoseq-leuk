@@ -177,4 +177,30 @@ nextflow_function {
             assert function.result == true
         }
     }
+
+    test("Accept clinical Batch uBAM input without Dorado models or basecalling queue") {
+        when {
+            function {
+                """
+                input[0] = [input_ubam:true, ubam_min_qscore:10, clinical:true, aws_region:'us-west-2', aws_queue:'cpu', aws_job_role:'role', outdir:'s3://bucket/results/run', aws_bam_high_queue:'high', aws_bam_high_vcpus:32, max_cpus:32, ref_cache:'/refs', vep_cache:'/vep']
+                input[1] = 'aws,clinical'
+                input[2] = 's3://bucket/work/run'
+                """
+            }
+        }
+        then { assert function.success; assert function.result == true }
+    }
+
+    test("Reject uBAM input with skipped mapping") {
+        when {
+            function {
+                """
+                input[0] = [input_ubam:true, ubam_min_qscore:10, skip_mapping:true]
+                input[1] = 'docker'
+                input[2] = '/work'
+                """
+            }
+        }
+        then { assert function.failed; assert function.stdout.join('\n').contains('cannot be combined') }
+    }
 }

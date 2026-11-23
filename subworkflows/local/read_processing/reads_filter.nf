@@ -24,7 +24,7 @@ workflow READS_FILTER {
 
     main:
 
-    if (params.skip_basecalling) {
+    if (params.skip_basecalling && !params.input_ubam) {
 
         ch_fastq = input
             .branch { meta, files ->
@@ -37,7 +37,7 @@ workflow READS_FILTER {
         ch_input = CAT_FASTQ.out.reads.map { meta, file -> tuple(id:meta.id, file)}
             .mix(ch_fastq.single)
 
-    } else if (!params.skip_mapping) {
+    } else if (!params.skip_mapping && !params.input_ubam) {
         input
             .map { meta, reads ->
                 def new_meta = modifyMetaId(meta, 'remove_suffix', '', '', '_pass')
@@ -46,7 +46,7 @@ workflow READS_FILTER {
             .set { ch_input }
     }
 
-    if (params.skip_mapping) {
+    if (params.skip_mapping || params.input_ubam) {
 
         ch_bam = cfdna_samplesheet
             .join(input)
@@ -118,7 +118,7 @@ workflow READS_FILTER {
 
     }
 
-    if (!params.skip_mapping) {
+    if (!params.skip_mapping && !params.input_ubam) {
 
         SEQKIT_STATS(ch_reads_out_final)
 

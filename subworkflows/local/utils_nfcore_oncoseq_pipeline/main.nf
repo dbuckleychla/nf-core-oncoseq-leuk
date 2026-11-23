@@ -334,7 +334,7 @@ workflow PIPELINE_INITIALISATION {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
-    if (params.skip_basecalling || params.skip_mapping ) {
+    if (params.input_ubam || params.skip_basecalling || params.skip_mapping ) {
 
         ch_model = channel.empty()
         ch_modif = channel.empty()

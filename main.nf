@@ -132,6 +132,8 @@ params {
     padding: Integer = 20000
 
     // Option to skip basecalling and start with fastq files in the samplesheet input column
+    input_ubam: Boolean = false
+    ubam_min_qscore: Integer = 10
     skip_basecalling: Boolean
 
     // Maximum memory any process can consume
@@ -331,9 +333,12 @@ workflow {
     def genome = genomeMap[params.genome]
 
     // Load model channels from parameters:
-    if (params.skip_basecalling || params.skip_mapping) {
+    if (params.input_ubam || params.skip_basecalling || params.skip_mapping) {
 
         ch_input = PIPELINE_INITIALISATION.out.samplesheet.map { meta, input, _ubam ->
+            if (params.input_ubam && (!input.name.endsWith('.bam') || _ubam.name != 'NOFILE')) {
+                throw new IllegalArgumentException('--input_ubam requires a .bam file in input and no basecalling resume uBAM')
+            }
             tuple(meta, input)
         }
 

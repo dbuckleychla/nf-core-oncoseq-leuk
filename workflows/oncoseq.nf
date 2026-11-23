@@ -141,8 +141,8 @@ workflow ONCOSEQ {
     def is_full_wgs = (!is_cfdna && !is_realtime)
     def realtime_hours = is_realtime ? params.realtime?.toInteger() : 0
     def time_series = (params.time_series && !is_realtime) ? true : false
-    def check_tags = (params.skip_basecalling || params.skip_mapping) ? true : false
-    def do_classify = ((params.m_bases || check_tags) && genome != "hs1") ? true : false
+    def check_tags = !params.input_ubam && (params.skip_basecalling || params.skip_mapping)
+    def do_classify = ((params.input_ubam || params.m_bases || check_tags) && genome != "hs1") ? true : false
     def run_snp = (!is_realtime || realtime_hours >= 6)
 
     def title_prefix = is_cfdna
@@ -176,7 +176,16 @@ workflow ONCOSEQ {
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
-    if (params.skip_basecalling || params.skip_mapping) {
+    if (params.input_ubam) {
+        ch_reads = ch_samples_for_processing.collect(flat: false).flatMap { rows ->
+            def identifiers = rows.collect { row -> row[0].id }
+            if (identifiers.size() != identifiers.unique(false).size()) {
+                throw new IllegalArgumentException('--input_ubam currently requires exactly one BAM per sample; merge same-sample uBAMs first')
+            }
+            rows
+        }
+    }
+    else if (params.skip_basecalling || params.skip_mapping) {
 
         ch_reads = ch_samples_for_processing
     }
@@ -203,7 +212,7 @@ workflow ONCOSEQ {
     }
 
     // cfDNA: filter reads before mapping (unless the input is already mapped)
-    if (is_cfdna && !params.skip_mapping) {
+    if (is_cfdna && !params.skip_mapping && !params.input_ubam) {
 
         READS_FILTER(
             cfdna_samplesheet,
@@ -223,7 +232,7 @@ workflow ONCOSEQ {
     )
 
     // cfDNA with mapped input: filter the BAM after mapping
-    if (is_cfdna && params.skip_mapping) {
+    if (is_cfdna && (params.skip_mapping || params.input_ubam)) {
 
         READS_FILTER(
             cfdna_samplesheet,
@@ -246,7 +255,7 @@ workflow ONCOSEQ {
 
     if (params.realtime) {
 
-        if (params.skip_mapping) {
+        if (params.skip_mapping || params.input_ubam) {
             // We have to convert bam to fastq when bam input is from MinKnow :
 
             ch_bam = MAPPING.out.bam.map { meta, bam, _bai ->

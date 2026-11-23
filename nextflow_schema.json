@@ -547,6 +547,17 @@
         "aws_basecall_queue": {
             "type": "string",
             "description": "Dedicated NVIDIA GPU AWS Batch queue for Dorado basecalling."
+        },
+        "input_ubam": {
+            "type": "boolean",
+            "default": false,
+            "description": "Start from one sample-separated unaligned BAM per samplesheet row. Validate the first 1000 reads and stream into alignment, preserving methylation tags."
+        },
+        "ubam_min_qscore": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 10,
+            "description": "Minimum qs tag score for streamed uBAM read filtering. Zero disables this filter and the qs tag requirement."
         }
     }
 }
