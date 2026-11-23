@@ -1,10 +1,12 @@
 Use `--input_ubam` to start from sample-separated, already basecalled unaligned BAMs. Put the BAM in the samplesheet **input** column; the existing **ubam** column remains reserved for resuming Dorado basecalling.
 
 ```csv
-sample,input
-SAMPLE_A,/path/to/sampleA.unaligned.bam
-SAMPLE_B,s3://your-input-bucket/sampleB.unaligned.bam
+sample,input,tumor_type
+SAMPLE_A,/path/to/sampleA.unaligned.bam,blood
+SAMPLE_B,s3://your-input-bucket/sampleB.unaligned.bam,blood
 ```
+
+The standard samplesheet metadata is preserved. Use `tumor_type` (not `sample_type`) to specify `blood` or another supported tissue type for classification; if omitted, it defaults to `other`. Other standard fields, including per-sample BED settings, remain available.
 
 Each sample must have exactly one `.bam` input. Merge multiple same-sample uBAMs first. Inputs should already be demultiplexed and trimmed; this mode cannot be combined with `--demux` or `--skip_mapping`. Do not add `--skip_basecalling`: uBAM mode bypasses Dorado and its model downloads itself.
 
