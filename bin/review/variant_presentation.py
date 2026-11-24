@@ -12,7 +12,7 @@ def significance(value, term):
     return bool(re.search(r'(^|[|/,])\s*' + term + r'\s*($|[|/,])', text(value).lower()))
 
 
-def cosmic_summary(row, gene=None):
+def cosmic_summary(row):
     sources = [s for e in row.get('evidence', []) for s in e.get('cosmic', {}).get('sources', [])]
     identifiers = sorted({i for s in sources for i in s.get('identifiers', [])})
     targeted = {t['identifier']: t for e in row.get('evidence', [])
@@ -34,15 +34,12 @@ def cosmic_summary(row, gene=None):
             status = evidence.get('MUTATION_SOMATIC_STATUS')
             if status:
                 statuses.add(status.lower())
-    tiers = sorted({str(o['info']['TIER']) for source in sources for o in source.get('observations', [])
-                    if o.get('info', {}).get('TIER') in ('1', '2', 1, 2)
-                    and (not gene or o['info'].get('GENE') == gene)})
     categories = []
     if any('confirmed somatic' in s for s in statuses):categories.append('Confirmed somatic reports')
     if any('another cancer sample' in s for s in statuses):categories.append('Other somatic reports')
     if any('unknown origin' in s for s in statuses):categories.append('Unknown origin reports')
     if statuses and not categories:categories.append('Other reported status')
-    return dict(matched=bool(identifiers), identifiers=identifiers, tiers=tiers,
+    return dict(matched=bool(identifiers), identifiers=identifiers,
                 tissue_known=any(p.get('classification') for t in targeted.values() for p in t.get('phenotypes', [])),
                 blood_match=any(e.get('cosmic', {}).get('blood_match') for e in row.get('evidence', [])),
                 sample_count=len(samples) if complete else None,
@@ -149,11 +146,16 @@ def enrich_variants(data):
             for warning in sorted({w for c in cosmic for w in c.get('warnings', [])}):
                 reasons.append('COSMIC join incomplete: ' + warning.replace('_', ' ') + '.')
             # Primary membership reflects tissue evidence, independently of ClinVar classification.
-            group = 'findings' if blood and not common else 'coding'
+            if blood and not common:
+                group = 'findings'
+            elif not matched and any(c.get('status') == 'no_match' for c in cosmic) and group == 'findings':
+                group = 'noncosmic_findings'
+            else:
+                group = 'coding'
             rank = 0 if blood else 1 if matched else 2 + rank
         if not native_reasons and not assertions:
             reasons.insert(0, 'Selected for review; original inclusion criteria are unavailable.')
         stars = max((4 if 'practice guideline' in text(a.get('CLNREVSTAT')) else 3 if 'expert panel' in text(a.get('CLNREVSTAT')) else 2 if 'multiple submitters' in text(a.get('CLNREVSTAT')) and 'no conflicts' in text(a.get('CLNREVSTAT')) else 1 if 'criteria provided' in text(a.get('CLNREVSTAT')) else 0 for a in assertions), default=0)
         row['presentation'] = dict(group=group, rank=rank, review_stars=stars, reasons=list(dict.fromkeys(reasons)),
                                    primary_selection=primary, selected_impact=impact, transcripts=transcripts,
-                                   cosmic=cosmic_summary(row, primary.get('gene')))
+                                   cosmic=cosmic_summary(row))

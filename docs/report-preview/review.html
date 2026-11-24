@@ -449,16 +449,6 @@
         background: #153448;
         border-color: #397795;
       }
-      .evidence-tier-1 {
-        color: #f3e8ff;
-        background: #42275d;
-        border-color: #9c72c7;
-      }
-      .evidence-tier-2 {
-        color: #ddd6fe;
-        background: #2d2944;
-        border-color: #68628c;
-      }
       .evidence-somatic {
         color: #99f6e4;
         background: #173c36;
@@ -1667,7 +1657,6 @@
                 "cosmic": {
                   "matched": true,
                   "identifiers": ["COSV1"],
-                  "tiers": ["1"],
                   "tissue_known": true,
                   "blood_match": true,
                   "sample_count": 1,
@@ -2392,7 +2381,6 @@
                 "cosmic": {
                   "matched": true,
                   "identifiers": ["COSV2"],
-                  "tiers": [],
                   "tissue_known": true,
                   "blood_match": false,
                   "sample_count": 1,
@@ -2579,7 +2567,7 @@
           {
             "category": "copy_number",
             "name": "B-allele frequency (BAF)",
-            "path": "/Volumes/DNB_External_1/temp_SSD_data/ONT_P2I_LEUK_20261119_Oncoseq/.cosmic_reannotation_work/tmpmf4kwu4a/review/presentation/nasvar.baf.svg",
+            "path": "/Volumes/DNB_External_1/temp_SSD_data/ONT_P2I_LEUK_20261119_Oncoseq/.cosmic_reannotation_work/tmpdikcm5nd/review/presentation/nasvar.baf.svg",
             "reformatted": true,
             "presentation_order": 2,
             "image_key": "73677ddb0dac5aad41d07bf3afd90e33edfef659cdbaf7514f1565d8a586fc40",
@@ -2588,7 +2576,7 @@
           {
             "category": "copy_number",
             "name": "GC-corrected coverage",
-            "path": "/Volumes/DNB_External_1/temp_SSD_data/ONT_P2I_LEUK_20261119_Oncoseq/.cosmic_reannotation_work/tmpmf4kwu4a/review/presentation/nasvar.overview.svg",
+            "path": "/Volumes/DNB_External_1/temp_SSD_data/ONT_P2I_LEUK_20261119_Oncoseq/.cosmic_reannotation_work/tmpdikcm5nd/review/presentation/nasvar.overview.svg",
             "reformatted": true,
             "presentation_order": 1,
             "image_key": "e7da5edd6b36ca8ff51d373d4a8ed85f7f2065c72f8774915ed411c95194e761",
@@ -2598,7 +2586,7 @@
             "category": "fusions",
             "generated": true,
             "event_id": "b6cf96d02bf1f8f39bc0333a",
-            "path": "/Volumes/DNB_External_1/temp_SSD_data/ONT_P2I_LEUK_20261119_Oncoseq/.cosmic_reannotation_work/tmpmf4kwu4a/figures/illustrative.svg",
+            "path": "/Volumes/DNB_External_1/temp_SSD_data/ONT_P2I_LEUK_20261119_Oncoseq/.cosmic_reannotation_work/tmpdikcm5nd/figures/illustrative.svg",
             "name": "Illustrative RUNX1::RUNX1T1 junction",
             "image_key": "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf",
             "order": [27, "Illustrative RUNX1::RUNX1T1 junction"]
@@ -2676,7 +2664,7 @@
             "cosmic_evidence": {
               "uri": "cosmic.evidence.sqlite",
               "release": "synthetic",
-              "sha256": "7ecf6389e602080508458a81038c7562e65f853498dde216bed666c09f84a171"
+              "sha256": "5204bc9456ac47d49081049078462aedf77c54e2eb19b2bb7dc19b859cabb07c"
             }
           }
         },
@@ -2874,7 +2862,6 @@
                     id: recurrence.identifier,
                     values: recurrence.values.join(" / "),
                     inconsistent: recurrence.inconsistent,
-                    tier: [...new Set((source.observations || []).map((r) => r.info?.TIER).filter(Boolean))].join(", "),
                   });
               }
           const cosmicBox = panel(content, "COSMIC");
@@ -2886,7 +2873,6 @@
                 label: "Reported recurrence",
                 value: (r) => r.values + (r.inconsistent ? " (conflicting values)" : ""),
               },
-              { label: "Gene Census tier", value: (r) => r.tier || "Not available" },
             ]);
           } else cosmicBox.append(el("p", cosmic(value), "muted"));
           const targeted = [
@@ -3340,6 +3326,19 @@
           ]
         );
       }
+      function compareCosmicReports(a, b) {
+        const reports = (r) => {
+          const c = r.presentation?.cosmic;
+          return c && !c.matched ? 0 : c?.publication_count ?? -1;
+        };
+        return (
+          reports(b) - reports(a) ||
+          (a.presentation?.rank ?? 99) - (b.presentation?.rank ?? 99) ||
+          (b.presentation?.review_stars ?? 0) - (a.presentation?.review_stars ?? 0) ||
+          (choice(a).gene || "").localeCompare(choice(b).gene || "") ||
+          JSON.stringify(a.coordinates).localeCompare(JSON.stringify(b.coordinates))
+        );
+      }
       function cosmic(r) {
         const hits = r.evidence.flatMap((e) => e.cosmic?.sources || []).flatMap((s) => s.identifiers || []);
         return (
@@ -3428,13 +3427,12 @@
             info.blood_match ? "blood" : info.tissue_known ? "neutral" : "uncertain",
           ),
         );
-        for (const tier of info.tiers) badges.append(evidenceBadge("Gene tier " + tier, "tier-" + tier));
         box.append(badges);
         if (info.counts_complete) {
           box.append(
             el("p", fmt(info.blood_sample_count) + " blood / lymphoid · " + fmt(info.sample_count) + " total samples"),
           );
-          box.append(el("p", fmt(info.publication_count) + " publications", "muted"));
+          box.append(el("p", fmt(info.publication_count) + " unique reports (PubMed)", "muted"));
         } else box.append(evidenceBadge("Counts unavailable", "uncertain"));
         const statuses = el("div", undefined, "evidence-badges");
         for (const status of info.somatic_categories)
@@ -3554,7 +3552,6 @@
             return c?.matched
               ? [
                   c.blood_match ? "Blood / lymphoid" : "Other tissue",
-                  ...c.tiers.map((t) => "Gene tier " + t),
                   c.sample_count === null ? "Counts unavailable" : c.sample_count + " samples",
                   ...c.somatic_categories,
                   ...c.identifiers,
@@ -3575,26 +3572,27 @@
       panel(
         sections.small,
         null,
-        "The main table shows variants also reported in blood or lymphoid cancers in COSMIC. Expand the additional view for other COSMIC matches and ClinVar/VEP findings. A COSMIC match does not prove that a variant is cancer-causing or acquired in this person. Reported somatic status refers to the COSMIC source samples. Counts show distinct catalogue samples, not necessarily different patients; Gene Census tier describes the gene, not this variant. ClinVar provides pathogenic/uncertain labels when available.",
+        "The main table shows variants also reported in blood or lymphoid cancers in COSMIC. A separate table shows high-priority variants without COSMIC matches, based on reviewed ClinVar assertions or curated predicted loss of function. Expand the additional view for other COSMIC matches and remaining ClinVar/VEP findings. Each table is sorted by unique COSMIC reports (distinct PubMed publications), highest first. A COSMIC match does not prove that a variant is cancer-causing or acquired in this person. Reported somatic status refers to the COSMIC source samples. Counts show distinct catalogue samples, not necessarily different patients. ClinVar provides pathogenic/uncertain labels when available.",
       );
       for (const [group, title] of [
         ["findings", "COSMIC blood / lymphoid variants"],
+        ["noncosmic_findings", "High priority variants without COSMIC matches"],
         ["coding", "Expanded small variant review"],
         ["supporting", "Lower priority and supporting small variants"],
       ]) {
         const rows = small
           .filter((r) => (r.presentation?.group || r.selections[0]?.review_group) === group)
-          .sort(
-            (a, b) =>
-              (a.presentation?.rank ?? 99) - (b.presentation?.rank ?? 99) ||
-              (b.presentation?.review_stars ?? 0) - (a.presentation?.review_stars ?? 0) ||
-              (choice(a).gene || "").localeCompare(choice(b).gene || "") ||
-              JSON.stringify(a.coordinates).localeCompare(JSON.stringify(b.coordinates)),
-          );
-        if (rows.length || group === "findings")
+          .sort(compareCosmicReports);
+        if (rows.length || ["findings", "noncosmic_findings"].includes(group))
           table(
-            group === "findings"
-              ? panel(sections.small, title)
+            ["findings", "noncosmic_findings"].includes(group)
+              ? panel(
+                  sections.small,
+                  title,
+                  group === "noncosmic_findings"
+                    ? "Reviewed ClinVar pathogenic / likely pathogenic assertions or curated predicted loss of function, without an exact COSMIC match."
+                    : undefined,
+                )
               : collapsed(sections.small, title, "Other COSMIC matches and additional annotation evidence."),
             rows,
             scols,

@@ -63,6 +63,20 @@ class VariantPresentationTests(unittest.TestCase):
         self.assertEqual(row['presentation']['group'],'coding')
 
 
+class NonCosmicPriorityTests(unittest.TestCase):
+    def test_previous_priority_criteria_get_a_separate_table(self):
+        pathogenic=record([selection('ClinVar pathogenic / likely pathogenic')], [dict(CLNSIG='Pathogenic',CLNREVSTAT='reviewed_by_expert_panel')])
+        lof=record([selection('Predicted loss of function','HIGH')])
+        broad=record([selection('VEP HIGH','HIGH','consensus_review')])
+        benign=record([selection('Predicted loss of function','HIGH')],[dict(CLNSIG='Benign')])
+        common=record([selection('Predicted loss of function','HIGH')],population=dict(status='excluded_common',combined_af=.1))
+        rows=[pathogenic,lof,broad,benign,common]
+        for row in rows:row['evidence'][0]['cosmic']=dict(status='no_match',sources=[],targeted_evidence=[],blood_match=False)
+        enrich_variants(dict(small_variants=dict(records=rows)))
+        self.assertEqual([r['presentation']['group'] for r in rows],['noncosmic_findings','noncosmic_findings','coding','coding','coding'])
+        self.assertTrue(all(not r['presentation']['cosmic']['matched'] for r in rows))
+
+
 class CosmicSummaryTests(unittest.TestCase):
     def test_distinct_samples_and_publications_across_ids_and_callers(self):
         phenotype=dict(phenotype_id='SYNTHETIC_PHENOTYPE', classification=dict(PRIMARY_SITE='haematopoietic_and_lymphoid_tissue'))
@@ -70,9 +84,13 @@ class CosmicSummaryTests(unittest.TestCase):
         target=dict(identifier='COSV1', status='matched', phenotypes=[phenotype], evidence=[evidence, dict(evidence, TRANSCRIPT_ACCESSION='SYNTHETIC_TX')])
         cosmic=dict(blood_match=True, sources=[dict(identifiers=['COSV1','COSV2'], observations=[dict(info=dict(GENE='DEMO',TIER='1')),dict(info=dict(GENE='OTHER',TIER='2'))])], targeted_evidence=[target,dict(target,identifier='COSV2')])
         row=dict(evidence=[dict(cosmic=cosmic),dict(cosmic=copy.deepcopy(cosmic))])
-        summary=cosmic_summary(row,'DEMO')
+        summary=cosmic_summary(row)
         self.assertEqual((summary['sample_count'],summary['blood_sample_count'],summary['publication_count']),(1,1,1))
-        self.assertEqual(summary['tiers'],['1'])
+        target['evidence'].append(dict(evidence,COSMIC_SAMPLE_ID='SYNTHETIC_SAMPLE_2'))
+        row['evidence'][1]['cosmic']=copy.deepcopy(cosmic)
+        multiple_samples=cosmic_summary(row)
+        self.assertEqual((multiple_samples['sample_count'],multiple_samples['publication_count']),(2,1))
+        self.assertNotIn('tiers',summary)
         self.assertEqual(summary['somatic_categories'],['Confirmed somatic reports'])
         self.assertTrue(summary['tissue_known'])
         row['selections']=[selection('COSMIC blood/lymphoid match')]

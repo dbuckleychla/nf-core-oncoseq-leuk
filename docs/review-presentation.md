@@ -5,15 +5,22 @@ Classification cards show the top class, numeric score, emitted diagnostic cutof
 Small variants primarily use mandatory COSMIC targeted-screen annotations. Exact
 normalized matches with positive blood/lymphoid tissue evidence appear in the
 primary table. The collapsed expanded view includes all other COSMIC matches and
-additional ClinVar/VEP candidates. Caller PASS and population eligibility apply
+remaining ClinVar/VEP candidates. A separate visible table shows variants without
+COSMIC matches that meet the earlier high-priority criteria: reviewed ClinVar
+pathogenic/likely pathogenic or curated predicted loss of function. Generic HIGH
+impact alone is insufficient, and conflicting/benign evidence retains the earlier
+safeguards. Caller PASS and population eligibility apply
 to both. Each allele appears once, with caller-specific percentages and read
 counts. The evidence popup shows distinct COSMIC sample counts, tissue, histology
 and subtypes, publications and reported somatic status, alongside ClinVar
 assertions and VEP consequences. The COSMIC evidence column precedes ClinVar and
-shows distinct catalogue sample counts, tissue category, gene tier and source
+shows distinct catalogue sample counts, tissue category and source
 somatic-status categories. These use labelled colour badges; ClinVar significance
 has separate formatting. Catalogue sample counts are deduplicated across COSV IDs
-and callers and do not imply distinct patients. IDs remain in the evidence dialog.
+and callers and do not imply distinct patients. Tables sort by distinct COSMIC
+PubMed publications, highest first; sample counts do not determine order. Ties
+retain the existing annotation ordering, and unavailable report counts appear
+last. IDs remain in the evidence dialog.
 Caller support shows native variant/total read counts; unavailable counts use a
 dash and are never inferred from variant percentage. A single overview disclaimer
 explains the limits of COSMIC evidence, without repeating it in variant reasons. Missing joins are explicit. Catalogue membership

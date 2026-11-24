@@ -46,3 +46,15 @@ class CallerFilterTests(unittest.TestCase):
         result=subprocess.run(['node','--input-type=module','-e',script],check=True,capture_output=True,text=True)
         self.assertEqual(json.loads(result.stdout),dict(complete='3/20',missing='—/20',empty='—/—',zero='0/20',
                          conflict='uncertain',vus='uncertain',pathogenic='pathogenic',benign='neutral'))
+
+    def test_unique_reports_sort_before_sample_counts_and_priority(self):
+        template=(Path(__file__).resolve().parents[2]/'assets/review/report.html').read_text()
+        start=template.index('function compareCosmicReports(')
+        end=template.index('function cosmic(r)',start)
+        script="function choice(r){return {gene:r.id};}\n"+template[start:end]+"""
+        const row=(id,reports,samples,rank=0,matched=true)=>({id,coordinates:[id],presentation:{rank,cosmic:{matched,publication_count:reports,sample_count:samples}}});
+        const rows=[row('many-samples',1,1000),row('many-reports',8,2,9),row('unknown',null,500),row('no-match',null,0,9,false)];
+        console.log(JSON.stringify(rows.sort(compareCosmicReports).map(r=>r.id)));
+        """
+        result=subprocess.run(['node','--input-type=module','-e',script],check=True,capture_output=True,text=True)
+        self.assertEqual(json.loads(result.stdout),['many-reports','many-samples','no-match','unknown'])

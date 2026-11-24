@@ -143,7 +143,7 @@ all remaining REF alleles passed strict normalization.
 COSMIC records with FILTER `.` are valid annotation input. Recurrence values
 remain associated with their catalogue and COSV identifier. Transcript rows
 are not added together. Inconsistent values are displayed separately. Gene
-Census tier is labelled as a gene property. These VCF counts are not
+Census tier is omitted from report displays. These VCF counts are not
 tissue-specific; the evidence database supplies tissue-specific counts separately.
 
 Extract the matching GRCh38 release's `Cosmic_CompleteTargetedScreensMutant_Tsv`
@@ -187,8 +187,11 @@ blood evidence. Conflicting duplicate phenotype definitions fail preparation.
 
 Policy version 4 puts matches classified as
 `PRIMARY_SITE=haematopoietic_and_lymphoid_tissue` in the primary table, including
-lymphoid disease. The collapsed expanded table includes every other exact COSMIC
-match plus existing ClinVar/VEP candidates. Caller PASS and population eligibility
+lymphoid disease. A separate high-priority table retains variants without COSMIC matches that meet
+the earlier reviewed ClinVar P/LP or curated predicted loss-of-function criteria.
+The collapsed expanded table includes other exact COSMIC matches and remaining
+ClinVar/VEP candidates. Tables order by distinct COSMIC PubMed publications,
+highest first. Caller PASS and population eligibility
 (including the explicit whitelist) apply to both tables and consensus selection.
 ClinVar conflicts and benign assertions remain visible even for primary COSMIC
 matches. COSMIC transcript/HGVS supplies the representative matched annotation;
