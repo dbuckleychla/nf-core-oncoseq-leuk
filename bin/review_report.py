@@ -39,6 +39,10 @@ def main():
     p = commands.add_parser('manifest')
     p.add_argument('--resources', required=True)
     p.add_argument('--output', required=True)
+    p = commands.add_parser('patch-alignment-qc')
+    p.add_argument('--input', required=True)
+    p.add_argument('--output', required=True)
+    p.add_argument('--alignment-qc', required=True)
     p = commands.add_parser('render')
     p.add_argument('--input', required=True)
     p.add_argument('--output', required=True)
@@ -60,6 +64,9 @@ def main():
         Path(args['output']).write_text(json.dumps(manifest, indent=2) + '\n')
     elif command == 'manifest':
         make_manifest(**args)
+    elif command == 'patch-alignment-qc':
+        from alignment_qc import patch_html
+        patch_html(**args)
     elif command == 'render':
         from render import render
         render(**args)

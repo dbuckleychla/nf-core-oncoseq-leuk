@@ -1,3 +1,5 @@
+include { SAMTOOLS_ALIGNMENT_QC } from '../../../../../modules/local/alignment_qc/main'
+
 include { MINIMAP2_ALIGN } from '../../../../../modules/local/clinical_threads/minimap2_align/main'
 
 process CHECK_UBAM_TAGS {
@@ -30,8 +32,10 @@ workflow UBAM_SMOKE {
     reference
     main:
     MINIMAP2_ALIGN(reads, reference, true, 'bai', false, false)
+    SAMTOOLS_ALIGNMENT_QC(MINIMAP2_ALIGN.out.bam)
     CHECK_UBAM_TAGS(MINIMAP2_ALIGN.out.bam.join(MINIMAP2_ALIGN.out.index))
     emit:
+    alignment_qc = SAMTOOLS_ALIGNMENT_QC.out.qc
     validation = MINIMAP2_ALIGN.out.ubam_validation
     checked = CHECK_UBAM_TAGS.out
 }

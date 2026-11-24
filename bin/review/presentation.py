@@ -51,6 +51,10 @@ def enrich(data, root, results_root=None):
                             summaries.append(dict(metric=scope.capitalize() + ' reads: ' + {'num_seqs':'count', 'sum_len':'total bases', 'N50':'N50 length (bases)', 'AvgQual':'mean Phred quality', 'Q20(%)':'bases at Q20 (%)', 'Q30(%)':'bases at Q30 (%)'}[key], value=row[key]))
     data['qc_summary'] = summaries
     data['qc_plots'] = qc_plots(data, seqkit)
+    alignment = root / 'qc.alignment.json'
+    if alignment.exists():
+        from alignment_qc import apply_alignment, load_alignment
+        apply_alignment(data, load_alignment(alignment))
     arms = data.get('nasvar', {}).get('karyotype', {}).get('karyotype', {})
     if arms:
         path = root / 'presentation' / 'nasvar.copy_estimates.svg'

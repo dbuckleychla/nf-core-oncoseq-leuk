@@ -105,6 +105,8 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
             events.extend(nasvar_events(native, sample, (gene_path, gene_audit)))
             shutil.copyfile(path, out / 'nasvar.native.json')
             statuses[kind] = 'completed'
+        elif kind == 'qc:alignment':
+            shutil.copyfile(path, out / 'qc.alignment.json')
         elif kind in ('qc:cramino', 'qc:seqkit'):
             shutil.copyfile(path, out / ('qc.' + kind.split(':')[1] + '.tsv'))
         elif kind in ('nasvar:coverage', 'nasvar:maf'):

@@ -856,6 +856,10 @@ workflow ONCOSEQ {
             .mix(COVERAGE_SEPARATE.out.review_coverage)
             .mix(MAPPING.out.coverage.map { meta, path -> tuple(meta.id, 'qc:cramino', path) })
             .mix(MAPPING.out.seqkit.map { meta, path -> tuple(meta.id, 'qc:seqkit', path) })
+            .mix(ch_bam_for_calling.map { meta, _bam, _index ->
+                tuple(time_series ? meta.id.replaceFirst(/_(FULL|0h_[^_]+h)$/, '') : meta.id, meta)
+            }.combine(MAPPING.out.alignment_qc.map { meta, path -> tuple(meta.id, path) }, by: 0)
+                .map { _source, meta, path -> tuple(meta.id, 'qc:alignment', path) })
             .mix(CNV_CALLING.out.qdnaseq_bed.map { meta, path -> tuple(meta.id, 'cnv:qdnaseq', path) })
             .mix(CNV_CALLING.out.delly_segs.map { meta, path -> tuple(meta.id, 'cnv:delly', path) })
             .mix(

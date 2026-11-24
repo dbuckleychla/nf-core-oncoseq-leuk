@@ -123,8 +123,10 @@ def make(directory):
         inventory.append(dict(kind='sv:' + caller, path=caller+'.sv.vcf.gz'))
     (root / 'nasvar.coverage.tsv').write_text('chromosome\tbin_start\tbin_end\tn_reads\tn_reads_gc_adj\nchr1\t0\t1000000\t10\t12\n')
     (root / 'nasvar.maf').write_text('chrom\tpos\tref\talt\nchr1\t100\t15\t5\n')
-    (root / 'cramino.txt').write_text('Number of reads\t1000\nN50\t15000\n')
+    (root / 'cramino.txt').write_text('Number of reads\t950\nN50\t15000\n')
     inventory += [dict(kind='nasvar:coverage', path='nasvar.coverage.tsv'), dict(kind='nasvar:maf', path='nasvar.maf'), dict(kind='qc:cramino', path='cramino.txt')]
+    (root / 'alignment_qc.json').write_text(json.dumps({'QC-passed reads': {'primary': 1000, 'primary mapped': 950}, 'QC-failed reads': {'primary': 0, 'primary mapped': 0}}))
+    inventory += [dict(kind='qc:alignment', path='alignment_qc.json')]
     inventory += [dict(kind='classification', path='classification.json'), dict(kind='nasvar', path='nasvar.json')]
     inventory += [dict(kind='coverage:' + label, path=label + '.bed') for label in ('primary', 'mapq60', 'nofilter')]
     (root / 'inputs.json').write_text(json.dumps(inventory, indent=2) + '\n')

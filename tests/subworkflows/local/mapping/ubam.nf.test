@@ -20,6 +20,9 @@ nextflow_workflow {
             assert validation.checked_reads == 1000
             assert validation.required_tags == ['MM','ML','qs']
             assert file(workflow.out.checked[0]).text.contains('tags preserved')
+            def qc = new groovy.json.JsonSlurperClassic().parseText(file(workflow.out.alignment_qc[0][1]).text)
+            assert qc['QC-passed reads']['primary'] == 1004
+            assert qc['QC-passed reads']['primary mapped'] == 1004
         }
     }
 

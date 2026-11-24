@@ -1431,6 +1431,16 @@
           d.append(s, el("pre", JSON.stringify(data.nasvar[key], null, 2)));
           p.append(d);
         }
+      if (data.alignment_qc) {
+        const alignment = panel(sections.qc, "Read alignment");
+        alignment.append(
+          el(
+            "p",
+            "Aligned primary reads divided by all primary reads; secondary and supplementary records are excluded.",
+          ),
+        );
+        alignment.append(el("p", data.alignment_qc.scope, "muted"));
+      }
       function qcChart(plot) {
         const box = panel(sections.qc, plot.title),
           ns = "http://www.w3.org/2000/svg";

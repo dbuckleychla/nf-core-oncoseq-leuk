@@ -16,6 +16,7 @@ include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_CHUNK } from '../../../modules/nf-cor
 include { SAMTOOLS_MERGE as SAMTOOLS_MERGE_FINAL } from '../../../modules/nf-core/samtools/merge/main'         // Merge BAMs
 include { CRAMINO                                } from '../../../modules/nf-core/cramino/main'
 include { SEQKIT_STATS                           } from '../../../modules/nf-core/seqkit/stats/main'
+include { SAMTOOLS_ALIGNMENT_QC                  } from '../../../modules/local/alignment_qc/main'
 // functions
 include { modifyMetaId           } from '../utils_nfcore_oncoseq_pipeline'
 include { softwareVersionsToYAML } from '../../../subworkflows/nf-core/utils_nfcore_pipeline' // Version reporting
@@ -132,6 +133,7 @@ workflow MAPPING {
 
             CRAMINO(bam_ch)
 
+
         } else {
 
             // Run minimap2 alignment
@@ -151,6 +153,13 @@ workflow MAPPING {
             CRAMINO(bam_ch)
 
         }
+
+    if (params.report_review) {
+        SAMTOOLS_ALIGNMENT_QC(bam_ch.map { meta, bam, _index -> tuple(meta, bam) })
+        ch_alignment_qc = SAMTOOLS_ALIGNMENT_QC.out.qc
+    } else {
+        ch_alignment_qc = channel.empty()
+    }
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -182,6 +191,7 @@ workflow MAPPING {
 
     emit:
     bam      = bam_ch                               // Final sorted BAM with index
+    alignment_qc = ch_alignment_qc
     coverage = CRAMINO.out.stats                   // Coverage stats
     seqkit   = ch_seqkit_out                       // Input fastq stats
     versions = ch_collated_versions               // All tool versions
