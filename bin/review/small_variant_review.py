@@ -71,7 +71,7 @@ def build(sample, paths, output, panel=None):
           for key,selections in sorted(grouped.items(),key=lambda kv:(min(r['priority'] for r in kv[1]),kv[1][0].get('gene') or '',kv[0]))]
     result=dict(schema_version=1,sample=sample,build='hg38',status='completed',report_policy_version=POLICY_VERSION,report_panel=panel_info,
                 records=rows,total_records=len(rows),selection_counts=counts,files=[p.name for p,_ in sources],
-                policy='Existing review groups and broad consensus selection before pagination. Exact normalized allele grouping; native FILTER/DP/AD/AF retained; no caller-count or AF pooling.')
+                policy='COSMIC blood/lymphoid primary review; other COSMIC and ClinVar/VEP candidates in expanded review. Caller PASS and population eligibility required. Exact normalized allele grouping; native FILTER/DP/AD/AF retained; no caller-count or AF pooling.')
     out=Path(output);out.parent.mkdir(parents=True,exist_ok=True);out.write_text(json.dumps(result,indent=2)+'\n')
     return result
 

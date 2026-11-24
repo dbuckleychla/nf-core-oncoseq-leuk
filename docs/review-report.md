@@ -51,9 +51,11 @@ For copy/upload commands using the institutional reference root, see
 ## Reference manifest
 
 Required resources are `fasta`, `fai`, `targets`, `gff`, `gnomad_genome`,
-`gnomad_exome`, `clinvar` and `clinvar_common_pathogenic`. Optional entries
-beginning with `cosmic` add COSMIC annotation, for example `cosmic_targeted` and
-`cosmic_genome`.
+`gnomad_exome`, `clinvar`, `clinvar_common_pathogenic`, `cosmic_targeted`
+and `cosmic_evidence`. The targeted VCF and prepared SQLite evidence database
+are mandatory, including in development. Missing resources, different release
+labels or a database prepared against different VCF bytes fail validation.
+Other `cosmic_*` products are not accepted by this targeted-screen workflow.
 
 Use the authoritative unpadded assay BED for `targets`. Coverage shown in the
 report retains the existing workflow's native intervals. Reporting genes and
@@ -78,7 +80,8 @@ Create a local resource mapping after preparing the files:
   "gnomad_exome": { "path": "/ref/gnomad.exomes.vcf.gz", "release": "4.0" },
   "clinvar": { "path": "/ref/clinvar.vcf.gz", "release": "YOUR_FIXED_RELEASE" },
   "clinvar_common_pathogenic": { "path": "/ref/rescue.vcf.gz", "release": "assay-rescue-v1" },
-  "cosmic_targeted": { "path": "/ref/cosmic.targeted.v105.GRCh38.vcf.gz", "release": "v105" }
+  "cosmic_targeted": { "path": "/ref/cosmic.targeted.v105.GRCh38.vcf.gz", "release": "v105" },
+  "cosmic_evidence": { "path": "/ref/cosmic.targeted.v105.GRCh38.evidence.sqlite", "release": "v105" }
 }
 ```
 
@@ -141,7 +144,62 @@ COSMIC records with FILTER `.` are valid annotation input. Recurrence values
 remain associated with their catalogue and COSV identifier. Transcript rows
 are not added together. Inconsistent values are displayed separately. Gene
 Census tier is labelled as a gene property. These VCF counts are not
-leukemia-specific; tissue-specific recurrence needs additional TSV resources.
+tissue-specific; the evidence database supplies tissue-specific counts separately.
+
+Extract the matching GRCh38 release's `Cosmic_CompleteTargetedScreensMutant_Tsv`
+and `Cosmic_Classification_Tsv` archives, retaining the compressed TSVs. Prepare
+an indexed evidence database once per reference release (outside the repository):
+
+```bash
+python3 bin/review_report.py prepare-cosmic \
+    --mutations /ref/Cosmic_CompleteTargetedScreensMutant_v105_GRCh38.tsv.gz \
+    --classification /ref/Cosmic_Classification_v105_GRCh38.tsv.gz \
+    --vcf /ref/cosmic.targeted.v105.GRCh38.vcf.gz \
+    --release v105 \
+    --output /ref/cosmic.targeted.v105.GRCh38.evidence.sqlite
+```
+
+The supplied v105 files were audited across 1,350,464 VCF transcript records
+representing 360,801 distinct COSV IDs: every ID joined to positive evidence,
+and every retained phenotype ID resolved. Of 63,485,816 mutation TSV rows,
+59,683,220 were negative screens; 158,277 positive rows lacked a COSV ID and
+could not join. After deduplication the database contained 3,641,814 evidence
+rows. These are reference-catalogue counts, not sample results.
+
+Use Python with the review runtime dependencies, or the pinned container above.
+The helper streams the mutation TSV into SQLite; annotation uses indexed COSV
+lookups instead of rescanning the TSV for each sample. It records source
+checksums, release, assembly, row counts and missing-classification counts inside
+the database. Existing outputs are never overwritten. Keep licensed source data
+and the production database in reference storage, outside this public repository.
+
+The joins are normalized GRCh38 CHROM/POS/REF/ALT → VCF COSV ID →
+`GENOMIC_MUTATION_ID` → `COSMIC_PHENOTYPE_ID`. Only `POSITIVE_SCREEN=y`
+rows enter the evidence database. Negative screens and positive records without
+a COSV ID cannot establish an allele match. The TSV's HGVS positions are not
+used as alternative coordinate matches. Transcript duplicates are retained as
+annotations but distinct `COSMIC_SAMPLE_ID` values determine recurrence. Counts
+across phenotype groups can overlap; they are not summed into unique totals.
+`SAMPLE_NAME` is never imported. Full positive evidence retains COSMIC reference
+sample IDs, transcript/HGVS, phenotype IDs, publications and reported somatic status.
+Missing TSV or classification joins remain explicit warnings; they never become
+blood evidence. Conflicting duplicate phenotype definitions fail preparation.
+
+Policy version 4 puts matches classified as
+`PRIMARY_SITE=haematopoietic_and_lymphoid_tissue` in the primary table, including
+lymphoid disease. The collapsed expanded table includes every other exact COSMIC
+match plus existing ClinVar/VEP candidates. Caller PASS and population eligibility
+(including the explicit whitelist) apply to both tables and consensus selection.
+ClinVar conflicts and benign assertions remain visible even for primary COSMIC
+matches. COSMIC transcript/HGVS supplies the representative matched annotation;
+VEP transcript consequences remain separate evidence. COSMIC's reported somatic
+status describes its catalogue samples, not the current sample.
+
+Annotated VCFs add `ONCOSEQ_REVIEW_COSMIC` and
+`ONCOSEQ_REVIEW_COSMIC_BLOOD`. JSON and complete annotation TSV exports retain the
+joined evidence, phenotype classifications and join warnings. Native caller FILTER
+and read evidence remain unchanged. Deploy the prepared database to the URI in
+`cosmic_evidence` before starting a run with the updated reference mapping.
 
 ## Output retention
 

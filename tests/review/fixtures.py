@@ -1,10 +1,15 @@
 """Small synthetic references and native records for review regression tests."""
+import csv
+import gzip
 import hashlib
 import json
+import sys
 from array import array
 from pathlib import Path
 
 import pysam
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin/review'))
 
 
 def make(directory):
@@ -67,7 +72,25 @@ def make(directory):
         h.info.add(name, 1, typ, 'Synthetic COSMIC field')
     write('cosmic.vcf.gz', h, [(150, 'T', 'COSV1', dict(GENE='TP53', TRANSCRIPT='TX1', TIER='1', TARGETED_SCREEN_SAMPLE_COUNT=7), False),
                              (150, 'T', 'COSV1', dict(GENE='TP53', TRANSCRIPT='TX1', TIER='1', TARGETED_SCREEN_SAMPLE_COUNT=7), False),
-                             (150, 'T', 'COSV1', dict(GENE='TP53', TRANSCRIPT='TX2', TIER='1', TARGETED_SCREEN_SAMPLE_COUNT=9), False)])
+                             (150, 'T', 'COSV1', dict(GENE='TP53', TRANSCRIPT='TX2', TIER='1', TARGETED_SCREEN_SAMPLE_COUNT=9), False),
+                             (160, 'AT', 'COSV2', dict(GENE='TP53', TRANSCRIPT='TX1', TARGETED_SCREEN_SAMPLE_COUNT=1), False),
+                             (170, 'C', 'COSV3', dict(GENE='TP53', TRANSCRIPT='TX1', TARGETED_SCREEN_SAMPLE_COUNT=1), False)])
+    from cosmic_evidence import EVIDENCE_FIELDS, PHENOTYPE_FIELDS, prepare_evidence
+    with gzip.open(root / 'cosmic.classification.tsv.gz', 'wt') as stream:
+        writer = csv.DictWriter(stream, fieldnames=PHENOTYPE_FIELDS, delimiter='\t')
+        writer.writeheader()
+        writer.writerow(dict(COSMIC_PHENOTYPE_ID='SYNTHETIC_COSO1', PRIMARY_SITE='haematopoietic_and_lymphoid_tissue', PRIMARY_HISTOLOGY='haematopoietic_neoplasm', HISTOLOGY_SUBTYPE_1='SYNTHETIC_leukaemia'))
+        writer.writerow(dict(COSMIC_PHENOTYPE_ID='SYNTHETIC_COSO2', PRIMARY_SITE='lung', PRIMARY_HISTOLOGY='carcinoma'))
+    with gzip.open(root / 'cosmic.mutations.tsv.gz', 'wt') as stream:
+        writer = csv.DictWriter(stream, fieldnames=[*EVIDENCE_FIELDS, 'POSITIVE_SCREEN'], delimiter='\t')
+        writer.writeheader()
+        for tx in ('TX1', 'TX1', 'TX2'):
+            writer.writerow(dict(GENOMIC_MUTATION_ID='COSV1', COSMIC_SAMPLE_ID='SYNTHETIC_COSS1', COSMIC_PHENOTYPE_ID='SYNTHETIC_COSO1', PUBMED_PMID='SYNTHETIC_PMID', MUTATION_SOMATIC_STATUS='Confirmed somatic variant', GENE_SYMBOL='TP53', TRANSCRIPT_ACCESSION=tx, POSITIVE_SCREEN='y'))
+        for identifier, phenotype in [('COSV2', 'SYNTHETIC_COSO2'), ('COSV3', 'SYNTHETIC_COSO1')]:
+            writer.writerow(dict(GENOMIC_MUTATION_ID=identifier, COSMIC_SAMPLE_ID='SYNTHETIC_COSS2', COSMIC_PHENOTYPE_ID=phenotype, PUBMED_PMID='SYNTHETIC_PMID', MUTATION_SOMATIC_STATUS='Variant of unknown origin', GENE_SYMBOL='TP53', TRANSCRIPT_ACCESSION='TX1', POSITIVE_SCREEN='y'))
+    evidence = root / 'cosmic.evidence.sqlite'
+    evidence.unlink(missing_ok=True)
+    prepare_evidence(root / 'cosmic.mutations.tsv.gz', root / 'cosmic.classification.tsv.gz', root / 'cosmic.vcf.gz', 'synthetic', evidence)
     h = header(True)
     for name, num, typ in [('SVTYPE', 1, 'String'), ('SUPPORT', 1, 'Integer'), ('MATEID', '.', 'String')]:
         h.info.add(name, num, typ, 'Synthetic SV field')
@@ -110,7 +133,7 @@ def make(directory):
     resources = {}
     mapping = dict(fasta='genome.fa', fai='genome.fa.fai', targets='targets.bed', gff='genes.gff',
                    gnomad_genome='gnomad_genome.vcf.gz', gnomad_exome='gnomad_exome.vcf.gz',
-                   clinvar='clinvar.vcf.gz', clinvar_common_pathogenic='rescue.vcf.gz', cosmic_targeted='cosmic.vcf.gz')
+                   clinvar='clinvar.vcf.gz', clinvar_common_pathogenic='rescue.vcf.gz', cosmic_targeted='cosmic.vcf.gz', cosmic_evidence='cosmic.evidence.sqlite')
     for name, value in mapping.items():
         resources[name] = dict(uri=value, release='synthetic', sha256=hashlib.sha256((root / value).read_bytes()).hexdigest())
         if value.endswith('.vcf.gz'):

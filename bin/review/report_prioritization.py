@@ -9,7 +9,7 @@ import re
 
 from transcript_selection import load_panel, select_transcript, effects, matches_preference
 
-POLICY_VERSION = 3
+POLICY_VERSION = 4
 LOSS_OF_FUNCTION = {'transcript_ablation', 'frameshift_variant', 'stop_gained',
                     'splice_acceptor_variant', 'splice_donor_variant'}
 
@@ -58,6 +58,27 @@ def small_candidate(annotation, filters, panel=None):
     panel = load_panel() if panel is None else panel
     if filters != ['PASS'] or annotation['population']['status'] == 'excluded_common':
         return None
+    cosmic = annotation.get('cosmic', {})
+    if cosmic.get('status') == 'matched':
+        observations = [o for source in cosmic['sources'] for o in source['observations']]
+        # COSMIC supplies display HGVS; VEP remains available as independent evidence.
+        choices = [dict(SYMBOL=o['info'].get('GENE'), Feature=o['info'].get('TRANSCRIPT') or '',
+                        HGVSc=o['info'].get('HGVSC') or o['info'].get('CDS') or '',
+                        HGVSp=o['info'].get('HGVSP') or o['info'].get('AA') or '',
+                        Consequence=o['info'].get('SO_TERM') or '', annotation_source='COSMIC')
+                   for o in observations if o['info'].get('GENE')]
+        selection = select_transcript(choices, panel)
+        tx = selection.get('transcript') or {}
+        blood = cosmic.get('blood_match', False)
+        reason = 'COSMIC blood/lymphoid match' if blood else 'COSMIC match; expanded review'
+        return dict(reason=reason, review_group='findings' if blood else 'coding',
+                    priority=0 if blood else 1, cosmic_primary=blood, cosmic_policy=True,
+                    panel_gene=tx.get('SYMBOL') in panel, gene=tx.get('SYMBOL') or 'Unassigned',
+                    transcript=tx.get('Feature'), consequence=tx.get('Consequence'),
+                    hgvsc=tx.get('HGVSc'), hgvsp=tx.get('HGVSp'), gene_context=selection,
+                    trigger_transcripts=annotation.get('consequences', []),
+                    clinvar=annotation.get('clinvar', []),
+                    population_af=annotation['population'].get('combined_af'))
     assertions = annotation.get('clinvar', [])
     sig = '|'.join(text_values(c.get('CLNSIG')) for c in assertions).lower()
     conflict = 'conflict' in sig or any(c.get('CLNSIGCONF') or 'conflicting' in text_values(c.get('CLNREVSTAT')).lower() for c in assertions)
@@ -87,12 +108,12 @@ def small_candidate(annotation, filters, panel=None):
         return None
     selection = select_transcript(choices, panel)
     tx = selection['transcript']
-    group = 'supporting' if benign or tx['SYMBOL'] not in panel else 'findings' if pathogenic or strong else 'coding'
+    group = 'coding'
     reason = 'ClinVar pathogenic / likely pathogenic' if pathogenic else 'Predicted loss of function' if strong else 'Panel coding variant; significance not established'
     return dict(reason=reason, review_group=group, panel_gene=tx['SYMBOL'] in panel,
                 clinvar=assertions,
                 gene_context=selection, trigger_transcripts=damaging if strong and not pathogenic else [],
-                priority=0 if pathogenic else 1 if strong else 2, gene=tx['SYMBOL'], transcript=tx.get('Feature'),
+                priority=2 if pathogenic else 3 if strong else 4, gene=tx['SYMBOL'], transcript=tx.get('Feature'),
                 consequence=tx.get('Consequence'), hgvsc=tx.get('HGVSc'), hgvsp=tx.get('HGVSp'),
                 population_af=annotation['population'].get('combined_af'),
                 clinvar_significance=sig or None,
@@ -101,7 +122,7 @@ def small_candidate(annotation, filters, panel=None):
 
 def consensus_candidate(annotation, filters, panel=None):
     """Broad review of exact PASS consensus: any HIGH transcript or P/LP assertion."""
-    if filters != ['PASS']:return None
+    if filters != ['PASS'] or annotation.get('population', {}).get('status') == 'excluded_common':return None
     assertions=annotation.get('clinvar',[])
     pathogenic=any(re.search(r'(^|[|/,])(?:likely_)?pathogenic($|[|/,])',text_values(c.get('CLNSIG')).lower()) for c in assertions)
     high=[t for t in annotation.get('consequences',[]) if t.get('IMPACT')=='HIGH']

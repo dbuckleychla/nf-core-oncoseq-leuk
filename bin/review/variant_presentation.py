@@ -34,8 +34,8 @@ def enrich_variants(data):
         panel_coding = any('Panel coding variant' in r for r in native_reasons)
         transcripts = []
         for selection in selections:
-            candidates = [(selection.get('gene_context', {}).get('transcript') or {}, 'Selected transcript')]
-            candidates += [(t, 'Loss-of-function trigger') for t in selection.get('trigger_transcripts', [])]
+            candidates = [(selection.get('gene_context', {}).get('transcript') or {}, 'Selected COSMIC transcript' if selection.get('cosmic_policy') else 'Selected transcript')]
+            candidates += [(t, 'VEP annotation' if selection.get('cosmic_policy') else 'Loss-of-function trigger') for t in selection.get('trigger_transcripts', [])]
             candidates += [(t, 'Broader review') for t in selection.get('transcripts', [])]
             for tx, role in candidates:
                 if not tx:
@@ -101,6 +101,18 @@ def enrich_variants(data):
             group, rank = 'coding', 5
         else:
             group, rank = 'supporting', 6
+        cosmic = [e.get('cosmic', {}) for e in row.get('evidence', [])]
+        if any('targeted_evidence' in c for c in cosmic):
+            matched = any(c.get('status') == 'matched' for c in cosmic)
+            blood = any(c.get('blood_match') for c in cosmic)
+            if matched:
+                reasons.insert(0, 'Exact COSMIC allele match' + (' reported in blood/lymphoid tissue; primary review.' if blood else '; expanded review.'))
+                reasons.append('COSMIC observations describe catalogue samples; they do not establish somatic origin or pathogenicity in this sample.')
+            for warning in sorted({w for c in cosmic for w in c.get('warnings', [])}):
+                reasons.append('COSMIC join incomplete: ' + warning.replace('_', ' ') + '.')
+            # Primary membership reflects tissue evidence, independently of ClinVar classification.
+            group = 'findings' if blood and not common else 'coding'
+            rank = 0 if blood else 1 if matched else 2 + rank
         if not native_reasons and not assertions:
             reasons.insert(0, 'Selected for review; original inclusion criteria are unavailable.')
         stars = max((4 if 'practice guideline' in text(a.get('CLNREVSTAT')) else 3 if 'expert panel' in text(a.get('CLNREVSTAT')) else 2 if 'multiple submitters' in text(a.get('CLNREVSTAT')) and 'no conflicts' in text(a.get('CLNREVSTAT')) else 1 if 'criteria provided' in text(a.get('CLNREVSTAT')) else 0 for a in assertions), default=0)

@@ -163,6 +163,19 @@ class ReviewTests(unittest.TestCase):
             self.assertEqual(len(hit['observations']), 2)
             self.assertEqual(hit['recurrence'][0]['values'], [7, 9])
             self.assertTrue(hit['recurrence'][0]['inconsistent'])
+            with pysam.VariantFile(str(Path(tmp) / 'output/clair3/SYNTHETIC.clair3.germline.targets.annotated.vcf.gz')) as vcf:
+                tagged = next(iter(vcf))
+                self.assertEqual(tagged.info['ONCOSEQ_REVIEW_COSMIC'], ('COSV1',))
+                self.assertTrue(tagged.info['ONCOSEQ_REVIEW_COSMIC_BLOOD'])
+                self.assertEqual(list(tagged.filter), ['PASS'])
+            joined = snv['evidence'][0]['cosmic']['targeted_evidence'][0]
+            self.assertEqual(joined['blood_sample_count'], 1)
+            self.assertEqual(joined['sample_count'], 1)
+            self.assertEqual(len(joined['evidence']), 2)
+            self.assertTrue(snv['selections'][0]['cosmic_primary'])
+            indel = next(r for r in data['small_variants']['records'] if r['coordinates'][1] == 160)
+            self.assertFalse(indel['selections'][0]['cosmic_primary'])
+            self.assertEqual(indel['evidence'][0]['cosmic']['targeted_evidence'][0]['phenotypes'][0]['classification']['PRIMARY_SITE'], 'lung')
             self.assertEqual(data['coverage'][0]['primary'], 80)
             self.assertEqual(data['classification'][0]['score'], 0.9)
             html = render(Path(tmp) / 'output/review.json', Path(tmp) / 'report.html',

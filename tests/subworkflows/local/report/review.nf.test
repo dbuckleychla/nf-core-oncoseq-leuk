@@ -18,6 +18,12 @@ nextflow_workflow {
             assert data.warnings.any { it.contains("unpinned") }
             assert data.small_variants.total_records == 2
             assert data.small_variants.records.every { row -> row.exact_pass_agreement }
+            def blood = data.small_variants.records.find { it.coordinates[1] == 150 }
+            def expanded = data.small_variants.records.find { it.coordinates[1] == 160 }
+            assert blood.selections[0].cosmic_primary
+            assert blood.evidence[0].cosmic.targeted_evidence[0].blood_sample_count == 1
+            assert !expanded.selections[0].cosmic_primary
+            assert expanded.evidence[0].cosmic.targeted_evidence[0].phenotypes[0].classification.PRIMARY_SITE == 'lung'
             assert data.classification[0].score == 0.9
             assert data.structural_events.every { event -> !event.selected }
             assert file(workflow.out.html[0][1]).text.contains('SYNTHETIC')

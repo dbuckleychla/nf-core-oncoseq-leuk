@@ -144,16 +144,16 @@ Preferred reporting transcripts may differ from the VEP cache release. Record
 missing preferences and the matching-gene fallback. Do not upgrade the cache
 or image independently.
 
-Use the targeted-screen COSMIC v105 GRCh38 normalised VCF initially. Permit the
-matching genome-screen VCF as an additional product. Keep source counts
-distinct. Tissue-specific counts require separate TSV data and sample
-deduplication; they are outside the first implementation.
+Require the targeted-screen COSMIC VCF and matching prepared evidence database.
+The implemented policy and tissue-specific joins are documented in
+[Review report](review-report.md#prepare-cosmic); these supersede the initial
+ClinVar-led selection plan below.
 
 ## Small variants
 
 Normalise native caller VCFs against the exact FASTA and select target overlap.
 Build a disk-backed unique-allele catalogue. Annotate candidate union once with
-VEP 115, then perform exact gnomAD, ClinVar, rescue and optional COSMIC joins.
+VEP 115, then perform exact gnomAD, ClinVar, rescue and required COSMIC joins.
 Parse CSQ fields from the VCF header. Preserve native FILTER, genotype, depth,
 allele depth, AF and identifiers, including failed counterparts to selected
 alleles. Keep full exports separate from concise presentation.

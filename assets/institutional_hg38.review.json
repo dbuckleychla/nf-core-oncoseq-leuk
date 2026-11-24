@@ -53,6 +53,11 @@
             "index": {
                 "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz.tbi"
             }
+        },
+        "cosmic_evidence": {
+            "uri": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/cosmic/cosmic.targeted.v105.GRCh38.evidence.sqlite",
+            "release": "v105",
+            "sha256": "9b128877ba908e666d68917d82a73698fa3615c248b96b41bf1d04af35e97ccc"
         }
     }
 }

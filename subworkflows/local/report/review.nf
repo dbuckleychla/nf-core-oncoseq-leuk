@@ -8,7 +8,7 @@ def resolveReviewReferences(source) {
     if (manifest.schema_version != 1 || manifest.assembly != 'GRCh38') {
         throw new IllegalArgumentException('Review references require schema_version=1 and assembly=GRCh38')
     }
-    def required = ['fasta', 'fai', 'targets', 'gff', 'gnomad_genome', 'gnomad_exome', 'clinvar', 'clinvar_common_pathogenic']
+    def required = ['fasta', 'fai', 'targets', 'gff', 'gnomad_genome', 'gnomad_exome', 'clinvar', 'clinvar_common_pathogenic', 'cosmic_targeted', 'cosmic_evidence']
     if (!manifest.resources || required.any { name -> !manifest.resources.containsKey(name) }) {
         throw new IllegalArgumentException('Review references are missing required resources')
     }

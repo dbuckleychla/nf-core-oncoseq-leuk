@@ -8,7 +8,7 @@ import pysam
 import pysam.bcftools
 
 REQUIRED = ('fasta', 'fai', 'targets', 'gff', 'gnomad_genome', 'gnomad_exome',
-            'clinvar', 'clinvar_common_pathogenic')
+            'clinvar', 'clinvar_common_pathogenic', 'cosmic_targeted', 'cosmic_evidence')
 
 
 def checksum(path):
@@ -27,6 +27,9 @@ def validate(path):
     development = manifest.get('pinning') == 'development'
     if set(REQUIRED) - entries.keys():
         raise ValueError('Missing review resources: ' + ', '.join(sorted(set(REQUIRED) - entries.keys())))
+    unknown_cosmic = {name for name in entries if name.startswith('cosmic') and name not in ('cosmic_targeted', 'cosmic_evidence')}
+    if unknown_cosmic:
+        raise ValueError('Unsupported COSMIC resources: ' + ', '.join(sorted(unknown_cosmic)))
     result = {}
     for name, entry in entries.items():
         value = Path(entry.get('path') or entry.get('uri', ''))
@@ -37,7 +40,7 @@ def validate(path):
         if (expected or not development) and (not re.fullmatch('[0-9a-f]{64}', expected) or checksum(value) != expected):
             raise ValueError('Review reference checksum mismatch: ' + name)
         result[name] = str(value.resolve())
-        if name.startswith(('gnomad', 'clinvar', 'cosmic')):
+        if name.startswith(('gnomad', 'clinvar')) or name == 'cosmic_targeted':
             index = entry.get('index', {})
             index_path = Path(index.get('path') or index.get('uri', ''))
             if not index_path.is_absolute():index_path=Path(path).parent/index_path
@@ -51,6 +54,16 @@ def validate(path):
                     next(handle.fetch(first), None)
     if Path(result['fai']).resolve() != Path(result['fasta'] + '.fai').resolve():
         raise ValueError('FASTA index must be adjacent to FASTA and named <fasta>.fai')
+    from cosmic_evidence import CosmicEvidence
+    evidence = CosmicEvidence(result['cosmic_evidence'])
+    try:
+        metadata = evidence.metadata
+        if metadata['sources']['vcf']['sha256'] != checksum(result['cosmic_targeted']):
+            raise ValueError('COSMIC evidence was prepared for a different targeted VCF')
+        if any(entries[name].get('release') != metadata['release'] for name in ('cosmic_targeted', 'cosmic_evidence')):
+            raise ValueError('COSMIC resource releases do not match the evidence database')
+    finally:
+        evidence.close()
     return result, manifest
 
 
@@ -127,7 +140,7 @@ def make_manifest(resources, output):
             raise ValueError('Prepared resource does not exist: ' + str(path))
         uri = entry.get('uri', str(path.resolve()))
         result[name] = dict(uri=uri, release=entry.get('release', 'operator-supplied'), sha256=checksum(path))
-        if name.startswith(('gnomad', 'clinvar', 'cosmic')):
+        if name.startswith(('gnomad', 'clinvar')) or name == 'cosmic_targeted':
             indexes = [Path(str(path) + suffix) for suffix in ('.tbi', '.csi')]
             index = next((p for p in indexes if p.is_file()), None)
             if index is None:

@@ -713,6 +713,48 @@
               ),
             );
           } else cosmicBox.append(el("p", cosmic(value), "muted"));
+          const targeted = [
+            ...new Map(
+              evidence.flatMap((e) => e.cosmic?.targeted_evidence || []).map((t) => [t.identifier, t]),
+            ).values(),
+          ];
+          if (targeted.length) {
+            simpleTable(cosmicBox, targeted, [
+              { label: "COSMIC ID", value: (r) => r.identifier },
+              { label: "Distinct positive samples", value: (r) => r.sample_count },
+              { label: "Blood / lymphoid samples", value: (r) => r.blood_sample_count },
+              { label: "Evidence join", value: (r) => r.status.replaceAll("_", " ") },
+            ]);
+            simpleTable(
+              cosmicBox,
+              targeted.flatMap((t) => t.phenotypes.map((p) => ({ ...p, identifier: t.identifier }))),
+              [
+                { label: "COSMIC ID", value: (r) => r.identifier },
+                {
+                  label: "Tissue",
+                  value: (r) => annotationText(r.classification?.PRIMARY_SITE) || "Missing classification",
+                },
+                {
+                  label: "Histology / subtypes",
+                  value: (r) =>
+                    ["PRIMARY_HISTOLOGY", "HISTOLOGY_SUBTYPE_1", "HISTOLOGY_SUBTYPE_2", "HISTOLOGY_SUBTYPE_3"]
+                      .map((k) => annotationText(r.classification?.[k]))
+                      .filter(Boolean)
+                      .join(" / "),
+                },
+                { label: "Distinct samples", value: (r) => r.sample_count },
+                { label: "Reported somatic status", value: (r) => r.somatic_statuses.join("; ") },
+                { label: "Publications (PMID)", value: (r) => r.publications.join(", ") },
+              ],
+            );
+            cosmicBox.append(
+              el(
+                "p",
+                "Positive-screen samples are deduplicated across transcripts. Counts across phenotype groups may overlap. Reported somatic status applies to the COSMIC source samples.",
+                "muted",
+              ),
+            );
+          }
           const transcriptRows = value.presentation?.transcripts || [
             ...new Map(
               selections.map((s) => [JSON.stringify([s.gene, s.transcript, s.hgvsc, s.hgvsp, s.consequence]), s]),
@@ -1133,7 +1175,7 @@
         const hits = r.evidence.flatMap((e) => e.cosmic?.sources || []).flatMap((s) => s.identifiers || []);
         return (
           [...new Set(hits)].join(", ") ||
-          ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Not configured")
+          ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Annotation unavailable")
         );
       }
       function decodeAnnotation(value) {
@@ -1302,11 +1344,11 @@
       panel(
         sections.small,
         null,
-        "Each variant appears once, ordered by the strength of its annotation evidence: reviewed pathogenic / likely pathogenic, predicted loss of function, other potentially damaging changes, then conflicting, benign or common-population supporting findings. This order is not a probability of pathogenicity.",
+        "The primary view shows exact COSMIC matches reported in blood or lymphoid tissue. Expand the additional view for all other COSMIC matches and ClinVar/VEP candidates. Tissue evidence is not a pathogenicity classification.",
       );
       for (const [group, title] of [
-        ["findings", "High priority small variants"],
-        ["coding", "Additional potentially pathogenic small variants"],
+        ["findings", "COSMIC blood / lymphoid variants"],
+        ["coding", "Expanded small variant review"],
         ["supporting", "Lower priority and supporting small variants"],
       ]) {
         const rows = small
@@ -1318,7 +1360,15 @@
               (choice(a).gene || "").localeCompare(choice(b).gene || "") ||
               JSON.stringify(a.coordinates).localeCompare(JSON.stringify(b.coordinates)),
           );
-        if (rows.length || group === "findings") table(panel(sections.small, title), rows, scols, title);
+        if (rows.length || group === "findings")
+          table(
+            group === "findings"
+              ? panel(sections.small, title)
+              : collapsed(sections.small, title, "Other COSMIC matches and additional annotation evidence."),
+            rows,
+            scols,
+            title,
+          );
       }
       panel(
         sections.small,
@@ -1336,7 +1386,7 @@
       for (const text of [
         "Clair3 / ClairS-TO / DeepSomatic calls →",
         "Group matching variants; keep failed calls for reference →",
-        "Annotate genes, population frequency, ClinVar and optional COSMIC →",
+        "Annotate genes, population frequency, ClinVar and COSMIC targeted screens and tissue classification →",
         "Select passing calls and uncommon variants; apply the whitelist →",
         "Prioritize variants for review",
       ])

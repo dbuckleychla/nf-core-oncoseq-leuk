@@ -95,7 +95,18 @@ docker run --rm --platform linux/amd64 \
     --output /ref/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz \
     --skip-masked-reference
 
-# Includes the VCF, index, and preparation audit. Keep the source archive locally.
+# Extract the matching mutation and classification TSV archives into COSMIC_DIR first.
+docker run --rm --platform linux/amd64 \
+    -v "$PWD:$PWD" -v "$LOCAL_REFS:/ref" -v "$COSMIC_DIR:/cosmic-source:ro" \
+    -w "$PWD" --entrypoint python3 "$REVIEW_IMAGE" \
+    bin/review_report.py prepare-cosmic \
+    --mutations /cosmic-source/Cosmic_CompleteTargetedScreensMutant_v105_GRCh38.tsv.gz \
+    --classification /cosmic-source/Cosmic_Classification_v105_GRCh38.tsv.gz \
+    --vcf /ref/hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz \
+    --release v105 \
+    --output /ref/hg38/cosmic/cosmic.targeted.v105.GRCh38.evidence.sqlite
+
+# Includes the VCF, index, evidence database and audit. Keep source archives locally.
 aws s3 sync "$LOCAL_REFS/hg38/cosmic/" "$ONCOSEQ_REF_ROOT/hg38/cosmic/" --only-show-errors
 ```
 
@@ -106,9 +117,9 @@ counts by contig and checksums in the preparation audit. It still fails on REF
 mismatches at unmasked bases. Default preparation remains strict without this
 flag. A source index is unnecessary because preparation reads sequentially.
 
-The matching genome-screen product is optional. Prepare it separately and add
-another `cosmic_*` manifest entry if you obtain it; never substitute another
-assembly or merge the products' recurrence counts.
+The targeted VCF and evidence database are both mandatory. Use matching GRCh38
+releases; do not substitute genome-screen products or combine recurrence counts.
+See [COSMIC preparation and joins](review-report.md#prepare-cosmic).
 
 ## Optional prelaunch checksum manifest
 
@@ -148,6 +159,7 @@ files = {
     'clinvar': ('hg38/clinvar/clinvar.hg38.vcf.gz', clinvar),
     'clinvar_common_pathogenic': ('hg38/hgnc/clinvar_pathogenic_common.vcf.gz', rescue),
     'cosmic_targeted': ('hg38/cosmic/cosmic.targeted.v105.GRCh38.vcf.gz', 'v105'),
+    'cosmic_evidence': ('hg38/cosmic/cosmic.targeted.v105.GRCh38.evidence.sqlite', 'v105'),
 }
 mapping = {name: {'path': str(root/key), 'uri': remote+'/'+key, 'release': release}
            for name, (key, release) in files.items()}

@@ -32,6 +32,9 @@ def main():
         p.add_argument('--' + name, required=True)
     p.add_argument('--skip-masked-reference', action='store_true',
                    help='Archive and exclude records over FASTA N bases; still reject other REF mismatches')
+    p = commands.add_parser('prepare-cosmic')
+    for name in ('mutations', 'classification', 'vcf', 'release', 'output'):
+        p.add_argument('--' + name, required=True)
     p = commands.add_parser('validate')
     p.add_argument('--references', required=True)
     p.add_argument('--analytical-fasta')
@@ -55,6 +58,9 @@ def main():
         import_results(**args)
     elif command == 'prepare-vcf':
         prepare_vcf(**args)
+    elif command == 'prepare-cosmic':
+        from cosmic_evidence import prepare_evidence
+        prepare_evidence(**args)
     elif command == 'validate':
         _, manifest = validate(args['references'])
         if args['analytical_fasta'] and manifest['resources']['fasta'].get('sha256'):

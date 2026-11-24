@@ -135,14 +135,16 @@ from transcript_selection import display_transcript, load_panel, panel_provenanc
 
 
 def review_group(annotation):
+    if annotation['cosmic']['blood_match']:return 0
+    if annotation['cosmic']['status'] == 'matched':return 1
     sig='|'.join(str(x.get('CLNSIG','')) for x in annotation['clinvar']).lower()
     conflict='conflict' in sig or ('pathogenic' in sig and ('benign' in sig or 'uncertain_significance' in sig)) or any('CLNSIGCONF' in x for x in annotation['clinvar'])
     pathogenic='pathogenic' in sig and not conflict
     benign='benign' in sig and not conflict
-    if annotation['population']['whitelist_rescue'] or pathogenic:return 0
-    if benign:return 3
-    if any(x.get('IMPACT') in ['HIGH','MODERATE'] for x in annotation['consequences']):return 1
-    return 2
+    if annotation['population']['whitelist_rescue'] or pathogenic:return 2
+    if benign:return 5
+    if any(x.get('IMPACT') in ['HIGH','MODERATE'] for x in annotation['consequences']):return 3
+    return 4
 
 
 def finish(catalog, vep, resources, sample, output, panel=None):
@@ -152,7 +154,9 @@ def finish(catalog, vep, resources, sample, output, panel=None):
     from report_prioritization import small_candidate, consensus_candidate, sample_evidence, POLICY_VERSION, bound_candidates
     cat=Path(catalog);out=Path(output);out.mkdir(parents=True,exist_ok=True)
     db=sqlite3.connect(cat/'catalog.sqlite')
-    handles={k:IndexedReference(v) for k,v in resources.items() if k in ['gnomad_genome','gnomad_exome','clinvar','clinvar_common_pathogenic'] or k.startswith('cosmic')}
+    handles={k:IndexedReference(v) for k,v in resources.items() if k in ['gnomad_genome','gnomad_exome','clinvar','clinvar_common_pathogenic'] or k == 'cosmic_targeted'}
+    from cosmic_evidence import CosmicEvidence
+    cosmic_evidence = CosmicEvidence(resources['cosmic_evidence'])
     for name,h in handles.items():
         required=['GENE','TRANSCRIPT'] if name.startswith('cosmic') else ['AC','AN'] if name.startswith('gnomad') else ['clinvar_cmn_path'] if name=='clinvar_common_pathogenic' else ['CLNSIG','CLNREVSTAT']
         if any(k not in h.header.info for k in required):raise ValueError('Missing annotation fields in '+name)
@@ -172,7 +176,7 @@ def finish(catalog, vep, resources, sample, output, panel=None):
             csq=consequences(rec,fields)
             ann=dict(population=population(counts(exact_records(handles['gnomad_genome'],rec)),counts(exact_records(handles['gnomad_exome'],rec)),rescue),clinvar=clinical,consequences=csq,display_transcript=display_transcript(csq, panel),csq=list(rec.info.get('CSQ',())))
             from cosmic import annotate as cosmic_annotate
-            ann['cosmic']=cosmic_annotate(handles,rec)
+            ann['cosmic']=cosmic_annotate(handles,rec,cosmic_evidence)
             ann['review_group']=review_group(ann)
             db.execute('UPDATE alleles SET annotation=? WHERE key=?',(json.dumps(ann),k))
             processed += 1
@@ -181,6 +185,7 @@ def finish(catalog, vep, resources, sample, output, panel=None):
     if db.execute('SELECT COUNT(*) FROM alleles WHERE candidate=1 AND annotation IS NULL').fetchone()[0]:raise ValueError('VEP omitted candidate alleles')
     progress(f'Reference annotation finished: {processed}/{expected}')
     for name, handle in handles.items():progress('Cache ' + name + ': ' + json.dumps(handle.statistics(), sort_keys=True))
+    cosmic_evidence.close()
     sources=json.loads((cat/'sources.json').read_text())
     for i,source in enumerate(sources):
         caller=source['caller'];kind=source['kind'];dest=out/caller;dest.mkdir(exist_ok=True)
@@ -190,6 +195,8 @@ def finish(catalog, vep, resources, sample, output, panel=None):
         header.add_record(csq_header)
         for name,num,typ,description in [('ONCOSEQ_REVIEW_POP_AF',1,'Float','Pooled valid gnomAD exome/genome AC/AN'),('ONCOSEQ_REVIEW_POP_STATUS',1,'String','Population eligibility; caller FILTER is unchanged'),('ONCOSEQ_REVIEW_CLINVAR','.', 'String','ClinVar assertions; percent-encoded JSON preserves conflicts')]:
             header.info.add(name,num,typ,description)
+        header.info.add('ONCOSEQ_REVIEW_COSMIC', '.', 'String', 'Exact normalized COSMIC targeted COSV identifiers')
+        header.info.add('ONCOSEQ_REVIEW_COSMIC_BLOOD', 0, 'Flag', 'Positive COSMIC targeted evidence in blood or lymphoid tissue; not sample somatic status')
         stats=Counter();review=[];total=0;report_candidates=[];report_total=0;report_groups=Counter();consensus_review=[];consensus_review_total=0
         contig_order={c:i for i,c in enumerate(header.contigs)}
         annotated=dest/(prefix+'.annotated.vcf.gz');prioritized=dest/(prefix+'.prioritized.vcf.gz')
@@ -213,6 +220,9 @@ def finish(catalog, vep, resources, sample, output, panel=None):
                     if pop['combined_af'] is not None:rec.info['ONCOSEQ_REVIEW_POP_AF']=pop['combined_af']
                     from urllib.parse import quote
                     if ann['clinvar']:rec.info['ONCOSEQ_REVIEW_CLINVAR']=tuple(quote(json.dumps(c,separators=(',',':')),safe='') for c in ann['clinvar'])
+                    cosmic_ids = sorted({identifier for source in ann['cosmic']['sources'] for identifier in source['identifiers']})
+                    if cosmic_ids:rec.info['ONCOSEQ_REVIEW_COSMIC'] = tuple(cosmic_ids)
+                    if ann['cosmic']['blood_match']:rec.info['ONCOSEQ_REVIEW_COSMIC_BLOOD'] = True
                     aw.write(rec);is_pass=list(rec.filter)==['PASS'];stats['annotated_records']+=1
                     stats[pop['status']]+=1
                     if is_pass:stats['pass_before_population']+=1

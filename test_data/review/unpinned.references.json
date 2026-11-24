@@ -52,6 +52,10 @@
             "index": {
                 "uri": "cosmic.vcf.gz.tbi"
             }
+        },
+        "cosmic_evidence": {
+            "uri": "cosmic.evidence.sqlite",
+            "release": "synthetic"
         }
     },
     "pinning": "development"

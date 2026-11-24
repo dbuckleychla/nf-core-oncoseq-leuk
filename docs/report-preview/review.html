@@ -760,7 +760,7 @@
             }
           }
         },
-        "policy_version": 3,
+        "policy_version": 4,
         "fusion_distance": 100,
         "statuses": {
           "small:clair3": "completed",
@@ -777,7 +777,7 @@
           "sample": "SYNTHETIC",
           "build": "hg38",
           "status": "completed",
-          "report_policy_version": 3,
+          "report_policy_version": 4,
           "report_panel": {
             "name": "panel.tsv",
             "sha256": "9dcf70b529f9a2bcd147ee931fbe5e8e59db3c310ed3e8da1c1593079d7e9bf5",
@@ -788,14 +788,32 @@
               "coordinates": ["chr1", 150, "A", "T"],
               "selections": [
                 {
-                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "reason": "COSMIC blood/lymphoid match",
                   "review_group": "findings",
+                  "priority": 0,
+                  "cosmic_primary": true,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [
-                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
-                  ],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
+                      "SYMBOL": "TP53",
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
+                  },
+                  "trigger_transcripts": [
+                    {
                       "Allele": "T",
                       "Consequence": "missense_variant",
                       "IMPACT": "MODERATE",
@@ -808,38 +826,44 @@
                       "HGVSc": "NM_TEST.1:c.150A>T",
                       "HGVSp": "NP_TEST:p.X",
                       "FLAGS": ""
-                    },
-                    "genes": ["TP53"],
-                    "ambiguous": false,
-                    "warnings": []
-                  },
-                  "trigger_transcripts": [],
-                  "priority": 0,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "missense_variant",
-                  "hgvsc": "NM_TEST.1:c.150A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                    }
+                  ],
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population_af": 0.001,
-                  "clinvar_significance": "pathogenic",
-                  "clinvar_review": "reviewed_by_expert_panel",
                   "coordinates": ["chr1", 150, "A", "T"],
                   "caller": "clair3",
                   "kind": "germline",
-                  "inclusion_reasons": [
-                    "ClinVar pathogenic / likely pathogenic",
-                    "Panel coding variant; significance not established"
-                  ]
+                  "inclusion_reasons": ["COSMIC blood/lymphoid match"]
                 },
                 {
-                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "reason": "COSMIC blood/lymphoid match",
                   "review_group": "findings",
+                  "priority": 0,
+                  "cosmic_primary": true,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [
-                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
-                  ],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
+                      "SYMBOL": "TP53",
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
+                  },
+                  "trigger_transcripts": [
+                    {
                       "Allele": "T",
                       "Consequence": "missense_variant",
                       "IMPACT": "MODERATE",
@@ -852,38 +876,44 @@
                       "HGVSc": "NM_TEST.1:c.150A>T",
                       "HGVSp": "NP_TEST:p.X",
                       "FLAGS": ""
-                    },
-                    "genes": ["TP53"],
-                    "ambiguous": false,
-                    "warnings": []
-                  },
-                  "trigger_transcripts": [],
-                  "priority": 0,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "missense_variant",
-                  "hgvsc": "NM_TEST.1:c.150A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                    }
+                  ],
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population_af": 0.001,
-                  "clinvar_significance": "pathogenic",
-                  "clinvar_review": "reviewed_by_expert_panel",
                   "coordinates": ["chr1", 150, "A", "T"],
                   "caller": "clairsto",
                   "kind": "tumor_only",
-                  "inclusion_reasons": [
-                    "ClinVar pathogenic / likely pathogenic",
-                    "Panel coding variant; significance not established"
-                  ]
+                  "inclusion_reasons": ["COSMIC blood/lymphoid match"]
                 },
                 {
-                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "reason": "COSMIC blood/lymphoid match",
                   "review_group": "findings",
+                  "priority": 0,
+                  "cosmic_primary": true,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [
-                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
-                  ],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
+                      "SYMBOL": "TP53",
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
+                  },
+                  "trigger_transcripts": [
+                    {
                       "Allele": "T",
                       "Consequence": "missense_variant",
                       "IMPACT": "MODERATE",
@@ -896,28 +926,16 @@
                       "HGVSc": "NM_TEST.1:c.150A>T",
                       "HGVSp": "NP_TEST:p.X",
                       "FLAGS": ""
-                    },
-                    "genes": ["TP53"],
-                    "ambiguous": false,
-                    "warnings": []
-                  },
-                  "trigger_transcripts": [],
-                  "priority": 0,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "missense_variant",
-                  "hgvsc": "NM_TEST.1:c.150A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                    }
+                  ],
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population_af": 0.001,
-                  "clinvar_significance": "pathogenic",
-                  "clinvar_review": "reviewed_by_expert_panel",
                   "coordinates": ["chr1", 150, "A", "T"],
                   "caller": "consensus",
                   "kind": "derived_exact_pass",
-                  "inclusion_reasons": [
-                    "ClinVar pathogenic / likely pathogenic",
-                    "Panel coding variant; significance not established"
-                  ]
+                  "inclusion_reasons": ["COSMIC blood/lymphoid match"]
                 },
                 {
                   "reason": "ClinVar P/LP",
@@ -993,14 +1011,32 @@
                   "inclusion_reasons": ["Consensus review: ClinVar P/LP"]
                 },
                 {
-                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "reason": "COSMIC blood/lymphoid match",
                   "review_group": "findings",
+                  "priority": 0,
+                  "cosmic_primary": true,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [
-                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
-                  ],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
+                      "SYMBOL": "TP53",
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
+                  },
+                  "trigger_transcripts": [
+                    {
                       "Allele": "T",
                       "Consequence": "missense_variant",
                       "IMPACT": "MODERATE",
@@ -1013,28 +1049,16 @@
                       "HGVSc": "NM_TEST.1:c.150A>T",
                       "HGVSp": "NP_TEST:p.X",
                       "FLAGS": ""
-                    },
-                    "genes": ["TP53"],
-                    "ambiguous": false,
-                    "warnings": []
-                  },
-                  "trigger_transcripts": [],
-                  "priority": 0,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "missense_variant",
-                  "hgvsc": "NM_TEST.1:c.150A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                    }
+                  ],
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population_af": 0.001,
-                  "clinvar_significance": "pathogenic",
-                  "clinvar_review": "reviewed_by_expert_panel",
                   "coordinates": ["chr1", 150, "A", "T"],
                   "caller": "deepsomatic",
                   "kind": "tumor_only",
-                  "inclusion_reasons": [
-                    "ClinVar pathogenic / likely pathogenic",
-                    "Panel coding variant; significance not established"
-                  ]
+                  "inclusion_reasons": ["COSMIC blood/lymphoid match"]
                 }
               ],
               "evidence": [
@@ -1097,7 +1121,62 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV1",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 1,
+                        "blood_match": true,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO1",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                              "HISTOLOGY_SUBTYPE_1": "SYNTHETIC_leukaemia",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "haematopoietic_neoplasm",
+                              "PRIMARY_SITE": "haematopoietic_and_lymphoid_tissue",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Confirmed somatic variant"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          },
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX2",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": true,
+                    "warnings": []
                   },
                   "native_records": ["chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
                   "file": "SYNTHETIC.clair3.germline.targets.annotation.tsv.gz"
@@ -1161,7 +1240,62 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV1",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 1,
+                        "blood_match": true,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO1",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                              "HISTOLOGY_SUBTYPE_1": "SYNTHETIC_leukaemia",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "haematopoietic_neoplasm",
+                              "PRIMARY_SITE": "haematopoietic_and_lymphoid_tissue",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Confirmed somatic variant"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          },
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX2",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": true,
+                    "warnings": []
                   },
                   "native_records": ["chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
                   "file": "SYNTHETIC.clairsto.tumor_only.targets.annotation.tsv.gz"
@@ -1220,7 +1354,62 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV1",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 1,
+                        "blood_match": true,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO1",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                              "HISTOLOGY_SUBTYPE_1": "SYNTHETIC_leukaemia",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "haematopoietic_neoplasm",
+                              "PRIMARY_SITE": "haematopoietic_and_lymphoid_tissue",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Confirmed somatic variant"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          },
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX2",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": true,
+                    "warnings": []
                   },
                   "native_records": [],
                   "file": "SYNTHETIC.consensus.derived_exact_pass.targets.annotation.tsv.gz"
@@ -1284,7 +1473,62 @@
                           }
                         ]
                       }
-                    ]
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV1",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 1,
+                        "blood_match": true,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO1",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                              "HISTOLOGY_SUBTYPE_1": "SYNTHETIC_leukaemia",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "haematopoietic_neoplasm",
+                              "PRIMARY_SITE": "haematopoietic_and_lymphoid_tissue",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Confirmed somatic variant"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          },
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV1",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS1",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO1",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Confirmed somatic variant",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX2",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": true,
+                    "warnings": []
                   },
                   "native_records": ["chr1\t150\tcall1\tA\tT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
                   "file": "SYNTHETIC.deepsomatic.tumor_only.targets.annotation.tsv.gz"
@@ -1296,20 +1540,39 @@
                 "rank": 0,
                 "review_stars": 3,
                 "reasons": [
+                  "Exact COSMIC allele match reported in blood/lymphoid tissue; primary review.",
                   "ClinVar: Pathogenic; reviewed by expert panel",
-                  "Protein-altering variant in the reporting gene panel: missense variant; VEP MODERATE.",
                   "Broader two-caller review: ClinVar pathogenic / likely pathogenic assertion; ClairS-TO and DeepSomatic both passed the exact allele.",
-                  "Maximum reported population frequency: 0.1%."
+                  "Maximum reported population frequency: 0.1%.",
+                  "COSMIC observations describe catalogue samples; they do not establish somatic origin or pathogenicity in this sample."
                 ],
                 "primary_selection": {
-                  "reason": "ClinVar pathogenic / likely pathogenic",
+                  "reason": "COSMIC blood/lymphoid match",
                   "review_group": "findings",
+                  "priority": 0,
+                  "cosmic_primary": true,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [
-                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
-                  ],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
+                      "SYMBOL": "TP53",
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
+                    },
+                    "genes": ["TP53"],
+                    "ambiguous": false,
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
+                  },
+                  "trigger_transcripts": [
+                    {
                       "Allele": "T",
                       "Consequence": "missense_variant",
                       "IMPACT": "MODERATE",
@@ -1322,31 +1585,28 @@
                       "HGVSc": "NM_TEST.1:c.150A>T",
                       "HGVSp": "NP_TEST:p.X",
                       "FLAGS": ""
-                    },
-                    "genes": ["TP53"],
-                    "ambiguous": false,
-                    "warnings": []
-                  },
-                  "trigger_transcripts": [],
-                  "priority": 0,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "missense_variant",
-                  "hgvsc": "NM_TEST.1:c.150A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                    }
+                  ],
+                  "clinvar": [
+                    { "record_id": "1", "CLNSIG": ["Pathogenic"], "CLNREVSTAT": ["reviewed_by_expert_panel"] }
+                  ],
                   "population_af": 0.001,
-                  "clinvar_significance": "pathogenic",
-                  "clinvar_review": "reviewed_by_expert_panel",
                   "coordinates": ["chr1", 150, "A", "T"],
                   "caller": "clair3",
                   "kind": "germline",
-                  "inclusion_reasons": [
-                    "ClinVar pathogenic / likely pathogenic",
-                    "Panel coding variant; significance not established"
-                  ]
+                  "inclusion_reasons": ["COSMIC blood/lymphoid match"]
                 },
-                "selected_impact": "MODERATE",
+                "selected_impact": null,
                 "transcripts": [
+                  {
+                    "gene": "TP53",
+                    "transcript": "TX1",
+                    "consequence": "",
+                    "impact": null,
+                    "hgvsc": "",
+                    "hgvsp": "",
+                    "roles": ["Selected COSMIC transcript"]
+                  },
                   {
                     "gene": "TP53",
                     "transcript": "NM_TEST.1",
@@ -1354,7 +1614,7 @@
                     "impact": "MODERATE",
                     "hgvsc": "NM_TEST.1:c.150A>T",
                     "hgvsp": "NP_TEST:p.X",
-                    "roles": ["Selected transcript", "Broader review"]
+                    "roles": ["VEP annotation", "Selected transcript", "Broader review"]
                   }
                 ]
               }
@@ -1363,28 +1623,29 @@
               "coordinates": ["chr1", 160, "A", "AT"],
               "selections": [
                 {
-                  "reason": "Predicted loss of function",
-                  "review_group": "findings",
+                  "reason": "COSMIC match; expanded review",
+                  "review_group": "coding",
+                  "priority": 1,
+                  "cosmic_primary": false,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
-                      "Allele": "AT",
-                      "Consequence": "frameshift_variant",
-                      "IMPACT": "HIGH",
                       "SYMBOL": "TP53",
-                      "Feature": "NM_TEST.1",
-                      "BIOTYPE": "protein_coding",
-                      "CANONICAL": "YES",
-                      "MANE_SELECT": "NM_TEST.1",
-                      "MANE_PLUS_CLINICAL": "",
-                      "HGVSc": "NM_TEST.1:c.160A>T",
-                      "HGVSp": "NP_TEST:p.X",
-                      "FLAGS": ""
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
                     },
                     "genes": ["TP53"],
                     "ambiguous": false,
-                    "warnings": []
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
                   },
                   "trigger_transcripts": [
                     {
@@ -1402,43 +1663,37 @@
                       "FLAGS": ""
                     }
                   ],
-                  "priority": 1,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "frameshift_variant",
-                  "hgvsc": "NM_TEST.1:c.160A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                  "clinvar": [],
                   "population_af": 0.001,
-                  "clinvar_significance": null,
-                  "clinvar_review": "",
                   "coordinates": ["chr1", 160, "A", "AT"],
                   "caller": "clair3",
                   "kind": "germline",
-                  "inclusion_reasons": ["Predicted loss of function"]
+                  "inclusion_reasons": ["COSMIC match; expanded review"]
                 },
                 {
-                  "reason": "Predicted loss of function",
-                  "review_group": "findings",
+                  "reason": "COSMIC match; expanded review",
+                  "review_group": "coding",
+                  "priority": 1,
+                  "cosmic_primary": false,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
-                      "Allele": "AT",
-                      "Consequence": "frameshift_variant",
-                      "IMPACT": "HIGH",
                       "SYMBOL": "TP53",
-                      "Feature": "NM_TEST.1",
-                      "BIOTYPE": "protein_coding",
-                      "CANONICAL": "YES",
-                      "MANE_SELECT": "NM_TEST.1",
-                      "MANE_PLUS_CLINICAL": "",
-                      "HGVSc": "NM_TEST.1:c.160A>T",
-                      "HGVSp": "NP_TEST:p.X",
-                      "FLAGS": ""
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
                     },
                     "genes": ["TP53"],
                     "ambiguous": false,
-                    "warnings": []
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
                   },
                   "trigger_transcripts": [
                     {
@@ -1456,43 +1711,37 @@
                       "FLAGS": ""
                     }
                   ],
-                  "priority": 1,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "frameshift_variant",
-                  "hgvsc": "NM_TEST.1:c.160A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                  "clinvar": [],
                   "population_af": 0.001,
-                  "clinvar_significance": null,
-                  "clinvar_review": "",
                   "coordinates": ["chr1", 160, "A", "AT"],
                   "caller": "clairsto",
                   "kind": "tumor_only",
-                  "inclusion_reasons": ["Predicted loss of function"]
+                  "inclusion_reasons": ["COSMIC match; expanded review"]
                 },
                 {
-                  "reason": "Predicted loss of function",
-                  "review_group": "findings",
+                  "reason": "COSMIC match; expanded review",
+                  "review_group": "coding",
+                  "priority": 1,
+                  "cosmic_primary": false,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
-                      "Allele": "AT",
-                      "Consequence": "frameshift_variant",
-                      "IMPACT": "HIGH",
                       "SYMBOL": "TP53",
-                      "Feature": "NM_TEST.1",
-                      "BIOTYPE": "protein_coding",
-                      "CANONICAL": "YES",
-                      "MANE_SELECT": "NM_TEST.1",
-                      "MANE_PLUS_CLINICAL": "",
-                      "HGVSc": "NM_TEST.1:c.160A>T",
-                      "HGVSp": "NP_TEST:p.X",
-                      "FLAGS": ""
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
                     },
                     "genes": ["TP53"],
                     "ambiguous": false,
-                    "warnings": []
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
                   },
                   "trigger_transcripts": [
                     {
@@ -1510,19 +1759,12 @@
                       "FLAGS": ""
                     }
                   ],
-                  "priority": 1,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "frameshift_variant",
-                  "hgvsc": "NM_TEST.1:c.160A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                  "clinvar": [],
                   "population_af": 0.001,
-                  "clinvar_significance": null,
-                  "clinvar_review": "",
                   "coordinates": ["chr1", 160, "A", "AT"],
                   "caller": "consensus",
                   "kind": "derived_exact_pass",
-                  "inclusion_reasons": ["Predicted loss of function"]
+                  "inclusion_reasons": ["COSMIC match; expanded review"]
                 },
                 {
                   "reason": "VEP HIGH",
@@ -1596,28 +1838,29 @@
                   "inclusion_reasons": ["Consensus review: VEP HIGH"]
                 },
                 {
-                  "reason": "Predicted loss of function",
-                  "review_group": "findings",
+                  "reason": "COSMIC match; expanded review",
+                  "review_group": "coding",
+                  "priority": 1,
+                  "cosmic_primary": false,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
-                      "Allele": "AT",
-                      "Consequence": "frameshift_variant",
-                      "IMPACT": "HIGH",
                       "SYMBOL": "TP53",
-                      "Feature": "NM_TEST.1",
-                      "BIOTYPE": "protein_coding",
-                      "CANONICAL": "YES",
-                      "MANE_SELECT": "NM_TEST.1",
-                      "MANE_PLUS_CLINICAL": "",
-                      "HGVSc": "NM_TEST.1:c.160A>T",
-                      "HGVSp": "NP_TEST:p.X",
-                      "FLAGS": ""
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
                     },
                     "genes": ["TP53"],
                     "ambiguous": false,
-                    "warnings": []
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
                   },
                   "trigger_transcripts": [
                     {
@@ -1635,19 +1878,12 @@
                       "FLAGS": ""
                     }
                   ],
-                  "priority": 1,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "frameshift_variant",
-                  "hgvsc": "NM_TEST.1:c.160A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                  "clinvar": [],
                   "population_af": 0.001,
-                  "clinvar_significance": null,
-                  "clinvar_review": "",
                   "coordinates": ["chr1", 160, "A", "AT"],
                   "caller": "deepsomatic",
                   "kind": "tumor_only",
-                  "inclusion_reasons": ["Predicted loss of function"]
+                  "inclusion_reasons": ["COSMIC match; expanded review"]
                 }
               ],
               "evidence": [
@@ -1674,10 +1910,71 @@
                     "whitelist_rescue": false
                   },
                   "cosmic": {
-                    "status": "no_match",
+                    "status": "matched",
                     "sources": [
-                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
-                    ]
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV2"],
+                            "info": { "GENE": "TP53", "TRANSCRIPT": "TX1", "TARGETED_SCREEN_SAMPLE_COUNT": 1 }
+                          }
+                        ],
+                        "identifiers": ["COSV2"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV2",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [1],
+                            "inconsistent": false
+                          }
+                        ]
+                      }
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV2",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 0,
+                        "blood_match": false,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO2",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                              "HISTOLOGY_SUBTYPE_1": "",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "carcinoma",
+                              "PRIMARY_SITE": "lung",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Variant of unknown origin"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV2",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS2",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Variant of unknown origin",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": false,
+                    "warnings": []
                   },
                   "native_records": ["chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
                   "file": "SYNTHETIC.clair3.germline.targets.annotation.tsv.gz"
@@ -1705,10 +2002,71 @@
                     "whitelist_rescue": false
                   },
                   "cosmic": {
-                    "status": "no_match",
+                    "status": "matched",
                     "sources": [
-                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
-                    ]
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV2"],
+                            "info": { "GENE": "TP53", "TRANSCRIPT": "TX1", "TARGETED_SCREEN_SAMPLE_COUNT": 1 }
+                          }
+                        ],
+                        "identifiers": ["COSV2"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV2",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [1],
+                            "inconsistent": false
+                          }
+                        ]
+                      }
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV2",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 0,
+                        "blood_match": false,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO2",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                              "HISTOLOGY_SUBTYPE_1": "",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "carcinoma",
+                              "PRIMARY_SITE": "lung",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Variant of unknown origin"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV2",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS2",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Variant of unknown origin",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": false,
+                    "warnings": []
                   },
                   "native_records": ["chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
                   "file": "SYNTHETIC.clairsto.tumor_only.targets.annotation.tsv.gz"
@@ -1731,10 +2089,71 @@
                     "whitelist_rescue": false
                   },
                   "cosmic": {
-                    "status": "no_match",
+                    "status": "matched",
                     "sources": [
-                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
-                    ]
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV2"],
+                            "info": { "GENE": "TP53", "TRANSCRIPT": "TX1", "TARGETED_SCREEN_SAMPLE_COUNT": 1 }
+                          }
+                        ],
+                        "identifiers": ["COSV2"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV2",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [1],
+                            "inconsistent": false
+                          }
+                        ]
+                      }
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV2",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 0,
+                        "blood_match": false,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO2",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                              "HISTOLOGY_SUBTYPE_1": "",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "carcinoma",
+                              "PRIMARY_SITE": "lung",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Variant of unknown origin"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV2",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS2",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Variant of unknown origin",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": false,
+                    "warnings": []
                   },
                   "native_records": [],
                   "file": "SYNTHETIC.consensus.derived_exact_pass.targets.annotation.tsv.gz"
@@ -1762,10 +2181,71 @@
                     "whitelist_rescue": false
                   },
                   "cosmic": {
-                    "status": "no_match",
+                    "status": "matched",
                     "sources": [
-                      { "source": "cosmic_targeted", "observations": [], "identifiers": [], "recurrence": [] }
-                    ]
+                      {
+                        "source": "cosmic_targeted",
+                        "observations": [
+                          {
+                            "ids": ["COSV2"],
+                            "info": { "GENE": "TP53", "TRANSCRIPT": "TX1", "TARGETED_SCREEN_SAMPLE_COUNT": 1 }
+                          }
+                        ],
+                        "identifiers": ["COSV2"],
+                        "recurrence": [
+                          {
+                            "identifier": "COSV2",
+                            "field": "TARGETED_SCREEN_SAMPLE_COUNT",
+                            "values": [1],
+                            "inconsistent": false
+                          }
+                        ]
+                      }
+                    ],
+                    "targeted_evidence": [
+                      {
+                        "identifier": "COSV2",
+                        "status": "matched",
+                        "sample_count": 1,
+                        "blood_sample_count": 0,
+                        "blood_match": false,
+                        "phenotypes": [
+                          {
+                            "phenotype_id": "SYNTHETIC_COSO2",
+                            "classification": {
+                              "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                              "HISTOLOGY_SUBTYPE_1": "",
+                              "HISTOLOGY_SUBTYPE_2": "",
+                              "HISTOLOGY_SUBTYPE_3": "",
+                              "PRIMARY_HISTOLOGY": "carcinoma",
+                              "PRIMARY_SITE": "lung",
+                              "SITE_SUBTYPE_1": "",
+                              "SITE_SUBTYPE_2": "",
+                              "SITE_SUBTYPE_3": ""
+                            },
+                            "sample_count": 1,
+                            "publications": ["SYNTHETIC_PMID"],
+                            "somatic_statuses": ["Variant of unknown origin"],
+                            "status": "matched"
+                          }
+                        ],
+                        "evidence": [
+                          {
+                            "GENOMIC_MUTATION_ID": "COSV2",
+                            "COSMIC_SAMPLE_ID": "SYNTHETIC_COSS2",
+                            "COSMIC_PHENOTYPE_ID": "SYNTHETIC_COSO2",
+                            "PUBMED_PMID": "SYNTHETIC_PMID",
+                            "MUTATION_SOMATIC_STATUS": "Variant of unknown origin",
+                            "GENE_SYMBOL": "TP53",
+                            "TRANSCRIPT_ACCESSION": "TX1",
+                            "HGVSC": "",
+                            "HGVSP": ""
+                          }
+                        ]
+                      }
+                    ],
+                    "blood_match": false,
+                    "warnings": []
                   },
                   "native_records": ["chr1\t160\tcall2\tA\tAT\t.\tPASS\t.\tGT:DP:AD:AF\t0/1:100:70,30:0.3\n"],
                   "file": "SYNTHETIC.deepsomatic.tumor_only.targets.annotation.tsv.gz"
@@ -1773,37 +2253,39 @@
               ],
               "exact_pass_agreement": true,
               "presentation": {
-                "group": "findings",
-                "rank": 2,
+                "group": "coding",
+                "rank": 1,
                 "review_stars": 0,
                 "reasons": [
-                  "Predicted loss of function: TP53: frameshift variant; HIGH impact on a transcript accepted by the gene-aware selection policy.",
+                  "Exact COSMIC allele match; expanded review.",
                   "Broader two-caller review: VEP HIGH (frameshift variant); ClairS-TO and DeepSomatic both passed the exact allele.",
-                  "Maximum reported population frequency: 0.1%."
+                  "Maximum reported population frequency: 0.1%.",
+                  "COSMIC observations describe catalogue samples; they do not establish somatic origin or pathogenicity in this sample."
                 ],
                 "primary_selection": {
-                  "reason": "Predicted loss of function",
-                  "review_group": "findings",
+                  "reason": "COSMIC match; expanded review",
+                  "review_group": "coding",
+                  "priority": 1,
+                  "cosmic_primary": false,
+                  "cosmic_policy": true,
                   "panel_gene": true,
-                  "clinvar": [],
+                  "gene": "TP53",
+                  "transcript": "TX1",
+                  "consequence": "",
+                  "hgvsc": "",
+                  "hgvsp": "",
                   "gene_context": {
                     "transcript": {
-                      "Allele": "AT",
-                      "Consequence": "frameshift_variant",
-                      "IMPACT": "HIGH",
                       "SYMBOL": "TP53",
-                      "Feature": "NM_TEST.1",
-                      "BIOTYPE": "protein_coding",
-                      "CANONICAL": "YES",
-                      "MANE_SELECT": "NM_TEST.1",
-                      "MANE_PLUS_CLINICAL": "",
-                      "HGVSc": "NM_TEST.1:c.160A>T",
-                      "HGVSp": "NP_TEST:p.X",
-                      "FLAGS": ""
+                      "Feature": "TX1",
+                      "HGVSc": "",
+                      "HGVSp": "",
+                      "Consequence": "",
+                      "annotation_source": "COSMIC"
                     },
                     "genes": ["TP53"],
                     "ambiguous": false,
-                    "warnings": []
+                    "warnings": ["Preferred transcript NM_TEST.1 unavailable for TP53; used matching-gene fallback"]
                   },
                   "trigger_transcripts": [
                     {
@@ -1821,22 +2303,24 @@
                       "FLAGS": ""
                     }
                   ],
-                  "priority": 1,
-                  "gene": "TP53",
-                  "transcript": "NM_TEST.1",
-                  "consequence": "frameshift_variant",
-                  "hgvsc": "NM_TEST.1:c.160A>T",
-                  "hgvsp": "NP_TEST:p.X",
+                  "clinvar": [],
                   "population_af": 0.001,
-                  "clinvar_significance": null,
-                  "clinvar_review": "",
                   "coordinates": ["chr1", 160, "A", "AT"],
                   "caller": "clair3",
                   "kind": "germline",
-                  "inclusion_reasons": ["Predicted loss of function"]
+                  "inclusion_reasons": ["COSMIC match; expanded review"]
                 },
-                "selected_impact": "HIGH",
+                "selected_impact": null,
                 "transcripts": [
+                  {
+                    "gene": "TP53",
+                    "transcript": "TX1",
+                    "consequence": "",
+                    "impact": null,
+                    "hgvsc": "",
+                    "hgvsp": "",
+                    "roles": ["Selected COSMIC transcript"]
+                  },
                   {
                     "gene": "TP53",
                     "transcript": "NM_TEST.1",
@@ -1844,7 +2328,7 @@
                     "impact": "HIGH",
                     "hgvsc": "NM_TEST.1:c.160A>T",
                     "hgvsp": "NP_TEST:p.X",
-                    "roles": ["Selected transcript", "Loss-of-function trigger", "Broader review"]
+                    "roles": ["VEP annotation", "Selected transcript", "Broader review"]
                   }
                 ]
               }
@@ -1891,7 +2375,7 @@
             "SYNTHETIC.consensus.derived_exact_pass.targets.annotation.tsv.gz",
             "SYNTHETIC.deepsomatic.tumor_only.targets.annotation.tsv.gz"
           ],
-          "policy": "Existing review groups and broad consensus selection before pagination. Exact normalized allele grouping; native FILTER/DP/AD/AF retained; no caller-count or AF pooling."
+          "policy": "COSMIC blood/lymphoid primary review; other COSMIC and ClinVar/VEP candidates in expanded review. Caller PASS and population eligibility required. Exact normalized allele grouping; native FILTER/DP/AD/AF retained; no caller-count or AF pooling."
         },
         "structural_events": [
           {
@@ -2025,7 +2509,7 @@
           {
             "category": "copy_number",
             "name": "B-allele frequency (BAF)",
-            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpbc7m3csb/review/presentation/nasvar.baf.svg",
+            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpyg5rrf9f/review/presentation/nasvar.baf.svg",
             "reformatted": true,
             "presentation_order": 2,
             "image_key": "73677ddb0dac5aad41d07bf3afd90e33edfef659cdbaf7514f1565d8a586fc40",
@@ -2034,7 +2518,7 @@
           {
             "category": "copy_number",
             "name": "GC-corrected coverage",
-            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpbc7m3csb/review/presentation/nasvar.overview.svg",
+            "path": "/private/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpyg5rrf9f/review/presentation/nasvar.overview.svg",
             "reformatted": true,
             "presentation_order": 1,
             "image_key": "e7da5edd6b36ca8ff51d373d4a8ed85f7f2065c72f8774915ed411c95194e761",
@@ -2044,7 +2528,7 @@
             "category": "fusions",
             "generated": true,
             "event_id": "b6cf96d02bf1f8f39bc0333a",
-            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpbc7m3csb/figures/illustrative.svg",
+            "path": "/var/folders/_3/5sq5sd316mb2x0dp31nczn500000gs/T/tmpyg5rrf9f/figures/illustrative.svg",
             "name": "Illustrative RUNX1::RUNX1T1 junction",
             "image_key": "c3c492ac5d41a718bb321d73687fa55c2d37efbdfd6f12084e1a471aea5a9adf",
             "order": [27, "Illustrative RUNX1::RUNX1T1 junction"]
@@ -2113,11 +2597,16 @@
             "cosmic_targeted": {
               "uri": "cosmic.vcf.gz",
               "release": "synthetic",
-              "sha256": "557f5b6a412707c28f2cb340dbcd9081d2d0295f3d6fd2d20dbea1c9bd966e8a",
+              "sha256": "70d152561a10ebd93541b5b5dad7e3d837b5558c26d752de61ac481840a51094",
               "index": {
                 "uri": "cosmic.vcf.gz.tbi",
-                "sha256": "d959e3723af8359a6e03380b4b309b99132fe040d29e8cc8bf8e95afe684fdee"
+                "sha256": "57d50ef2e3c295f81232ed370deaa28d99891e9a13c18e84722384624f3903d1"
               }
+            },
+            "cosmic_evidence": {
+              "uri": "cosmic.evidence.sqlite",
+              "release": "synthetic",
+              "sha256": "93998be73b03387955bc9ec2cad5c8b489c1f1a6682b4193107d44850e946121"
             }
           }
         },
@@ -2338,6 +2827,48 @@
               ),
             );
           } else cosmicBox.append(el("p", cosmic(value), "muted"));
+          const targeted = [
+            ...new Map(
+              evidence.flatMap((e) => e.cosmic?.targeted_evidence || []).map((t) => [t.identifier, t]),
+            ).values(),
+          ];
+          if (targeted.length) {
+            simpleTable(cosmicBox, targeted, [
+              { label: "COSMIC ID", value: (r) => r.identifier },
+              { label: "Distinct positive samples", value: (r) => r.sample_count },
+              { label: "Blood / lymphoid samples", value: (r) => r.blood_sample_count },
+              { label: "Evidence join", value: (r) => r.status.replaceAll("_", " ") },
+            ]);
+            simpleTable(
+              cosmicBox,
+              targeted.flatMap((t) => t.phenotypes.map((p) => ({ ...p, identifier: t.identifier }))),
+              [
+                { label: "COSMIC ID", value: (r) => r.identifier },
+                {
+                  label: "Tissue",
+                  value: (r) => annotationText(r.classification?.PRIMARY_SITE) || "Missing classification",
+                },
+                {
+                  label: "Histology / subtypes",
+                  value: (r) =>
+                    ["PRIMARY_HISTOLOGY", "HISTOLOGY_SUBTYPE_1", "HISTOLOGY_SUBTYPE_2", "HISTOLOGY_SUBTYPE_3"]
+                      .map((k) => annotationText(r.classification?.[k]))
+                      .filter(Boolean)
+                      .join(" / "),
+                },
+                { label: "Distinct samples", value: (r) => r.sample_count },
+                { label: "Reported somatic status", value: (r) => r.somatic_statuses.join("; ") },
+                { label: "Publications (PMID)", value: (r) => r.publications.join(", ") },
+              ],
+            );
+            cosmicBox.append(
+              el(
+                "p",
+                "Positive-screen samples are deduplicated across transcripts. Counts across phenotype groups may overlap. Reported somatic status applies to the COSMIC source samples.",
+                "muted",
+              ),
+            );
+          }
           const transcriptRows = value.presentation?.transcripts || [
             ...new Map(
               selections.map((s) => [JSON.stringify([s.gene, s.transcript, s.hgvsc, s.hgvsp, s.consequence]), s]),
@@ -2758,7 +3289,7 @@
         const hits = r.evidence.flatMap((e) => e.cosmic?.sources || []).flatMap((s) => s.identifiers || []);
         return (
           [...new Set(hits)].join(", ") ||
-          ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Not configured")
+          ((r.evidence || []).some((e) => e.cosmic?.status === "no_match") ? "No match" : "Annotation unavailable")
         );
       }
       function decodeAnnotation(value) {
@@ -2927,11 +3458,11 @@
       panel(
         sections.small,
         null,
-        "Each variant appears once, ordered by the strength of its annotation evidence: reviewed pathogenic / likely pathogenic, predicted loss of function, other potentially damaging changes, then conflicting, benign or common-population supporting findings. This order is not a probability of pathogenicity.",
+        "The primary view shows exact COSMIC matches reported in blood or lymphoid tissue. Expand the additional view for all other COSMIC matches and ClinVar/VEP candidates. Tissue evidence is not a pathogenicity classification.",
       );
       for (const [group, title] of [
-        ["findings", "High priority small variants"],
-        ["coding", "Additional potentially pathogenic small variants"],
+        ["findings", "COSMIC blood / lymphoid variants"],
+        ["coding", "Expanded small variant review"],
         ["supporting", "Lower priority and supporting small variants"],
       ]) {
         const rows = small
@@ -2943,7 +3474,15 @@
               (choice(a).gene || "").localeCompare(choice(b).gene || "") ||
               JSON.stringify(a.coordinates).localeCompare(JSON.stringify(b.coordinates)),
           );
-        if (rows.length || group === "findings") table(panel(sections.small, title), rows, scols, title);
+        if (rows.length || group === "findings")
+          table(
+            group === "findings"
+              ? panel(sections.small, title)
+              : collapsed(sections.small, title, "Other COSMIC matches and additional annotation evidence."),
+            rows,
+            scols,
+            title,
+          );
       }
       panel(
         sections.small,
@@ -2961,7 +3500,7 @@
       for (const text of [
         "Clair3 / ClairS-TO / DeepSomatic calls →",
         "Group matching variants; keep failed calls for reference →",
-        "Annotate genes, population frequency, ClinVar and optional COSMIC →",
+        "Annotate genes, population frequency, ClinVar and COSMIC targeted screens and tissue classification →",
         "Select passing calls and uncommon variants; apply the whitelist →",
         "Prioritize variants for review",
       ])

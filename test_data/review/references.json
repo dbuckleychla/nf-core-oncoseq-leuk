@@ -61,11 +61,16 @@
         "cosmic_targeted": {
             "uri": "cosmic.vcf.gz",
             "release": "synthetic",
-            "sha256": "557f5b6a412707c28f2cb340dbcd9081d2d0295f3d6fd2d20dbea1c9bd966e8a",
+            "sha256": "70d152561a10ebd93541b5b5dad7e3d837b5558c26d752de61ac481840a51094",
             "index": {
                 "uri": "cosmic.vcf.gz.tbi",
-                "sha256": "d959e3723af8359a6e03380b4b309b99132fe040d29e8cc8bf8e95afe684fdee"
+                "sha256": "57d50ef2e3c295f81232ed370deaa28d99891e9a13c18e84722384624f3903d1"
             }
+        },
+        "cosmic_evidence": {
+            "uri": "cosmic.evidence.sqlite",
+            "release": "synthetic",
+            "sha256": "95b55a32d56a58cb11d50d2d3a0fb8be84590a6ee85c47eee9441e9e961b1e07"
         }
     }
 }
