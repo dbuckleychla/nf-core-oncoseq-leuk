@@ -3,7 +3,7 @@ import sys
 import unittest
 from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin/review'))
-from variant_presentation import enrich_variants
+from variant_presentation import enrich_variants, cosmic_summary
 
 
 def selection(reason, impact='MODERATE', group='findings'):
@@ -61,3 +61,30 @@ class VariantPresentationTests(unittest.TestCase):
         self.assertEqual(row['presentation']['selected_impact'],'MODERATE')
         self.assertTrue(any(t['impact']=='HIGH' and 'Broader review' in t['roles'] for t in row['presentation']['transcripts']))
         self.assertEqual(row['presentation']['group'],'coding')
+
+
+class CosmicSummaryTests(unittest.TestCase):
+    def test_distinct_samples_and_publications_across_ids_and_callers(self):
+        phenotype=dict(phenotype_id='SYNTHETIC_PHENOTYPE', classification=dict(PRIMARY_SITE='haematopoietic_and_lymphoid_tissue'))
+        evidence=dict(COSMIC_SAMPLE_ID='SYNTHETIC_SAMPLE', COSMIC_PHENOTYPE_ID='SYNTHETIC_PHENOTYPE', PUBMED_PMID='SYNTHETIC_PUBLICATION', MUTATION_SOMATIC_STATUS='Confirmed somatic variant')
+        target=dict(identifier='COSV1', status='matched', phenotypes=[phenotype], evidence=[evidence, dict(evidence, TRANSCRIPT_ACCESSION='SYNTHETIC_TX')])
+        cosmic=dict(blood_match=True, sources=[dict(identifiers=['COSV1','COSV2'], observations=[dict(info=dict(GENE='DEMO',TIER='1')),dict(info=dict(GENE='OTHER',TIER='2'))])], targeted_evidence=[target,dict(target,identifier='COSV2')])
+        row=dict(evidence=[dict(cosmic=cosmic),dict(cosmic=copy.deepcopy(cosmic))])
+        summary=cosmic_summary(row,'DEMO')
+        self.assertEqual((summary['sample_count'],summary['blood_sample_count'],summary['publication_count']),(1,1,1))
+        self.assertEqual(summary['tiers'],['1'])
+        self.assertEqual(summary['somatic_categories'],['Confirmed somatic reports'])
+        self.assertTrue(summary['tissue_known'])
+        row['selections']=[selection('COSMIC blood/lymphoid match')]
+        enrich_variants(dict(small_variants=dict(records=[row])))
+        self.assertFalse(any('do not establish somatic origin' in r for r in row['presentation']['reasons']))
+
+    def test_missing_join_has_unavailable_counts(self):
+        row=dict(evidence=[dict(cosmic=dict(sources=[dict(identifiers=['COSV1'])], targeted_evidence=[dict(identifier='COSV1',status='missing_targeted_evidence',phenotypes=[],evidence=[])]))])
+        summary=cosmic_summary(row)
+        self.assertTrue(summary['matched'])
+        self.assertIsNone(summary['sample_count'])
+        self.assertFalse(summary['tissue_known'])
+        row['evidence'][0]['cosmic']['sources'][0]['identifiers'].append('COSV2')
+        row['evidence'][0]['cosmic']['targeted_evidence'][0]['status']='matched'
+        self.assertIsNone(cosmic_summary(row)['sample_count'])

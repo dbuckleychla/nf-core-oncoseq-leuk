@@ -9,7 +9,14 @@ additional ClinVar/VEP candidates. Caller PASS and population eligibility apply
 to both. Each allele appears once, with caller-specific percentages and read
 counts. The evidence popup shows distinct COSMIC sample counts, tissue, histology
 and subtypes, publications and reported somatic status, alongside ClinVar
-assertions and VEP consequences. Missing joins are explicit. Catalogue membership
+assertions and VEP consequences. The COSMIC evidence column precedes ClinVar and
+shows distinct catalogue sample counts, tissue category, gene tier and source
+somatic-status categories. These use labelled colour badges; ClinVar significance
+has separate formatting. Catalogue sample counts are deduplicated across COSV IDs
+and callers and do not imply distinct patients. IDs remain in the evidence dialog.
+Caller support shows native variant/total read counts; unavailable counts use a
+dash and are never inferred from variant percentage. A single overview disclaimer
+explains the limits of COSMIC evidence, without repeating it in variant reasons. Missing joins are explicit. Catalogue membership
 and reported somatic status do not classify the current sample. Caller controls
 filter selected rows without pooling evidence. Complete annotation exports retain
 all target alleles and the joined evidence.

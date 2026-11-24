@@ -12,6 +12,45 @@ def significance(value, term):
     return bool(re.search(r'(^|[|/,])\s*' + term + r'\s*($|[|/,])', text(value).lower()))
 
 
+def cosmic_summary(row, gene=None):
+    sources = [s for e in row.get('evidence', []) for s in e.get('cosmic', {}).get('sources', [])]
+    identifiers = sorted({i for s in sources for i in s.get('identifiers', [])})
+    targeted = {t['identifier']: t for e in row.get('evidence', [])
+                for t in e.get('cosmic', {}).get('targeted_evidence', [])}
+    samples, blood_samples, publications, statuses = set(), set(), set(), set()
+    complete = bool(targeted) and set(targeted) == set(identifiers) and all(t.get('status') == 'matched' and 'evidence' in t for t in targeted.values())
+    for target in targeted.values():
+        blood_ids = {p['phenotype_id'] for p in target.get('phenotypes', [])
+                     if (p.get('classification') or {}).get('PRIMARY_SITE') == 'haematopoietic_and_lymphoid_tissue'}
+        for evidence in target.get('evidence', []):
+            sample = evidence.get('COSMIC_SAMPLE_ID')
+            if sample and sample not in ('.', 'NS'):
+                samples.add(sample)
+                if evidence.get('COSMIC_PHENOTYPE_ID') in blood_ids:
+                    blood_samples.add(sample)
+            pmid = evidence.get('PUBMED_PMID')
+            if pmid and pmid not in ('.', 'NS'):
+                publications.add(pmid)
+            status = evidence.get('MUTATION_SOMATIC_STATUS')
+            if status:
+                statuses.add(status.lower())
+    tiers = sorted({str(o['info']['TIER']) for source in sources for o in source.get('observations', [])
+                    if o.get('info', {}).get('TIER') in ('1', '2', 1, 2)
+                    and (not gene or o['info'].get('GENE') == gene)})
+    categories = []
+    if any('confirmed somatic' in s for s in statuses):categories.append('Confirmed somatic reports')
+    if any('another cancer sample' in s for s in statuses):categories.append('Other somatic reports')
+    if any('unknown origin' in s for s in statuses):categories.append('Unknown origin reports')
+    if statuses and not categories:categories.append('Other reported status')
+    return dict(matched=bool(identifiers), identifiers=identifiers, tiers=tiers,
+                tissue_known=any(p.get('classification') for t in targeted.values() for p in t.get('phenotypes', [])),
+                blood_match=any(e.get('cosmic', {}).get('blood_match') for e in row.get('evidence', [])),
+                sample_count=len(samples) if complete else None,
+                blood_sample_count=len(blood_samples) if complete else None,
+                publication_count=len(publications) if complete else None,
+                somatic_categories=categories, counts_complete=complete)
+
+
 def enrich_variants(data):
     for row in data.get('small_variants', {}).get('records', []):
         selections = row.get('selections', [])
@@ -107,7 +146,6 @@ def enrich_variants(data):
             blood = any(c.get('blood_match') for c in cosmic)
             if matched:
                 reasons.insert(0, 'Exact COSMIC allele match' + (' reported in blood/lymphoid tissue; primary review.' if blood else '; expanded review.'))
-                reasons.append('COSMIC observations describe catalogue samples; they do not establish somatic origin or pathogenicity in this sample.')
             for warning in sorted({w for c in cosmic for w in c.get('warnings', [])}):
                 reasons.append('COSMIC join incomplete: ' + warning.replace('_', ' ') + '.')
             # Primary membership reflects tissue evidence, independently of ClinVar classification.
@@ -117,4 +155,5 @@ def enrich_variants(data):
             reasons.insert(0, 'Selected for review; original inclusion criteria are unavailable.')
         stars = max((4 if 'practice guideline' in text(a.get('CLNREVSTAT')) else 3 if 'expert panel' in text(a.get('CLNREVSTAT')) else 2 if 'multiple submitters' in text(a.get('CLNREVSTAT')) and 'no conflicts' in text(a.get('CLNREVSTAT')) else 1 if 'criteria provided' in text(a.get('CLNREVSTAT')) else 0 for a in assertions), default=0)
         row['presentation'] = dict(group=group, rank=rank, review_stars=stars, reasons=list(dict.fromkeys(reasons)),
-                                   primary_selection=primary, selected_impact=impact, transcripts=transcripts)
+                                   primary_selection=primary, selected_impact=impact, transcripts=transcripts,
+                                   cosmic=cosmic_summary(row, primary.get('gene')))
