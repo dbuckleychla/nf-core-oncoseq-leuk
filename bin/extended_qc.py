@@ -41,7 +41,10 @@ def main():
                   'unsupported_cytosine_modification' if mods.get('mapped_unsupported') else
                   'no_usable_modifications' if not mods.get('usable') else None)
         data['methylation_status'] = state('disabled' if a.disable_methylation else 'unavailable' if reason else 'partial' if mods.get('usable', 0) < data['counts'].get('mapped_primary', 0) else 'complete', reason or ('partial_modification_evidence' if mods.get('usable', 0) < data['counts'].get('mapped_primary', 0) else None))
-        data['versions'] = dict(samtools=subprocess.check_output(['samtools', '--version'], text=True).splitlines()[0])
+        # Debian build-option text can contain non-UTF8 bytes; only the version
+        # header is part of QC provenance, not compiler paths/options.
+        version = subprocess.check_output(['samtools', '--version']).splitlines()[0].decode('ascii')
+        data['versions'] = dict(samtools=version)
         write_json(a.output, data)
     elif a.command == 'methylation':
         from qc_extended.methylation import collect, panels

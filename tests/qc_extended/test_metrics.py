@@ -5,6 +5,7 @@ import sys
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 import jsonschema
 import pysam
@@ -73,6 +74,16 @@ class QCTests(unittest.TestCase):
         self.assertEqual(result['counts']['primary_records'], 0)
         self.assertEqual(result['coverage']['0']['genome_primary']['histogram'], {0: 100})
         self.assertIsNone(result['read_lengths']['all']['n50'])
+
+    def test_non_utf8_samtools_build_options_do_not_break_provenance(self):
+        import extended_qc
+        output = self.root / 'version-test.json'
+        args = ['extended_qc.py', 'alignment', '--bam', str(self.root / 'plain.bam'),
+                '--reference', str(self.root / 'reference.json'), '--enrichment', str(self.root / 'enrichment.bed'),
+                '--targets', str(self.root / 'targets.bed'), '--threads', '2', '--output', str(output)]
+        with patch.object(sys, 'argv', args), patch('extended_qc.subprocess.check_output', return_value=b'samtools 1.19.2\nBuild options: \xabpath\xbb\n'):
+            extended_qc.main()
+        self.assertEqual(json.loads(output.read_text())['versions']['samtools'], 'samtools 1.19.2')
 
     def test_modification_integrity(self):
         tagged = self.collect('tagged')
