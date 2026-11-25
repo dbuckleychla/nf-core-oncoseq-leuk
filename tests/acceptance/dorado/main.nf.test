@@ -1,0 +1,49 @@
+nextflow_workflow {
+    name "Dorado candidate acceptance gates"
+    script "tests/acceptance/dorado/main.nf"
+    workflow "DORADO_ACCEPTANCE"
+    config "tests/acceptance/dorado/nextflow.config"
+
+    test("Reject a mutable candidate tag before starting GPU tasks") {
+        when {
+            params {
+                image = 'ghcr.io/dbuckleychla/dorado-2.2.0:latest'
+            }
+        }
+        then {
+            assert !workflow.success
+            assert workflow.stdout.join('\n').contains('tags are not accepted')
+        }
+    }
+
+    test("Require explicit runtime inputs for a pinned image") {
+        when {
+            params {
+                image = 'ghcr.io/dbuckleychla/dorado-2.2.0@sha256:' + 'a' * 64
+                pod5 = null
+                model = null
+                mod_model = null
+            }
+        }
+        then {
+            assert !workflow.success
+            assert workflow.stdout.join('\n').contains('Supply --pod5, --model, --mod_model and --outdir')
+        }
+    }
+
+    test("Reject replacement model versions before starting GPU tasks") {
+        when {
+            params {
+                image = 'ghcr.io/dbuckleychla/dorado-2.2.0@sha256:' + 'a' * 64
+                pod5 = "${projectDir}/tests/subworkflows/local/basecalling/fixtures/alpha/a.pod5"
+                model = "${projectDir}/tests/subworkflows/local/basecalling/fixtures/base_model"
+                mod_model = "${projectDir}/tests/subworkflows/local/basecalling/fixtures/base_model"
+                outdir = "${outputDir}/results"
+            }
+        }
+        then {
+            assert !workflow.success
+            assert workflow.stdout.join('\n').contains('existing SUP v5.2.0 and matching CpG v2')
+        }
+    }
+}

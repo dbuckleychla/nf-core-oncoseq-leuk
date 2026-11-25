@@ -1,6 +1,6 @@
 # Dorado SUP v5.2.0 compatibility
 
-The clinical candidate pins `ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785` for Linux x86-64. Its OCI configuration and build history identify Dorado **1.3.0**, installed from ONT's versioned Linux archive. The image uses the CUDA 12.3.2 runtime. The replacement image configuration was inspected on 21 November 2026 with
+The current clinical candidate pins `ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785` for Linux x86-64. Its OCI configuration and build history identify Dorado **1.3.0**, installed from ONT's versioned Linux archive. The image uses the CUDA 12.3.2 runtime. The replacement image configuration was inspected on 21 November 2026 with
 `skopeo inspect --config`. It adds preprocessing dependencies to the same
 Dorado base release; it is not a Dorado version upgrade. The digest was pulled,
 but a local runtime check failed after Docker exhausted scratch storage. Run
@@ -8,6 +8,10 @@ the GPU smoke test below on the intended worker before production acceptance.
 The parent image-update request is tracked as `oncoseq-4f7`.
 
 Dorado 1.3.0 explicitly lists `dna_r10.4.1_e8.2_400bps_sup@v5.2.0` for R10.4.1 E8.2, 400 bps, 5 kHz DNA data. It also lists matching `5mCG_5hmCG@v1` and `@v2` CpG models, and `5mC_5hmC@v1` and `@v2` all-context models. The software release supports the requested basecalling model. [Dorado model catalogue at the release commit](https://github.com/nanoporetech/dorado/blob/6ea40018974f30d436122f17e422bdc55d8d7945/dorado/models/models.cpp#L308)
+
+A tracked Dorado 2.2.0 candidate and owner-only publishing instructions are now available in
+[Build and publish Dorado 2.2.0](dorado-image.md). The pipeline pin stays on the
+image below until the new published digest passes GPU acceptance.
 
 GPU execution remains unverified in this fork. Use the selected Batch NVIDIA AMI and instance type for the acceptance test. The local development host has no NVIDIA GPU, and the original base image alone contains approximately 5.4 GiB of compressed layers. Dorado's documented Linux driver minimum is 525.105, and the image's NVIDIA runtime constraints also apply. [Dorado platform requirements](https://github.com/nanoporetech/dorado/blob/6ea40018974f30d436122f17e422bdc55d8d7945/README.md#platforms)
 

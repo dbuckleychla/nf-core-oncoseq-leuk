@@ -1,0 +1,41 @@
+nextflow_process {
+    name "Dorado GPU output acceptance"
+    script "tests/acceptance/dorado/main.nf"
+    process "VALIDATE_DORADO"
+    config "tests/acceptance/dorado/nextflow.config"
+
+    test("Accept valid synthetic modified-base BAM evidence") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+            }
+            process {
+                """
+                input[0] = [[id: 'SYNTHETIC_DORADO_SMOKE'], file("${projectDir}/tests/acceptance/dorado/fixtures/with_mods.bam")]
+                input[1] = file("${projectDir}/tests/acceptance/dorado/fixtures/versions.yml")
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert file(process.out.validation[0]).text.contains('2.2.0\t1\tpresent')
+        }
+    }
+
+    test("Reject a BAM without modified-base tags") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+            }
+            process {
+                """
+                input[0] = [[id: 'SYNTHETIC_DORADO_SMOKE'], file("${projectDir}/tests/acceptance/dorado/fixtures/without_mods.bam")]
+                input[1] = file("${projectDir}/tests/acceptance/dorado/fixtures/versions.yml")
+                """
+            }
+        }
+        then {
+            assert !process.success
+        }
+    }
+}
