@@ -956,3 +956,7 @@ The implementation uses common long-form TSV columns across the metric tables an
 ## 17. Locked-image command validation
 
 Actual Linux execution showed that this modkit rejects `--seed` with `--num-reads`, and explicit `--max-depth` requires the downsampling `--high-depth` path. The production command therefore uses indexed count-based threshold sampling (`--num-reads 10042 --filter-percentile 0.1`), without a seed, explicit depth cap, or downsampling. Provenance records those settings accurately. This supersedes the seed/depth-cap assumptions in section 7; source depth near the documented optimized-path high-depth range produces a factual warning, not an automatic sampling-policy change.
+
+## 18. Execution validation boundary
+
+At the user's request, GitHub smoke testing was stopped and the newly added remote smoke workflow removed. Local calculation, report, typed-configuration, isolated-worker, nf-test, and publication checks were completed. The locked-image driver remains an optional manual test for a supported Linux host; its completion is not a blocker for this implementation handoff. Do not automatically schedule GitHub smoke tests.
