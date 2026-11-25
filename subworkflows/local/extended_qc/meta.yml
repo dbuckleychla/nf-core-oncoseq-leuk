@@ -1,0 +1,42 @@
+name: extended_qc
+description: Add cellular-DNA read, coverage, and methylation QC without changing analytical steps
+keywords:
+  - nanopore
+  - adaptive sampling
+  - methylation
+  - quality control
+components:
+  - extended_qc
+input:
+  - bams:
+      type: file
+      description: Full mapping-stage BAM and index per original sample
+  - reference:
+      type: file
+      description: Mapping reference FASTA
+  - fai:
+      type: file
+      description: Reference index
+  - regions:
+      type: file
+      description: Per-sample enrichment intervals; exact targets are resolved independently
+  - preprocessing:
+      type: file
+      description: Optional existing stage artifacts with explicit sample/run associations
+  - assembly:
+      type: string
+      description: Reference assembly identifier
+output:
+  - metrics:
+      type: file
+      description: Versioned aggregate QC JSON
+  - tables:
+      type: file
+      description: Aggregate QC metric TSV files
+  - sections:
+      type: file
+      description: Private inline QC section consumed by the native report
+authors:
+  - "@dbuckleychla"
+maintainers:
+  - "@dbuckleychla"

@@ -55,6 +55,16 @@ def enrich(data, root, results_root=None):
     if alignment.exists():
         from alignment_qc import apply_alignment, load_alignment
         apply_alignment(data, load_alignment(alignment))
+    extended = root / 'qc.extended.json'
+    if results_root:
+        published = Path(results_root) / 'qc_extended' / data['sample'] / 'metrics.json'
+        if published.exists():
+            extended = published
+    if extended.exists():
+        from qc_extended.report import content
+        payload = json.loads(extended.read_text())
+        data['extended_qc'] = payload
+        data['extended_qc_html'] = content(payload)
     arms = data.get('nasvar', {}).get('karyotype', {}).get('karyotype', {})
     if arms:
         path = root / 'presentation' / 'nasvar.copy_estimates.svg'

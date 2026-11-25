@@ -73,6 +73,11 @@ params {
 
     clinical: Boolean
     report_review: Boolean = false
+    qc_extended: Boolean = true
+    qc_methylation: Boolean = true
+    qc_targets_bed: Path?
+    qc_sample_manifest: Path?
+    qc_cpg_panels: Path?
     review_references: Path?
     review_panel: Path = "${projectDir}/assets/reporting/leukemia-v1.tsv"
     review_fusion_distance: Integer = 100

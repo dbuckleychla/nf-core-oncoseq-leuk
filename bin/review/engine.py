@@ -107,6 +107,8 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
             statuses[kind] = 'completed'
         elif kind == 'qc:alignment':
             shutil.copyfile(path, out / 'qc.alignment.json')
+        elif kind == 'qc:extended':
+            shutil.copyfile(path, out / 'qc.extended.json')
         elif kind in ('qc:cramino', 'qc:seqkit'):
             shutil.copyfile(path, out / ('qc.' + kind.split(':')[1] + '.tsv'))
         elif kind in ('nasvar:coverage', 'nasvar:maf'):
@@ -197,6 +199,9 @@ def import_results(results, sample, output):
         if path.suffix.lower() in ('.png', '.svg'):
             category = 'fusions' if 'fusion' in path.name.lower() else 'target_loci' if 'target' in path.name.lower() else 'chromosomes'
             inventory.append(dict(kind='figure:' + category, path=str(path.resolve()), name=path.name))
+    extended = root / 'qc_extended' / sample / 'metrics.json'
+    if extended.is_file():
+        inventory.append(dict(kind='qc:extended', path=str(extended.resolve()), name=extended.name))
     out.parent.mkdir(parents=True, exist_ok=True)
     write_json(out, inventory)
     return inventory

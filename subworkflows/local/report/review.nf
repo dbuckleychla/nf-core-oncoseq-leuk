@@ -38,7 +38,7 @@ def resolveReviewReferences(source) {
 }
 
 def reviewCodeDigest() {
-    def paths = files("${projectDir}/bin/review/*.py") + [file("${projectDir}/bin/review_report.py"), file("${projectDir}/bin/review_figures.py")]
+    def paths = files("${projectDir}/bin/review/*.py") + [file("${projectDir}/bin/qc_extended/report.py"), file("${projectDir}/bin/review_report.py"), file("${projectDir}/bin/review_figures.py")]
     def digest = java.security.MessageDigest.getInstance('SHA-256')
     paths.sort { left, right -> left.name <=> right.name }.each { path -> digest.update(path.bytes) }
     digest.digest().encodeHex().toString()

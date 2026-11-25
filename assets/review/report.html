@@ -1621,11 +1621,17 @@
         box.append(svg);
       }
       for (const plot of data.qc_plots || []) qcChart(plot);
-      panel(
-        sections.qc,
-        "Read length distributions",
-        "Unavailable in these outputs. A read-level length histogram is required; N50 and mean length cannot reconstruct the distribution.",
-      );
+      if (data.extended_qc_html) {
+        const expanded = el("div");
+        expanded.innerHTML = data.extended_qc_html;
+        sections.qc.append(expanded);
+      } else {
+        panel(
+          sections.qc,
+          "Read length distributions",
+          "Unavailable in these outputs. Enable extended QC with an explicit exact-target BED to add regional read lengths and methylation QC.",
+        );
+      }
       table(
         panel(
           sections.qc,

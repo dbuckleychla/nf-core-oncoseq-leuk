@@ -73,6 +73,34 @@
                     "minimum": 0,
                     "default": 100,
                     "description": "Maximum distance in bases at each breakpoint for conservative caller consensus."
+                },
+                "qc_extended": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Add cellular DNA QC to metrics and reports; requires explicit exact targets."
+                },
+                "qc_methylation": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Calculate independent CpG methylation QC."
+                },
+                "qc_targets_bed": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Explicit exact-target BED for additive QC, independent of enrichment padding."
+                },
+                "qc_sample_manifest": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "TSV of sample and targets_bed overrides."
+                },
+                "qc_cpg_panels": {
+                    "type": "string",
+                    "format": "file-path",
+                    "exists": true,
+                    "description": "Optional versioned classifier CpG panel manifest."
                 }
             }
         },

@@ -1,0 +1,43 @@
+nextflow_workflow {
+    name "Additive QC with private intermediates"
+    script "subworkflows/local/extended_qc/main.nf"
+    workflow "EXTENDED_QC"
+    config "tests/subworkflows/local/extended_qc/local.config"
+
+    test("Complete both samples without modification tags or preprocessing history") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                qc_targets_bed = "${projectDir}/test_data/qc_extended/targets.bed"
+                qc_methylation = false
+            }
+            workflow {
+                """
+                input[0] = channel.of([[id:'SYNTHETIC_A'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')],
+                                      [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')])
+                input[1] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa')])
+                input[2] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa.fai')])
+                input[3] = channel.of([[id:'SYNTHETIC_A'], file('${projectDir}/test_data/qc_extended/enrichment.bed'), 0, []],
+                                      [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/enrichment.bed'), 0, []])
+                input[4] = channel.empty()
+                input[5] = 'hg38'
+                """
+            }
+        }
+        then {
+            assert workflow.success
+            assert workflow.out.metrics.size() == 2
+            assert workflow.out.sections.size() == 2
+            workflow.out.metrics.each { meta, path ->
+                def data = new groovy.json.JsonSlurperClassic().parseText(file(path).text)
+                assert data.components.methylation.status == 'disabled'
+                assert data.metrics.find { it.metric_id == 'alignment.rate' }.value == 0.75
+                def published = file("${outputDir}/results/qc_extended/${meta.id}")
+                assert published.listFiles().collect { it.name }.sort() == ['metrics.json','summary.tsv','read_lengths.tsv','coverage.tsv','targets.tsv','methylation.tsv','classifier_cpgs.tsv','adequacy.tsv','preprocessing.tsv'].sort()
+            }
+            workflow.out.sections.each { meta, _section, folder, _name ->
+                assert file("${folder}/Extended_QC.qmd").text.contains('Read lengths on/off exact targets')
+            }
+        }
+    }
+}
