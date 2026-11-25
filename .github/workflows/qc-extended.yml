@@ -43,9 +43,8 @@ jobs:
           qc_root=$(mktemp -d)
           python tests/qc_extended/build_fixture.py --outdir "$qc_root/fixture"
           ONCOSEQ_QC_TEST_PATH=$(dirname "$(command -v python)") \
-          nextflow run . -main-script tests/subworkflows/local/extended_qc/acceptance.nf \
-            -c tests/subworkflows/local/extended_qc/local.config \
-            --custom_config_base '' \
+          nextflow -C tests/subworkflows/local/extended_qc/standalone.config \
+            run . -main-script tests/subworkflows/local/extended_qc/acceptance.nf \
             --qc_fixture_dir "$qc_root/fixture" --qc_targets_bed "$qc_root/fixture/targets.bed" \
             --outdir "$qc_root/results" -work-dir "$qc_root/work"
           python tests/qc_extended/check_publication.py "$qc_root/results"
