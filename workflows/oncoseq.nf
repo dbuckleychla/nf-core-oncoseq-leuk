@@ -33,6 +33,8 @@ include { VARIANT_PROCESS } from '../subworkflows/local/variant_calling/variant_
 
 // Adaptive-specific
 include { COVERAGE_SEPARATE } from '../subworkflows/local/adaptive_specific/coverage_separate'
+include { EXTENDED_QC } from '../subworkflows/local/extended_qc/main'
+include { QC_EXT_ATTACH_REPORT } from '../modules/local/extended_qc/main'
 
 // Tumor classification
 include { CLASSY } from '../subworkflows/local/methylation_analysis/classy.nf'
@@ -152,6 +154,9 @@ workflow ONCOSEQ {
             : 'OncoSeq Workflow Report'
 
     ch_versions = channel.empty()
+    ch_qc_stages = channel.empty()
+    ch_qc_metrics = channel.empty()
+    ch_qc_content = channel.empty()
 
     ch_samples_for_processing = samplesheet
     if (params.report_review) {
@@ -197,6 +202,7 @@ workflow ONCOSEQ {
         )
 
         ch_reads = BASECALL_MULTIPLEX.out.fastq
+        ch_qc_stages = BASECALL_MULTIPLEX.out.qc_stages
 
         ch_versions = ch_versions.mix(BASECALL_MULTIPLEX.out.versions)
     }
@@ -207,6 +213,7 @@ workflow ONCOSEQ {
         )
 
         ch_reads = BASECALL_SIMPLEX.out.fastq
+        ch_qc_stages = BASECALL_SIMPLEX.out.qc_stages
 
         ch_versions = ch_versions.mix(BASECALL_SIMPLEX.out.versions)
     }
@@ -246,6 +253,11 @@ workflow ONCOSEQ {
     }
 
     ch_versions = ch_versions.mix(MAPPING.out.versions)
+    if (params.qc_extended && !is_cfdna) {
+        EXTENDED_QC(MAPPING.out.bam, ch_ref, ch_ref_fai, bed, ch_qc_stages, genome)
+        ch_qc_metrics = EXTENDED_QC.out.metrics
+        ch_qc_content = EXTENDED_QC.out.report_content
+    }
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -853,6 +865,10 @@ workflow ONCOSEQ {
         }
         ch_review = ch_bam_for_calling
             .map { meta, _bam, _bai -> tuple(meta.id, 'sample', []) }
+            .mix(ch_bam_for_calling.map { meta, _bam, _index ->
+                tuple(time_series ? meta.id.replaceFirst(/_(FULL|0h_[^_]+h)$/, '') : meta.id, meta)
+            }.combine(ch_qc_metrics.map { meta, metrics -> tuple(meta.id, metrics) }, by: 0)
+                .map { _source, meta, metrics -> tuple(meta.id, 'qc:extended', metrics) })
             .mix(COVERAGE_SEPARATE.out.review_coverage)
             .mix(MAPPING.out.coverage.map { meta, path -> tuple(meta.id, 'qc:cramino', path) })
             .mix(MAPPING.out.seqkit.map { meta, path -> tuple(meta.id, 'qc:seqkit', path) })
@@ -915,4 +931,11 @@ workflow ONCOSEQ {
         ch_final_versions,
         ch_title,
     )
+    if (params.qc_extended && !is_cfdna) {
+        ch_qc_native_reports = MIDNIGHT_REPORT.out.html
+            .map { meta, html -> tuple(time_series ? meta.id.replaceFirst(/_(FULL|0h_[^_]+h)$/, '') : meta.id, meta, html) }
+            .combine(ch_qc_content.map { meta, fragment -> tuple(meta.id, fragment) }, by: 0)
+            .map { _source, meta, html, fragment -> tuple(meta, html, fragment) }
+        QC_EXT_ATTACH_REPORT(ch_qc_native_reports)
+    }
 }
