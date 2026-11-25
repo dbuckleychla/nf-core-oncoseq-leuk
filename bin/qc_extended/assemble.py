@@ -124,9 +124,9 @@ def assemble(sample, alignment, methylation, reference, preprocessing=(), proven
     if methylation.get('scopes') and not methylation['scopes']['genome_primary']['combined']['sites']:
         warnings.append(dict(code='no_valid_cpg_calls', component='methylation', count=1, message='No valid primary-genome CpG calls observed'))
     maximum_depth = max((int(k) for k, v in alignment['coverage']['0']['genome_primary']['histogram'].items() if v), default=0)
-    if maximum_depth >= 8000:
-        warnings.append(dict(code='potential_methylation_depth_cap', component='methylation', count=1,
-                             message='Source depth may exceed the 8000-record modkit cap; eligible-record policies differ'))
+    if maximum_depth >= 65000:
+        warnings.append(dict(code='potential_high_modkit_depth', component='methylation', count=1,
+                             message='Source depth may exceed the optimized modkit high-depth range; no downsampling was enabled'))
     provenance = dict(provenance or {}, reference_sha256=reference['reference_sha256'],
                       target_intervals=alignment['target_intervals'], basecalling_models=alignment['models'],
                       classifier_panels=[{k: v for k, v in p.items() if k != 'depth'} for p in methylation.get('features', [])],

@@ -361,8 +361,7 @@ modkit pileup INPUT.bam sample.cpg.bedmethyl.gz \
     --ref reference.fa \
     --cpg --modified-bases 5mC 5hmC --combine-strands --bgzf \
     --threads ALLOCATED_CPUS \
-    --num-reads 10042 --filter-percentile 0.1 --seed 42 \
-    --max-depth 8000 \
+    --num-reads 10042 --filter-percentile 0.1 \
     --log-filepath modkit.log
 ```
 
@@ -953,3 +952,7 @@ The immediate document-only completion criterion is a single added Markdown file
 The user explicitly requested that QC also appear in reports. `QC_EXT_REPORT` generates private aggregate QC content. `QC_EXT_ATTACH_REPORT` adds that content to the completed native HTML, with QC navigation, so native Quarto output directories do not acquire QC-only fragments. Native HTML publication is routed through this additive finalization only when QC is enabled; final report filenames and existing report-directory outputs are retained. Review reporting consumes `qc:extended` metric artifacts and embeds the same content in the QC tab. Both display regional lengths, coverage breadth, methylation distributions, sampling adequacy, feature availability, component statuses, and the full-mapping-stage scope. Standalone QC intermediate HTML, pileups, indexes, and logs remain unpublished.
 
 The implementation uses common long-form TSV columns across the metric tables and publishes multiplex run stage counts in `qc_extended/run_preprocessing.tsv`. These are aggregate metric-file interface refinements of sections 9 and 10. The synthetic acceptance profile is a dedicated QC entrypoint selected with `-main-script tests/subworkflows/local/extended_qc/acceptance.nf`; it validates real metric execution without altering native callers.
+
+## 17. Locked-image command validation
+
+Actual Linux execution showed that this modkit rejects `--seed` with `--num-reads`, and explicit `--max-depth` requires the downsampling `--high-depth` path. The production command therefore uses indexed count-based threshold sampling (`--num-reads 10042 --filter-percentile 0.1`), without a seed, explicit depth cap, or downsampling. Provenance records those settings accurately. This supersedes the seed/depth-cap assumptions in section 7; source depth near the documented optimized-path high-depth range produces a factual warning, not an automatic sampling-policy change.

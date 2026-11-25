@@ -63,7 +63,7 @@ process QC_EXT_MODKIT_PILEUP {
         subprocess.run(['modkit', 'pileup', ${qcPy(bam)}, 'pileup.bed.gz', '--ref', ${qcPy(fasta)},
                         '--cpg', '--modified-bases', '5mC', '5hmC', '--combine-strands', '--bgzf',
                         '--threads', '${Math.min(8, task.cpus as int)}', '--num-reads', '10042', '--filter-percentile', '0.1',
-                        '--seed', '42', '--max-depth', '8000', '--log-filepath', 'modkit.log'], check=True)
+                        '--log-filepath', 'modkit.log'], check=True)
         Path('modkit.version.txt').write_text(subprocess.check_output(['modkit', '--version'], text=True))
     PY
     """

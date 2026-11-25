@@ -116,6 +116,7 @@ def collect(bed, reference, cpgs, enrichment, targets, supported, feature_panels
         hist[0] += size - sum(hist.values())
         features.append(dict(**{k: v for k, v in panel.items() if k != 'features'}, size=size, depth=dict(hist)))
     return dict(status=state(), scopes=metrics, features=features,
-                filtering=dict(percentile=.1, seed=42, sampled_reads=10042, max_depth=8000,
+                filtering=dict(percentile=.1, seed=None, sampled_reads=10042, max_depth=None,
+                               sampling_method='indexed_even_by_count', high_depth=False,
                                policy='Pinned modkit primary-alignment policy; not MAPQ20 coverage',
                                thresholds_status='threshold_values_unavailable'))

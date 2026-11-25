@@ -39,7 +39,7 @@ PY
 /workflow/bin/extended_qc.py reference --fasta reference.fa --cpgs reference.cpgs.gz --output reference.json
 /workflow/bin/extended_qc.py alignment --bam tagged.bam --reference reference.json --enrichment enrichment.bed --targets targets.bed --threads 2 --output alignment.json
 ''')
-    run(MODKIT_IMAGE, f'''modkit pileup tagged.bam pileup.bed.gz --ref reference.fa --cpg --modified-bases 5mC 5hmC --combine-strands --bgzf --threads {a.threads} --num-reads 10042 --filter-percentile 0.1 --seed 42 --max-depth 8000 --log-filepath modkit.log''')
+    run(MODKIT_IMAGE, f'''modkit pileup tagged.bam pileup.bed.gz --ref reference.fa --cpg --modified-bases 5mC 5hmC --combine-strands --bgzf --threads {a.threads} --num-reads 10042 --filter-percentile 0.1 --log-filepath modkit.log''')
     run(METRICS_IMAGE, '''/workflow/bin/extended_qc.py methylation --alignment alignment.json --reference reference.json --cpgs reference.cpgs.gz --fasta reference.fa --bedmethyl pileup.bed.gz --enrichment enrichment.bed --targets targets.bed --output methylation.json
 /workflow/bin/extended_qc.py assemble --sample SYNTHETIC_SMOKE --alignment alignment.json --methylation methylation.json --reference reference.json --enrichment enrichment.bed --targets targets.bed --output metrics
 ''')
