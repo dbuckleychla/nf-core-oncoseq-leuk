@@ -88,7 +88,8 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "description": "Explicit exact-target BED for additive QC, independent of enrichment padding."
+                    "description": "Explicit exact-target BED for additive QC, independent of enrichment padding.",
+                    "default": "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed"
                 },
                 "qc_sample_manifest": {
                     "type": "string",

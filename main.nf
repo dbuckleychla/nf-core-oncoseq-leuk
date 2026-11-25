@@ -75,7 +75,7 @@ params {
     report_review: Boolean = false
     qc_extended: Boolean = true
     qc_methylation: Boolean = true
-    qc_targets_bed: Path?
+    qc_targets_bed: Path? = "s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed"
     qc_sample_manifest: Path?
     qc_cpg_panels: Path?
     review_references: Path?

@@ -1,6 +1,6 @@
 // Stage each deterministic file group as one Dorado input directory.
 process DORADO_BASECALL {
-    container 'ghcr.io/chusj-pigu/dorado:851b0a37ecbff6b3b952c811b31dad48ca6bf995'
+    container 'ghcr.io/dbuckleychla/dorado-2.2.0@sha256:5b35034d809fc98502943f40e491a7a5b1810844b949afe964ac1052b58ce6fa'
 
     // nf-core resource label
     label "process_high"

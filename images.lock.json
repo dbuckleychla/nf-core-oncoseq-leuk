@@ -167,11 +167,14 @@
         "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785": {
             "image": "ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785",
             "processes": [
-                "DORADO_BASECALL",
-                "DORADO_DEMULTIPLEX",
-                "DORADO_DOWNLOAD_LIST",
-                "DORADO_DOWNLOAD_MODEL",
-                "DORADO_TRIM"
+                "QC_EXT_ALIGNMENT",
+                "QC_EXT_ASSEMBLE",
+                "QC_EXT_ATTACH_REPORT",
+                "QC_EXT_METHYLATION",
+                "QC_EXT_PREPROCESSING",
+                "QC_EXT_REFERENCE",
+                "QC_EXT_REPORT",
+                "QC_EXT_RUN_SUMMARY"
             ]
         },
         "quay.io/biocontainers/cramino:1.1.0--h3dc2dae_0": {
@@ -185,6 +188,20 @@
         "quay.io/biocontainers/whatshap:2.8--py39h2de1943_0": {
             "image": "quay.io/biocontainers/whatshap@sha256:d63cdf64c29f99016ace7f8a4ace72d7a1dbbec262831e65d1a97d6a57960a30",
             "processes": ["WHATSHAP_STATS"]
+        },
+        "ghcr.io/dbuckleychla/dorado-2.2.0:latest": {
+            "image": "ghcr.io/dbuckleychla/dorado-2.2.0@sha256:5b35034d809fc98502943f40e491a7a5b1810844b949afe964ac1052b58ce6fa",
+            "processes": [
+                "DORADO_BASECALL",
+                "DORADO_DEMULTIPLEX",
+                "DORADO_DOWNLOAD_LIST",
+                "DORADO_DOWNLOAD_MODEL",
+                "DORADO_TRIM"
+            ]
+        },
+        "ghcr.io/chusj-pigu/classy-slim@sha256:7ec5fc1e4607be13d30dc65a1b07f2844f8289edbec0ca67a70e9b88ef8beb4c": {
+            "image": "ghcr.io/chusj-pigu/classy-slim@sha256:7ec5fc1e4607be13d30dc65a1b07f2844f8289edbec0ca67a70e9b88ef8beb4c",
+            "processes": ["QC_EXT_MODKIT_PILEUP"]
         }
     }
 }

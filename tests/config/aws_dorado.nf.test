@@ -9,6 +9,7 @@ nextflow_process {
             params {
                 aws_gpu_queue = 'general-gpu-test'
                 aws_basecall_queue = 'basecall-gpu-test'
+                basecall_shards = 16
                 wgs = true
                 huge = true
             }
@@ -18,7 +19,7 @@ nextflow_process {
             def values = process.out.settings[0].readLines()
             assert values[0] == 'basecall-gpu-test'
             assert values[1] == '1'
-            assert values[2] == 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+            assert values[2] == 'ghcr.io/dbuckleychla/dorado-2.2.0@sha256:5b35034d809fc98502943f40e491a7a5b1810844b949afe964ac1052b58ce6fa'
             assert values[3..4] == ['', '']
             assert values[5] == '8'
             assert values[6] == '30 GB'

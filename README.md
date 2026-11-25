@@ -328,4 +328,4 @@ You can cite the `nf-core` publication as follows:
 >
 > _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
 
-Cellular-DNA runs include [extended sequencing QC](docs/extended-qc.md) in the metric outputs and reports. Enabled QC requires an explicit exact-target BED.
+Cellular-DNA runs include [extended sequencing QC](docs/extended-qc.md) in the metric outputs and reports. The default QC exact-target BED is the institutional hg38 target panel; override `--qc_targets_bed` for another panel or assembly.

@@ -3,9 +3,11 @@
 The tracked [Dockerfile](../containers/dorado-2.2.0/Dockerfile) installs ONT's
 Linux x64 Dorado 2.2.0 release in a digest-pinned CUDA 12.8.1/cuDNN Ubuntu 24.04
 runtime. The image name is `ghcr.io/dbuckleychla/dorado-2.2.0`, with tag `latest`.
-The pipeline will use its Linux amd64 SHA-256 digest after acceptance, rather
-than the mutable tag. The current pipeline image remains pinned to Dorado 1.3.0
-until that promotion is validated.
+At the user’s request, the pipeline now pins the Linux amd64 manifest
+`sha256:5b35034d809fc98502943f40e491a7a5b1810844b949afe964ac1052b58ce6fa`.
+The pushed manifest-list digest is
+`sha256:0639860967a252e25ac0a93fd503f6056b537d01ba02e70f82a0d84850946f3c`.
+Registry metadata confirms the amd64 child; this update does not claim GPU inference validation.
 
 BuildKit checks the official archive's SHA-256 before extraction:
 `c2376701a48bc6227a9cb5ad1d0b9ada60b5f3c8760a657066131fdf0d9545c4`.

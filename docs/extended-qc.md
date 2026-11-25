@@ -2,7 +2,7 @@
 
 Cellular-DNA runs now add regional read-length, coverage, and independent methylation QC. The new metrics appear in both the native report and the optional review report's QC tab. Existing analytical steps and outputs are retained.
 
-QC is enabled by default and requires an **explicit exact-target BED**, supplied globally or through a per-sample override manifest. The pipeline's enrichment BED still defines enrichment. Removing padding from that BED is not a substitute for supplying the original target intervals.
+QC is enabled by default and uses the exact-target BED at `s3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/targets/DARGAN_OCCRA_ALMA_CHLA_wishlist.GENCODE_v50.hg38.bed`. Override it with `--qc_targets_bed` or a per-sample override manifest when using another panel or assembly. The pipeline's enrichment BED still defines enrichment. Removing padding from that BED is not a substitute for supplying the original target intervals.
 
 ```bash
 nextflow run . -profile clinical \

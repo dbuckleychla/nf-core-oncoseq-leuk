@@ -1,6 +1,8 @@
+> Current pin: Dorado 2.2.0, promoted at the user’s request. See [image provenance](dorado-image.md). The 1.3.0 inspection below is historical evidence.
+
 # Dorado SUP v5.2.0 compatibility
 
-The current clinical candidate pins `ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785` for Linux x86-64. Its OCI configuration and build history identify Dorado **1.3.0**, installed from ONT's versioned Linux archive. The image uses the CUDA 12.3.2 runtime. The replacement image configuration was inspected on 21 November 2026 with
+The earlier clinical candidate pinned `ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785` for Linux x86-64. Its OCI configuration and build history identify Dorado **1.3.0**, installed from ONT's versioned Linux archive. The image uses the CUDA 12.3.2 runtime. The replacement image configuration was inspected on 21 November 2026 with
 `skopeo inspect --config`. It adds preprocessing dependencies to the same
 Dorado base release; it is not a Dorado version upgrade. The digest was pulled,
 but a local runtime check failed after Docker exhausted scratch storage. Run
