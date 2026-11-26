@@ -102,6 +102,8 @@ def enrich(data, root, results_root=None):
         payload = json.loads(extended.read_text())
         data['extended_qc'] = payload
         data['extended_qc_html'] = content(payload)
+    from provenance import enrich as enrich_provenance
+    enrich_provenance(data, results_root)
     arms = data.get('nasvar', {}).get('karyotype', {}).get('karyotype', {})
     if arms:
         path = root / 'presentation' / 'nasvar.copy_estimates.svg'

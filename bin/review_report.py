@@ -18,6 +18,7 @@ def main():
     p = commands.add_parser('prepare')
     for name in ('sample', 'inputs', 'references', 'panel', 'output', 'payload'):
         p.add_argument('--' + name, required=True)
+    p.add_argument('--provenance')
     p = commands.add_parser('complete')
     for name in ('sample', 'catalogue', 'payload', 'vep', 'references', 'panel', 'known-fusions', 'output'):
         p.add_argument('--' + name, required=True)
@@ -52,6 +53,9 @@ def main():
     p.add_argument('--template', default=str(Path(__file__).resolve().parents[1] / 'assets/review/report.html'))
     p.add_argument('--figures')
     p.add_argument('--results-root', help='Optional existing local output directory for presentation-only QC and NASVAR plots')
+    p = commands.add_parser('attach-provenance')
+    for name in ('input', 'output', 'versions'):
+        p.add_argument('--' + name, required=True)
     args = vars(parser.parse_args())
     command = args.pop('command')
     if command == 'import':
@@ -76,6 +80,9 @@ def main():
     elif command == 'render':
         from render import render
         render(**args)
+    elif command == 'attach-provenance':
+        from provenance import attach_report
+        attach_report(**args)
     else:
         globals()[command](**args)
 

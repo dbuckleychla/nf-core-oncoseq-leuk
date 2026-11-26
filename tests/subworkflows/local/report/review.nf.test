@@ -25,12 +25,14 @@ nextflow_workflow {
             assert !expanded.selections[0].cosmic_primary
             assert expanded.evidence[0].cosmic.targeted_evidence[0].phenotypes[0].classification.PRIMARY_SITE == 'lung'
             assert data.classification[0].score == 0.9
+            assert data.runtime_provenance.parameters.basecall_model == 'dna_synthetic@v1'
             assert data.figures.any { it.category == 'classification' && it.path.endsWith('_combined_task_pies.svg') }
             assert data.structural_events.every { event -> !event.selected }
             assert file(workflow.out.html[0][1]).text.contains('SYNTHETIC')
             assert file(workflow.out.html[0][1]).text.contains('"classy_summary":true')
             assert file(workflow.out.html[0][1]).text.contains('"classy_plot":"blood"')
             assert file(workflow.out.html[0][1]).text.contains('10.1186/s13073-026-01815-7')
+            assert file(workflow.out.html[0][1]).text.contains('"version":"1.20"')
             assert file("${outputDir}/results/reports/SYNTHETIC.review.html").exists()
             assert file("${outputDir}/results/reports/review/SYNTHETIC/manifest.json").exists()
             assert !file("${outputDir}/results/reports/review/SYNTHETIC/review_data").exists()

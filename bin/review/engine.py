@@ -22,12 +22,15 @@ def write_json(path, value):
     Path(path).write_text(json.dumps(value, indent=2, allow_nan=False) + '\n')
 
 
-def prepare(sample, inputs, references, panel, output, payload):
+def prepare(sample, inputs, references, panel, output, payload, provenance=None):
     refs, manifest = validate(references)
     entries = json.loads(Path(inputs).read_text())
     out, saved = Path(output), Path(payload)
     out.mkdir(parents=True, exist_ok=True)
     saved.mkdir(parents=True, exist_ok=True)
+    if provenance:
+        from provenance import recorded_context
+        write_json(saved / 'run.provenance.json', recorded_context(json.loads(Path(provenance).read_text())))
     sources, inventory = [], []
     for ordinal, entry in enumerate(entries):
         source = Path(entry['path'])
@@ -137,6 +140,9 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
                   classification=classification, coverage=coverage(cov), cnv=cnv,
                   nasvar=native, figures=figures, references=manifest,
                   panel=panel_provenance(panel), warnings=[])
+    run_provenance = saved / 'run.provenance.json'
+    if run_provenance.is_file():
+        result['runtime_provenance'] = json.loads(run_provenance.read_text())
     if manifest.get('pinning') == 'development':
         result['warnings'].append('Development references are unpinned; reference checksums must be pinned before clinical launch.')
     progress('Writing final review data and provenance')

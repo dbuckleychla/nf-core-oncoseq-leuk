@@ -64,6 +64,7 @@
                 "REVIEW_PREPARE",
                 "REVIEW_COMPLETE",
                 "REVIEW_RENDER",
+                "REVIEW_PROVENANCE_ATTACH",
                 "QC_EXT_ALIGNMENT",
                 "QC_EXT_ASSEMBLE",
                 "QC_EXT_ATTACH_REPORT",

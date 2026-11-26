@@ -205,6 +205,10 @@
         background: white;
         border-radius: 4px;
       }
+      #provenance td {
+        overflow-wrap: anywhere;
+        word-break: break-word;
+      }
       .reference-controls {
         display: flex;
         flex-wrap: wrap;
@@ -654,7 +658,7 @@
         ["nasvar", "Copy number / NASVAR"],
         ["targets", "Target genes"],
         ["qc", "Coverage and QC"],
-        ["methods", "Methods and files"],
+        ["provenance", "Provenance"],
         ["references", "References"],
       ];
       const sections = {};
@@ -674,6 +678,7 @@
         document.getElementById("report").append(s);
       }
       function activate(id) {
+        if (id === "methods") id = "provenance";
         if (!sections[id]) id = "overview";
         for (const [k, s] of Object.entries(sections)) {
           s.classList.toggle("active", k === id);
@@ -1781,7 +1786,50 @@
         content.append(toggle, viewport);
         dialog.showModal();
       }
+      const croppedClassy = new Set();
+      function cropClassySvg(item) {
+        if (!item.classy_summary || croppedClassy.has(item.image_key)) return;
+        croppedClassy.add(item.image_key);
+        const uri = data.images[item.image_key];
+        if (!uri.startsWith("data:image/svg+xml;base64,")) return;
+        const bytes = Uint8Array.from(atob(uri.split(",")[1]), (c) => c.charCodeAt(0)),
+          xml = new DOMParser().parseFromString(new TextDecoder().decode(bytes), "image/svg+xml"),
+          original = xml.documentElement;
+        if (original.localName !== "svg" || xml.querySelector("parsererror")) return;
+        const measurement = original.cloneNode(true),
+          view = original.viewBox.baseVal,
+          width = view.width || original.width.baseVal.value,
+          height = view.height || original.height.baseVal.value;
+        for (const child of [...measurement.children]) {
+          if (child.localName === "rect" &&
+              Number(child.getAttribute("x") || 0) === (view.x || 0) &&
+              Number(child.getAttribute("y") || 0) === (view.y || 0) &&
+              Number(child.getAttribute("width")) === width &&
+              Number(child.getAttribute("height")) === height) child.remove();
+        }
+        measurement.style.position = "absolute";
+        measurement.style.left = "-100000px";
+        measurement.style.visibility = "hidden";
+        document.body.append(measurement);
+        try {
+          const bounds = measurement.getBBox(), pad = 24;
+          if (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return;
+          original.setAttribute("viewBox", [bounds.x-pad, bounds.y-pad, bounds.width+2*pad, bounds.height+2*pad].join(" "));
+          original.setAttribute("width", bounds.width+2*pad);
+          original.setAttribute("height", bounds.height+2*pad);
+          const encoded = new TextEncoder().encode(new XMLSerializer().serializeToString(original));
+          let binary = "";
+          for (const byte of encoded) binary += String.fromCharCode(byte);
+          data.images[item.image_key] = "data:image/svg+xml;base64," + btoa(binary);
+        } catch (_error) {
+          // Keep the native view if this browser cannot measure the SVG.
+          return;
+        } finally {
+          measurement.remove();
+        }
+      }
       function figurePanel(parent, item) {
+        cropClassySvg(item);
         const box = el("figure"),
           img = el("img");
         img.loading = "lazy";
@@ -1882,7 +1930,7 @@
       panel(
         sections.references,
         "Workflow and tool publications",
-        "Publications and software references for OncoSeq workflow capabilities. Optional analyses may not run for every sample; execution details are in Methods and files.",
+        "Publications and software references for OncoSeq workflow capabilities. Optional analyses may not run for every sample; execution details are in Provenance.",
       );
       referenceSearch.type = "search";
       referenceSearch.placeholder = "Search tools, authors or publications";
@@ -1934,7 +1982,58 @@
       referenceSearch.oninput = referenceCategory.onchange = showReferences;
       showReferences();
       if (bibliography.reviewed) sections.references.append(el("p", "Bibliography reviewed " + bibliography.reviewed + ".", "muted"));
-      const methods = panel(sections.methods, "References and policy");
+      const provenance = data.run_provenance || { workflow: {}, identity: {}, parameters: {}, models: [], versions: [], containers: [], qc_containers: [], configured_containers: [], checksums: [] };
+      table(
+        panel(sections.provenance, "Workflow and run", "Metadata captured for the analytical run and review report."),
+        Object.entries({ ...provenance.workflow, ...provenance.identity, run_id: provenance.parameters.run_id })
+          .filter(([_key, value]) => value !== null && value !== undefined && value !== "")
+          .map(([key, value]) => ({ field: key.replaceAll("_", " "), value })),
+        [{ label: "Field", value: (r) => r.field }, { label: "Recorded value", value: (r) => r.value }],
+        "workflow provenance",
+      );
+      table(
+        panel(sections.provenance, "Basecalling and modified-base models", "Sources distinguish configured model requests from identifiers recorded in BAM read groups."),
+        provenance.models,
+        [{ label: "Model", value: (r) => r.kind }, { label: "Specification", value: (r) => r.specification }, { label: "Source", value: (r) => r.source }],
+        "basecalling models",
+      );
+      table(
+        panel(sections.provenance, "Captured software versions", "Versions emitted by tools are shown verbatim. Multiple versions of a tool can occur in different containers."),
+        provenance.versions,
+        [{ label: "Tool", value: (r) => r.tool }, { label: "Version", value: (r) => r.version }, { label: "Process", value: (r) => r.process }, { label: "Source", value: (r) => r.source }],
+        "software versions",
+      );
+      const containerColumns = [
+        { label: "Process", value: (r) => r.process },
+        { label: "Container", value: (r) => r.image.split("@")[0] },
+        { label: "SHA-256", value: (r) => r.image.includes("@sha256:") ? r.image.split("@sha256:")[1] : "Not recorded" },
+        { label: "Source", value: (r) => r.source },
+      ];
+      table(
+        panel(sections.provenance, "Recorded containers", "Execution-trace entries describe completed or cached tasks. QC entries come from the saved metric provenance."),
+        [...provenance.containers, ...provenance.qc_containers],
+        containerColumns,
+        "recorded containers",
+      );
+      table(
+        collapsed(sections.provenance, "Configured container lock", "Configured pins cover workflow capabilities and do not establish that every process ran. Execution-trace entries above take precedence."),
+        provenance.configured_containers.map((r) => ({ process: r.processes.join(", "), image: r.image, source: "Saved image lock" })),
+        containerColumns,
+        "configured container pins",
+      );
+      table(
+        panel(sections.provenance, "Reference checksums"),
+        provenance.checksums,
+        [{ label: "Reference", value: (r) => r.asset }, { label: "SHA-256", value: (r) => r.sha256 }, { label: "Source", value: (r) => r.source }],
+        "reference checksums",
+      );
+      table(
+        collapsed(sections.provenance, "Run settings"),
+        Object.entries(provenance.parameters).map(([key, value]) => ({ setting: key, value })),
+        [{ label: "Setting", value: (r) => r.setting }, { label: "Value", value: (r) => r.value }],
+        "recorded run settings",
+      );
+      const methods = panel(sections.provenance, "Reference and policy details");
       const detail = el("details"),
         summary = el("summary", "Reference details");
       detail.append(
@@ -1956,7 +2055,7 @@
         ),
       );
       methods.append(detail);
-      const files = panel(sections.methods, "Downloadable files");
+      const files = panel(sections.provenance, "Downloadable files");
       for (const name of [
         "small_variants.tsv.gz",
         "structural_events.tsv.gz",

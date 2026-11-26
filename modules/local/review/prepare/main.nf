@@ -13,6 +13,7 @@ process REVIEW_PREPARE {
     path reference_files, stageAs: 'references/*'
     val reference_manifest
     path panel
+    val run_provenance
     val _code_digest
 
     output:
@@ -28,6 +29,7 @@ process REVIEW_PREPARE {
     )
     def refs = groovy.json.JsonOutput.toJson(reference_manifest)
     def sample = reviewShellQuote(meta.id)
+    def provenance = groovy.json.JsonOutput.toJson(run_provenance)
     """
     cat > inputs.json <<'REVIEW_INPUTS'
     ${inputs}
@@ -35,8 +37,11 @@ process REVIEW_PREPARE {
     cat > references.json <<'REVIEW_REFERENCES'
     ${refs}
     REVIEW_REFERENCES
+    cat > run.provenance.json <<'REVIEW_PROVENANCE'
+    ${provenance}
+    REVIEW_PROVENANCE
     review_report.py prepare --sample ${sample} --inputs inputs.json --references references.json \\
-        --panel ${reviewShellQuote(panel)} --output catalogue --payload payload
+        --panel ${reviewShellQuote(panel)} --provenance run.provenance.json --output catalogue --payload payload
     """
 }
 
@@ -129,6 +134,31 @@ process REVIEW_RENDER {
     def additional = figures ? "--figures \"\$(pwd)/\"${reviewShellQuote(figures)}" : ''
     """
     review_report.py render --input ${reviewShellQuote("${data}/review.json")} --output ${output} --template ${reviewShellQuote(template)} ${additional}
+    """
+}
+
+process REVIEW_PROVENANCE_ATTACH {
+    tag "${meta.id}"
+    label 'process_low'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
+
+    input:
+    tuple val(meta), path(html, stageAs: 'native_input/*')
+    val software_versions
+    val _code_digest
+
+    output:
+    tuple val(meta), path('*.review.html'), emit: html
+
+    // No versions topic: this step runs after version producers finish.
+    script:
+    def versions = groovy.json.JsonOutput.toJson(software_versions)
+    """
+    cat > software_versions.json <<'REVIEW_VERSIONS'
+    ${versions}
+    REVIEW_VERSIONS
+    review_report.py attach-provenance --input ${reviewShellQuote(html)} \\
+        --versions software_versions.json --output ${reviewShellQuote(meta.id + '.review.html')}
     """
 }
 

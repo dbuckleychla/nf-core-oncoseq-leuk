@@ -32,6 +32,7 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(rows['ClairS-TO']['kind'], 'preprint')
         self.assertEqual(rows['Dorado']['kind'], 'software')
         self.assertIsNone(rows['Dorado']['doi'])
+        self.assertNotIn('FrankONTstein', rows)
         self.assertEqual(catalog()['entries'][0]['name'], 'nf-core/oncoseq')
 
     def test_catalog_is_independent_between_reports(self):

@@ -922,7 +922,19 @@ workflow ONCOSEQ {
             ch_review = ch_review.mix(NASVAR.out.maf.map { meta, path -> tuple(meta.id, 'nasvar:maf', path) })
             ch_review = ch_review.mix(ch_kar_out.map { meta, path -> tuple(meta.id, 'nasvar', path) })
         }
-        REVIEW_REPORT(ch_review, ch_bam_for_calling, ch_ref, vep_cache)
+        def provenance_params = ['run_id', 'genome', 'basecall_model', 'm_bases', 'skip_basecalling',
+            'skip_mapping', 'basecall_shards', 'device', 'bed', 'padding', 'qc_targets_bed',
+            'time_series', 'cfdna', 'clinical'].collectEntries { key ->
+                def value = params[key]
+                [(key): value instanceof Path ? value.toUriString() : value]
+            }
+        def provenance_workflow = [pipeline: workflow.manifest.name, pipeline_version: workflow.manifest.version,
+            nextflow_version: workflow.nextflow.version.toString(), commit_id: workflow.commitId,
+            revision: workflow.revision]
+        def ch_run_provenance = channel.value([workflow: provenance_workflow, parameters: provenance_params])
+        def ch_review_versions = ch_versions.unique()
+            .map { version -> version instanceof Path ? version.text : version.toString() }.toList()
+        REVIEW_REPORT(ch_review, ch_bam_for_calling, ch_ref, vep_cache, ch_run_provenance, ch_review_versions)
     }
 
     MIDNIGHT_REPORT(

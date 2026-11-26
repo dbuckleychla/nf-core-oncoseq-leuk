@@ -1,5 +1,5 @@
 include { orderedReviewArtifacts } from './input_order'
-include { REVIEW_PREPARE ; REVIEW_VEP ; REVIEW_COMPLETE ; REVIEW_FIGURES ; REVIEW_RENDER } from '../../../modules/local/review/prepare/main'
+include { REVIEW_PREPARE ; REVIEW_VEP ; REVIEW_COMPLETE ; REVIEW_FIGURES ; REVIEW_RENDER ; REVIEW_PROVENANCE_ATTACH } from '../../../modules/local/review/prepare/main'
 
 def resolveReviewReferences(source) {
     source = source ?: "${projectDir}/assets/institutional_hg38.review.json"
@@ -50,6 +50,8 @@ workflow REVIEW_REPORT {
     bams
     ref
     vep_cache
+    run_provenance
+    software_versions
 
     main:
     def resolved = resolveReviewReferences(params.review_references)
@@ -68,7 +70,7 @@ workflow REVIEW_REPORT {
             tuple([id: sample], ordered[0], ordered[1])
         }
 
-    REVIEW_PREPARE(ch_samples, paths, refs, panel, code)
+    REVIEW_PREPARE(ch_samples, paths, refs, panel, run_provenance, code)
     ch_prepared = REVIEW_PREPARE.out.prepared.map { meta, catalogue, payload ->
         def counts = new groovy.json.JsonSlurperClassic().parseText(file("${catalogue.toUriString()}/summary.json").text)
         tuple(meta + [review_candidates: counts.candidate_alleles], catalogue, payload)
@@ -89,8 +91,9 @@ workflow REVIEW_REPORT {
         .map { meta, data -> tuple(meta, data, []) }
         .mix(REVIEW_FIGURES.out.figures)
     REVIEW_RENDER(ch_render, template, code)
+    REVIEW_PROVENANCE_ATTACH(REVIEW_RENDER.out.html, software_versions, code)
 
     emit:
-    html = REVIEW_RENDER.out.html
+    html = REVIEW_PROVENANCE_ATTACH.out.html
     data = REVIEW_COMPLETE.out.data
 }
