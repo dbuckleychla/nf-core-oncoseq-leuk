@@ -6,6 +6,7 @@ from concurrent.futures import ProcessPoolExecutor
 import math
 import re
 import subprocess
+import sys
 
 import pysam
 
@@ -225,7 +226,10 @@ def depth_contig(job):
             events[a].append((key, 1))
             events[b].append((key, -1))
         boundaries, cursor, active = sorted(events), 0, set()
-        cmd = ['samtools', 'depth', '-r', chrom, '-q', '0', '-Q', str(threshold), '-g', '0x600', '-G', '0x900', str(bam)]
+        # Stream the Samtools implementation shipped with the active pysam.
+        # save_stdout avoids materializing a chromosome's depth as a Python string.
+        depth_driver = "import pysam,sys; pysam.samtools.depth(*sys.argv[1:], catch_stdout=False, save_stdout='/dev/stdout')"
+        cmd = [sys.executable, '-c', depth_driver, '-r', chrom, '-q', '0', '-Q', str(threshold), '-g', '0x600', '-G', '0x900', str(bam)]
         with subprocess.Popen(cmd, stdout=subprocess.PIPE, text=True) as proc:
             for line in proc.stdout:
                 _chrom, pos, depth = line.split()

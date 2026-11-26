@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import sys
 import subprocess
+import os
 import tempfile
 import unittest
 from unittest.mock import patch
@@ -75,15 +76,17 @@ class QCTests(unittest.TestCase):
         self.assertEqual(result['coverage']['0']['genome_primary']['histogram'], {0: 100})
         self.assertIsNone(result['read_lengths']['all']['n50'])
 
-    def test_non_utf8_samtools_build_options_do_not_break_provenance(self):
+    def test_embedded_samtools_does_not_require_an_external_executable(self):
         import extended_qc
         output = self.root / 'version-test.json'
         args = ['extended_qc.py', 'alignment', '--bam', str(self.root / 'plain.bam'),
                 '--reference', str(self.root / 'reference.json'), '--enrichment', str(self.root / 'enrichment.bed'),
                 '--targets', str(self.root / 'targets.bed'), '--threads', '2', '--output', str(output)]
-        with patch.object(sys, 'argv', args), patch('extended_qc.subprocess.check_output', return_value=b'samtools 1.19.2\nBuild options: \xabpath\xbb\n'):
+        with patch.object(sys, 'argv', args), patch.dict(os.environ, {'PATH': '/nonexistent'}):
             extended_qc.main()
-        self.assertEqual(json.loads(output.read_text())['versions']['samtools'], 'samtools 1.19.2')
+        result = json.loads(output.read_text())
+        self.assertEqual(result['versions']['samtools'], pysam.__samtools_version__)
+        self.assertEqual(result['coverage']['0']['genome_primary']['aligned_bases'], 40)
 
     def test_modification_integrity(self):
         tagged = self.collect('tagged')

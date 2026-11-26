@@ -2,6 +2,10 @@ def qcQuote(value) {
     "'" + value.toString().replace("'", "'\\''") + "'"
 }
 
+def qcPythonPath(override) {
+    override ?: '/opt/wave/.pixi/envs/default/bin/python3'
+}
+
 def qcPy(value) {
     groovy.json.JsonOutput.toJson(value.toString())
 }
@@ -9,7 +13,7 @@ def qcPy(value) {
 process QC_EXT_REFERENCE {
     tag 'reference'
     label 'qc_extended_small'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(meta), path(fasta), path(fai)
     val code_digest
@@ -17,14 +21,14 @@ process QC_EXT_REFERENCE {
     tuple path('reference.json'), path('reference.cpgs.gz'), emit: summary
     script:
     """
-    extended_qc.py reference --fasta ${qcQuote(fasta)} --cpgs reference.cpgs.gz --output reference.json
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" reference --fasta ${qcQuote(fasta)} --cpgs reference.cpgs.gz --output reference.json
     """
 }
 
 process QC_EXT_ALIGNMENT {
     tag "${meta.id}"
     label 'qc_extended_bam'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(meta), path(bam), path(bai), path(enrichment, stageAs: 'enrichment/*'), path(targets, stageAs: 'targets/*')
     tuple path(reference), path(cpgs)
@@ -34,7 +38,7 @@ process QC_EXT_ALIGNMENT {
     script:
     def disabled = params.qc_methylation ? '' : '--disable-methylation'
     """
-    extended_qc.py alignment --bam ${qcQuote(bam)} --reference ${qcQuote(reference)} \\
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" alignment --bam ${qcQuote(bam)} --reference ${qcQuote(reference)} \\
         --enrichment ${qcQuote(enrichment)} --targets ${qcQuote(targets)} --threads ${Math.min(8, task.cpus as int)} \\
         ${disabled} --output alignment.json
     """
@@ -72,7 +76,7 @@ process QC_EXT_MODKIT_PILEUP {
 process QC_EXT_METHYLATION {
     tag "${meta.id}"
     label 'qc_extended_bam'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(meta), path(enrichment, stageAs: 'enrichment/*'), path(targets, stageAs: 'targets/*'), path(alignment), path(pileup), path(modkit_version)
     tuple path(reference), path(cpgs)
@@ -92,11 +96,11 @@ process QC_EXT_METHYLATION {
     cat > panels.tsv <<'QC_PANELS'
     ${manifest}
     QC_PANELS
-    extended_qc.py methylation --alignment ${qcQuote(alignment)} --reference ${qcQuote(reference)} \\
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" methylation --alignment ${qcQuote(alignment)} --reference ${qcQuote(reference)} \\
         --cpgs ${qcQuote(cpgs)} --fasta ${qcQuote(fasta)} --bedmethyl ${qcQuote(pileup)} \\
         --enrichment ${qcQuote(enrichment)} --targets ${qcQuote(targets)} --assembly ${qcQuote(assembly)} \\
         --panel-manifest panels.tsv --output methylation.json
-    python3 - <<'PY'
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} - <<'PY'
     import json
     from pathlib import Path
     data = json.loads(Path('methylation.json').read_text())
@@ -110,7 +114,7 @@ process QC_EXT_METHYLATION {
 process QC_EXT_PREPROCESSING {
     tag "${scope.id}:${scope.stage}"
     label 'qc_extended_bam'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(scope), path(bams, stageAs: 'stage_inputs/*')
     val code_digest
@@ -124,14 +128,14 @@ process QC_EXT_PREPROCESSING {
     cat > stage_inputs.json <<'QC_INPUTS'
     ${descriptor}
     QC_INPUTS
-    extended_qc.py preprocessing --input stage_inputs.json --output stage.json
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" preprocessing --input stage_inputs.json --output stage.json
     """
 }
 
 process QC_EXT_ASSEMBLE {
     tag "${meta.id}"
     label 'qc_extended_small'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(meta), path(enrichment, stageAs: 'enrichment/*'), path(targets, stageAs: 'targets/*'), path(alignment), path(methylation)
     tuple path(reference), path(cpgs)
@@ -147,7 +151,7 @@ process QC_EXT_ASSEMBLE {
     cat > preprocessing.json <<'QC_STAGES'
     ${preprocessing}
     QC_STAGES
-    extended_qc.py assemble --sample ${qcQuote(meta.id)} --alignment ${qcQuote(alignment)} \\
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" assemble --sample ${qcQuote(meta.id)} --alignment ${qcQuote(alignment)} \\
         --methylation ${qcQuote(methylation)} --reference ${qcQuote(reference)} --assembly ${qcQuote(assembly)} \\
         --enrichment ${qcQuote(enrichment)} --targets ${qcQuote(targets)} --preprocessing preprocessing.json \\
         --code-digest ${qcQuote(code_digest)} --output metrics
@@ -157,7 +161,7 @@ process QC_EXT_ASSEMBLE {
 process QC_EXT_REPORT {
     tag "${meta.id}"
     label 'qc_extended_small'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(meta), path(metrics)
     val code_digest
@@ -167,8 +171,8 @@ process QC_EXT_REPORT {
     script:
     """
     mkdir qc_report_inputs
-    extended_qc.py report --input ${qcQuote(metrics)} --output content.html
-    python3 - <<'PY'
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" report --input ${qcQuote(metrics)} --output content.html
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} - <<'PY'
     from pathlib import Path
     Path('qc_report_inputs/Extended_QC.qmd').write_text('## Extended sequencing QC {#extended-qc}\\n\\n```{=html}\\n' + Path('content.html').read_text() + '\\n```\\n')
     PY
@@ -178,21 +182,21 @@ process QC_EXT_REPORT {
 process QC_EXT_ATTACH_REPORT {
     tag "${meta.id}"
     label 'qc_extended_small'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     tuple val(meta), path(native_html, stageAs: 'native_input/*'), path(fragment, stageAs: 'qc_input/*')
     output:
     tuple val(meta), path("${meta.id}.html"), emit: html
     script:
     """
-    extended_qc.py attach-report --input ${qcQuote(native_html)} --fragment ${qcQuote(fragment)} --output ${qcQuote(meta.id + '.html')}
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" attach-report --input ${qcQuote(native_html)} --fragment ${qcQuote(fragment)} --output ${qcQuote(meta.id + '.html')}
     """
 }
 
 process QC_EXT_RUN_SUMMARY {
     tag 'run'
     label 'qc_extended_small'
-    container 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+    container 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
     input:
     path tables, stageAs: 'samples/??/*'
     val stages
@@ -203,8 +207,8 @@ process QC_EXT_RUN_SUMMARY {
     script:
     def rows = groovy.json.JsonOutput.toJson(stages.findAll { it.scope_type == 'run' })
     """
-    extended_qc.py run-summary --input samples --output run_summary.tsv
-    python3 - <<'PY'
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} "\$(command -v extended_qc.py)" run-summary --input samples --output run_summary.tsv
+    ${qcQuote(qcPythonPath(task.ext.qc_python))} - <<'PY'
     import csv, json
     rows = json.loads(${qcPy(rows)})
     with open('run_preprocessing.tsv', 'w') as out:

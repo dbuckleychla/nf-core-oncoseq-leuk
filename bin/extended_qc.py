@@ -41,10 +41,9 @@ def main():
                   'unsupported_cytosine_modification' if mods.get('mapped_unsupported') else
                   'no_usable_modifications' if not mods.get('usable') else None)
         data['methylation_status'] = state('disabled' if a.disable_methylation else 'unavailable' if reason else 'partial' if mods.get('usable', 0) < data['counts'].get('mapped_primary', 0) else 'complete', reason or ('partial_modification_evidence' if mods.get('usable', 0) < data['counts'].get('mapped_primary', 0) else None))
-        # Debian build-option text can contain non-UTF8 bytes; only the version
-        # header is part of QC provenance, not compiler paths/options.
-        version = subprocess.check_output(['samtools', '--version']).splitlines()[0].decode('ascii')
-        data['versions'] = dict(samtools=version)
+        import pysam
+        data['versions'] = dict(pysam=pysam.__version__, samtools=pysam.__samtools_version__,
+                                depth_backend='pysam.samtools.depth')
         write_json(a.output, data)
     elif a.command == 'methylation':
         from qc_extended.methylation import collect, panels
@@ -73,7 +72,7 @@ def main():
                         stages,
                         dict(assembly=a.assembly, enrichment_sha256=checksum(a.enrichment), targets_sha256=checksum(a.targets),
                              code_sha256=a.code_digest,
-                             images=dict(metrics='ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785',
+                             images=dict(metrics='community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5',
                                          methylation='ghcr.io/chusj-pigu/classy-slim@sha256:7ec5fc1e4607be13d30dc65a1b07f2844f8289edbec0ca67a70e9b88ef8beb4c'),
                              versions=load(a.alignment).get('versions', {})))
         out = Path(a.output)

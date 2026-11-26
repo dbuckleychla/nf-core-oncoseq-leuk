@@ -55,3 +55,5 @@ python3 tests/qc_extended/check_publication.py /tmp/synthetic-qc-results
 ```
 
 This local acceptance disables methylation and validates actual read/coverage calculations, sample completion, report content, and publication. The separate production-image methylation smoke test requires a supported Linux amd64 container environment; it must execute actual modkit rather than use a stub. See the detailed [implementation handoff](qc-expansion-handoff.md) for numerical definitions and test requirements.
+
+Python QC tasks use the pinned review runtime's packaged interpreter (`/opt/wave/.pixi/envs/default/bin/python3`). Depth is streamed from the Samtools implementation bundled with pysam, and both versions are recorded. This avoids assuming that a Dorado/preprocessing image or the task PATH provides the required Python package or a separate Samtools executable.

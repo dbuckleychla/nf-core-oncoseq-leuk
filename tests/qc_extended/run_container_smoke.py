@@ -6,7 +6,7 @@ from pathlib import Path
 import subprocess
 import tempfile
 
-METRICS_IMAGE = 'ghcr.io/dbuckleychla/frankontstein@sha256:15c315c121d37b5c115d3d965836e60d56756498ca2deebe066a373d41e96785'
+METRICS_IMAGE = 'community.wave.seqera.io/library/oncoseq_review_1_0_0@sha256:b143e350e1dae33ad26758fc6f9ccf2392cb8b49881de73960f42525602d5eb5'
 MODKIT_IMAGE = 'ghcr.io/chusj-pigu/classy-slim@sha256:7ec5fc1e4607be13d30dc65a1b07f2844f8289edbec0ca67a70e9b88ef8beb4c'
 
 parser = argparse.ArgumentParser()
@@ -19,7 +19,7 @@ with tempfile.TemporaryDirectory(prefix='synthetic-qc-container-') as tmp:
     def run(image, script):
         subprocess.run(['docker', 'run', '--rm', '--platform', 'linux/amd64', '--network', 'none',
                         '--entrypoint', '/bin/bash', '-v', tmp + ':/data', '-v', str(repo / 'bin') + ':/workflow/bin:ro',
-                        '-w', '/data', image, '-euc', script], check=True)
+                        '-w', '/data', image, '-euc', ("export PATH=/opt/wave/.pixi/envs/default/bin:$PATH\n" + script if image == METRICS_IMAGE else script)], check=True)
     run(METRICS_IMAGE, '''python3 - <<'PY'
 from pathlib import Path
 from array import array

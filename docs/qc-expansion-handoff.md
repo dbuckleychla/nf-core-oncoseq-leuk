@@ -960,3 +960,7 @@ Actual Linux execution showed that this modkit rejects `--seed` with `--num-read
 ## 18. Execution validation boundary
 
 At the user's request, GitHub smoke testing was stopped and the newly added remote smoke workflow removed. Local calculation, report, typed-configuration, isolated-worker, nf-test, and publication checks were completed. The locked-image driver remains an optional manual test for a supported Linux host; its completion is not a blocker for this implementation handoff. Do not automatically schedule GitHub smoke tests.
+
+## 19. QC Python runtime correction
+
+A production task showed that the original preprocessing image's selected Python could not import pysam. Python QC tasks now use the already-pinned `oncoseq_review_1_0_0` runtime and its explicit packaged Python interpreter. Depth calculation streams pysam's bundled Samtools to the subprocess pipe with `save_stdout=/dev/stdout`, never capturing a whole chromosome in a Python string. Actual pysam and bundled Samtools versions are recorded. This supersedes the original Python/preprocessing image and standalone Samtools assumptions; modkit retains its separate image.
