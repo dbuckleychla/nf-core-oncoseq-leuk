@@ -29,6 +29,8 @@ nextflow_workflow {
             assert data.structural_events.every { event -> !event.selected }
             assert file(workflow.out.html[0][1]).text.contains('SYNTHETIC')
             assert file(workflow.out.html[0][1]).text.contains('"classy_summary":true')
+            assert file(workflow.out.html[0][1]).text.contains('"classy_plot":"blood"')
+            assert file(workflow.out.html[0][1]).text.contains('10.1186/s13073-026-01815-7')
             assert file("${outputDir}/results/reports/SYNTHETIC.review.html").exists()
             assert file("${outputDir}/results/reports/review/SYNTHETIC/manifest.json").exists()
             assert !file("${outputDir}/results/reports/review/SYNTHETIC/review_data").exists()

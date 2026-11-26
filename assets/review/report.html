@@ -205,6 +205,29 @@
         background: white;
         border-radius: 4px;
       }
+      .reference-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin: 18px 0;
+      }
+      .reference-controls input {
+        flex: 1;
+        min-width: 200px;
+      }
+      .reference-entry {
+        border-top: 1px solid var(--line);
+        padding: 16px 0;
+      }
+      .reference-entry h4 {
+        margin: 0 0 6px;
+      }
+      .reference-entry p {
+        margin: 6px 0;
+      }
+      .reference-entry a {
+        overflow-wrap: anywhere;
+      }
       .gallery {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
@@ -632,6 +655,7 @@
         ["targets", "Target genes"],
         ["qc", "Coverage and QC"],
         ["methods", "Methods and files"],
+        ["references", "References"],
       ];
       const sections = {};
       for (const [id, label] of names) {
@@ -1771,15 +1795,34 @@
         box.append(img, b);
         parent.append(box);
       }
-      for (const item of data.figures.filter((f) => f.classy_summary)) {
-        const summary = panel(
-          sections.classification,
-          "Classy combined summary",
-          "Native Classy summary across classifiers. Open the full view to inspect labels and scores.",
-        );
-        summary.classList.add("classy-summary");
-        figurePanel(summary, item);
-        sections.classification.prepend(summary);
+      const classyPlots = data.figures.filter((f) => f.classy_summary),
+        classyTitles = { blood: "Blood classifiers", brain: "Brain classifiers", solid: "Solid-tumor classifiers", combined: "Combined summary", nanomix: "Tissue of origin" },
+        bloodPlots = classyPlots.filter((f) => f.classy_plot === "blood"),
+        otherClassyPlots = classyPlots.filter((f) => f.classy_plot !== "blood");
+      if (bloodPlots.length) {
+        const blood = panel(sections.classification, "Classy blood classifiers");
+        blood.classList.add("classy-summary");
+        for (const item of bloodPlots) figurePanel(blood, item);
+        sections.classification.prepend(blood);
+      }
+      if (otherClassyPlots.length) {
+        const other = collapsed(sections.classification, "Other Classy plots"),
+          selector = el("select"),
+          selectedPlot = el("div");
+        other.classList.add("classy-summary");
+        selector.setAttribute("aria-label", "Other Classy plot");
+        otherClassyPlots.forEach((item, index) => {
+          const option = el("option", classyTitles[item.classy_plot] || item.name);
+          option.value = String(index);
+          selector.append(option);
+        });
+        function showClassyPlot() {
+          selectedPlot.replaceChildren();
+          figurePanel(selectedPlot, otherClassyPlots[Number(selector.value)]);
+        }
+        selector.onchange = showClassyPlot;
+        other.append(selector, selectedPlot);
+        showClassyPlot();
       }
       const cnOverview = el("div");
       sections.nasvar.prepend(cnOverview);
@@ -1830,6 +1873,67 @@
         f.append(el("figcaption", item.name), img, b);
         galleries[id].append(f);
       }
+      const bibliography = data.publications || { entries: [] },
+        referenceControls = el("div", undefined, "reference-controls"),
+        referenceSearch = el("input"),
+        referenceCategory = el("select"),
+        referenceCount = el("p", undefined, "muted"),
+        referenceList = el("div");
+      panel(
+        sections.references,
+        "Workflow and tool publications",
+        "Publications and software references for OncoSeq workflow capabilities. Optional analyses may not run for every sample; execution details are in Methods and files.",
+      );
+      referenceSearch.type = "search";
+      referenceSearch.placeholder = "Search tools, authors or publications";
+      referenceSearch.setAttribute("aria-label", "Search references");
+      referenceCategory.setAttribute("aria-label", "Reference category");
+      const referenceGroups = [...new Set(bibliography.entries.map((r) => r.group))];
+      for (const group of ["All categories", ...referenceGroups]) {
+        const option = el("option", group);
+        option.value = group;
+        referenceCategory.append(option);
+      }
+      referenceCount.setAttribute("role", "status");
+      referenceControls.append(referenceSearch, referenceCategory);
+      sections.references.append(referenceControls, referenceCount, referenceList);
+      function referenceLink(label, url) {
+        const a = el("a", label);
+        a.href = url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+        return a;
+      }
+      function showReferences() {
+        const query = referenceSearch.value.toLowerCase().trim(),
+          matches = bibliography.entries.filter((r) =>
+            (referenceCategory.value === "All categories" || r.group === referenceCategory.value) &&
+            [r.name, r.citation, r.doi || ""].join(" ").toLowerCase().includes(query),
+          );
+        referenceCount.textContent = matches.length + " references";
+        referenceList.replaceChildren();
+        for (const group of referenceGroups) {
+          const rows = matches.filter((r) => r.group === group);
+          if (!rows.length) continue;
+          const section = panel(referenceList, group);
+          for (const r of rows) {
+            const entry = el("article", undefined, "reference-entry"),
+              links = el("p");
+            entry.append(el("h4", r.name), el("p", r.citation));
+            if (r.doi) {
+              links.append(el("span", r.kind === "preprint" ? "Preprint · " : "Publication · "));
+              links.append(referenceLink("DOI: " + r.doi, "https://doi.org/" + r.doi), document.createTextNode(" · "));
+            } else links.append(el("span", "Software reference · "));
+            links.append(referenceLink("Source", r.software_url));
+            entry.append(links);
+            section.append(entry);
+          }
+        }
+        if (!matches.length) referenceList.append(el("p", "No references match this search."));
+      }
+      referenceSearch.oninput = referenceCategory.onchange = showReferences;
+      showReferences();
+      if (bibliography.reviewed) sections.references.append(el("p", "Bibliography reviewed " + bibliography.reviewed + ".", "muted"));
       const methods = panel(sections.methods, "References and policy");
       const detail = el("details"),
         summary = el("summary", "Reference details");

@@ -15,6 +15,7 @@ class PresentationTests(unittest.TestCase):
         add_classy_summary(data)
         self.assertEqual(len(data['figures']), 1)
         self.assertTrue(data['figures'][0]['classy_summary'])
+        self.assertEqual(data['figures'][0]['classy_plot'], 'combined')
 
     def test_classy_summary_discovery_is_sample_specific_and_optional(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -32,6 +33,14 @@ class PresentationTests(unittest.TestCase):
             self.assertEqual(len(data['figures']), 1)
             self.assertTrue(data['figures'][0]['classy_summary'])
             self.assertEqual(Path(data['figures'][0]['path']), path.resolve())
+            blood = folder / 'SYNTHETIC_combined_classification_combined_blood.svg'
+            blood.write_text('<svg/>')
+            add_classy_summary(data, root)
+            self.assertEqual({f['classy_plot'] for f in data['figures']}, {'blood', 'combined'})
+            nanomix = folder / 'SYNTHETIC_combined_classification_nanomix_nanomix_pie.svg'
+            nanomix.write_text('<svg/>')
+            add_classy_summary(data, root)
+            self.assertEqual({f['classy_plot'] for f in data['figures']}, {'blood', 'combined', 'nanomix'})
 
     def test_native_score_shapes_and_cutoff_roles(self):
         data = {'sturgeon': {'models': [{'model_root': '/models/general', 'top_class': {'class': 'Synthetic class', 'score': .9}, 'scores': [{'class': 'Synthetic class', 'score': .9}], 'threshold': .5, 'cutoff': .8}]},

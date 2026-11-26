@@ -154,6 +154,9 @@ def make(directory):
     summary = 'SYNTHETIC_combined_classification_combined_task_pies.svg'
     (root / summary).write_text('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="600" height="200" fill="white"/><text x="20" y="40">Synthetic Classy summary</text></svg>')
     inventory.append(dict(kind='figure:classification', path=summary))
+    blood = 'SYNTHETIC_combined_classification_combined_blood.svg'
+    (root / blood).write_text('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="600" height="200" fill="white"/><text x="20" y="40">Synthetic blood classifiers</text></svg>')
+    inventory.append(dict(kind='figure:classification', path=blood))
     inventory += [dict(kind='coverage:' + label, path=label + '.bed') for label in ('primary', 'mapq60', 'nofilter')]
     (root / 'inputs.json').write_text(json.dumps(inventory, indent=2) + '\n')
     return root

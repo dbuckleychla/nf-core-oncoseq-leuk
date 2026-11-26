@@ -121,10 +121,14 @@ workflow CLASSY {
 
     // Collect versions from all modules
     ch_versions = CLASSY_COMBINED.out.versions.mix(PARSE_JSON_COMBINED.out.versions)
+    ch_review_plots = CLASSY_COMBINED.out.svg_blood.mix(CLASSY_COMBINED.out.svg_brain)
+        .mix(CLASSY_COMBINED.out.svg_solid).mix(CLASSY_COMBINED.out.svg_combined)
+        .mix(CLASSY_COMBINED.out.svg_nanomix)
 
     emit:
     json = CLASSY_COMBINED.out.json_combined
     summary_plot = CLASSY_COMBINED.out.svg_combined
+    review_plots = ch_review_plots
     plot = ch_final_plot
     pred = ch_final_pred
     versions = ch_versions // All tool versions

@@ -7,23 +7,46 @@ from pathlib import Path
 from adapters import classifiers, chromosome_key
 
 
+CLASSY_PLOTS = {
+    'combined_blood.svg': ('blood', 'Classy blood classifiers'),
+    'combined_brain.svg': ('brain', 'Classy brain classifiers'),
+    'combined_solid.svg': ('solid', 'Classy solid-tumor classifiers'),
+    'combined_task_pies.svg': ('combined', 'Classy combined summary'),
+    'nanomix_pie.svg': ('nanomix', 'Classy tissue-of-origin summary'),
+}
+
+
+def classy_output_path(results_root, sample, suffix):
+    folder = Path(results_root) / 'reports/tumor_classifiers'
+    prefix = sample + '_combined_classification_'
+    path = folder / (prefix + suffix)
+    if suffix == 'nanomix_pie.svg' and not path.is_file():
+        path = folder / (prefix + 'nanomix_' + suffix)
+    return path
+
+
 def add_classy_summary(data, results_root=None):
-    """Use the native combined SVG from pipeline inputs or a completed run."""
+    """Use native Classy SVGs from pipeline inputs or a completed run."""
     figures = data.setdefault('figures', [])
     for item in figures:
-        if item.get('category') == 'classification' and Path(item['path']).name.endswith('_combined_task_pies.svg'):
-            item['classy_summary'] = True
-    if results_root and data.get('sample') and not any(item.get('classy_summary') for item in figures):
-        path = Path(results_root) / 'reports/tumor_classifiers' / (data['sample'] + '_combined_classification_combined_task_pies.svg')
-        if path.is_file():
-            figures.append(dict(category='classification', name='Classy combined summary',
-                                path=str(path.resolve()), classy_summary=True))
+        if item.get('category') == 'classification':
+            for suffix, (kind, _title) in CLASSY_PLOTS.items():
+                if Path(item['path']).name.endswith('_' + suffix):
+                    item.update(classy_summary=True, classy_plot=kind)
+    if results_root and data.get('sample'):
+        for suffix, (kind, title) in CLASSY_PLOTS.items():
+            path = classy_output_path(results_root, data['sample'], suffix)
+            if path.is_file() and not any(item.get('classy_plot') == kind for item in figures):
+                figures.append(dict(category='classification', name=title,
+                                    path=str(path.resolve()), classy_summary=True, classy_plot=kind))
 
 
 def enrich(data, root, results_root=None):
     from variant_presentation import enrich_variants
     enrich_variants(data)
     add_classy_summary(data, results_root)
+    from publications import catalog
+    data['publications'] = catalog()
     root = Path(root)
     native = root / 'classification.native.json'
     if native.exists():

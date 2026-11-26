@@ -32,6 +32,10 @@
         "path": "SYNTHETIC_combined_classification_combined_task_pies.svg"
     },
     {
+        "kind": "figure:classification",
+        "path": "SYNTHETIC_combined_classification_combined_blood.svg"
+    },
+    {
         "kind": "nasvar",
         "path": "nasvar.json"
     },
