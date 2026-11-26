@@ -21,6 +21,8 @@ def qcManifest(path, columns) {
 }
 
 def qcAsset(value, manifest) {
+    // Typed remote parameters already carry their filesystem provider.
+    if (value instanceof java.nio.file.Path) return file(value, checkIfExists: true)
     def uri = value.toString()
     file(uri.contains('://') || uri.startsWith('/') || !manifest ? uri : file(manifest).parent.resolve(uri), checkIfExists: true)
 }

@@ -13,6 +13,17 @@ nextflow_workflow {
             }
             workflow {
                 """
+                params.qc_targets_bed = file(params.qc_targets_bed)
+                // Exercise remote Path handling without checking a real S3 object.
+                def remote = file('s3://synthetic-qc-assets/targets.bed')
+                def source = file('${projectDir}/subworkflows/local/extended_qc/main.nf').text
+                def helper = source.substring(source.indexOf('def qcAsset('), source.indexOf('workflow EXTENDED_QC'))
+                def binding = new Binding([value: remote, file: { options, value ->
+                    assert value instanceof java.nio.file.Path
+                    assert options.checkIfExists
+                    value
+                }])
+                assert new GroovyShell(binding).evaluate(helper + '\\nqcAsset(value, null)') == remote
                 input[0] = channel.of([[id:'SYNTHETIC_A'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')],
                                       [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')])
                 input[1] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa')])
