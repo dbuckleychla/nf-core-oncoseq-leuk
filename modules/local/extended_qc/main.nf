@@ -56,20 +56,11 @@ process QC_EXT_MODKIT_PILEUP {
     tuple val(meta), path('pileup.bed.gz'), path('modkit.version.txt'), emit: pileup
     script:
     """
-    python3 - <<'PY'
-    import gzip, json, subprocess
-    from pathlib import Path
-    data = json.loads(Path(${qcPy(alignment)}).read_text())
-    if data['methylation_status']['status'] in ('disabled', 'unavailable'):
-        with gzip.open('pileup.bed.gz', 'wt'): pass
-        Path('modkit.version.txt').write_text('not_run\\n')
-    else:
-        subprocess.run(['modkit', 'pileup', ${qcPy(bam)}, 'pileup.bed.gz', '--ref', ${qcPy(fasta)},
-                        '--cpg', '--modified-bases', '5mC', '5hmC', '--combine-strands', '--bgzf',
-                        '--threads', '${Math.min(8, task.cpus as int)}', '--num-reads', '10042', '--filter-percentile', '0.1',
-                        '--log-filepath', 'modkit.log'], check=True)
-        Path('modkit.version.txt').write_text(subprocess.check_output(['modkit', '--version'], text=True))
-    PY
+    modkit pileup ${qcQuote(bam)} pileup.bed.gz --ref ${qcQuote(fasta)} \\
+        --cpg --modified-bases 5mC 5hmC --combine-strands --bgzf \\
+        --threads ${Math.min(8, task.cpus as int)} --num-reads 10042 --filter-percentile 0.1 \\
+        --log-filepath modkit.log
+    modkit --version > modkit.version.txt
     """
 }
 

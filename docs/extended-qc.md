@@ -39,6 +39,8 @@ Only the final aggregate metrics are published by new QC tasks. QC-only pileups,
 
 The additional scans and independent pileup add I/O and compute cost. Native Classy continues to perform its own processing. New BAM readers follow the existing isolated-worker policy.
 
+The independent pileup invokes modkit directly in its pinned Classy slim image, which does not provide `python3`. The workflow routes only alignments with complete or partial modification availability to this process; disabled or unavailable methylation bypasses pileup. Python aggregation runs separately in the pinned QC Python runtime.
+
 ## Synthetic validation
 
 The fixture builder and acceptance workflow use synthetic sequences and names only:
