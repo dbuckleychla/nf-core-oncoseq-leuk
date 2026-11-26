@@ -140,6 +140,26 @@ def heatmap(headers, labels, values, row_label='Region'):
     return out + '</tbody></table></div>'
 
 
+def median_cpg_depth(histogram, reference_cpgs):
+    """Exact median over reference CpGs, including unobserved sites at zero."""
+    if histogram is None or not reference_cpgs:
+        return None
+    counts = {}
+    for b in histogram['bins']:
+        if b['lower'] != b['upper'] or b['lower'] < 0 or b['count'] < 0:
+            raise ValueError('CpG median requires a discrete nonnegative depth histogram')
+        counts[b['lower']] = counts.get(b['lower'], 0) + b['count']
+    missing = reference_cpgs - sum(counts.values())
+    if missing < 0:
+        raise ValueError('Reference CpG count smaller than observed sites')
+    counts[0] = counts.get(0, 0) + missing
+    ranks, middle, acc = ((reference_cpgs - 1) // 2, reference_cpgs // 2), [], 0
+    for depth, count in sorted(counts.items()):
+        middle.extend(depth for rank in ranks if acc <= rank < acc + count)
+        acc += count
+    return sum(middle) / 2
+
+
 def content(data):
     validate(data)
     rows = data['metrics']
@@ -152,12 +172,16 @@ def content(data):
         row = lookup(*args, **kwargs)
         return row['value'] if row else None
 
+    cpg_depth = next((h for h in data['histograms'] if h['metric_id'] == 'methylation.valid_depth'
+                      and h['scope'] == 'targets' and h['modification'] == 'combined'), None)
+    cpg_median = median_cpg_depth(cpg_depth, number('methylation.reference_cpgs', 'targets', modification='combined'))
     out = '<section class="qc-ext">' + STYLE + '<h3>Extended sequencing QC</h3><p class="qc-ext-note">Full mapping-stage sample: ' + escape(data['sample_id']) + '. Primary records before downstream filtering or classifier subsampling. These summaries are not clinical pass/fail assessments.</p>'
     cards = [
         ('Mapped reads', lookup('alignment.rate'), value(lookup('alignment.primary_records')) + ' primary records'),
         ('On-target median length', lookup('read_length.median', 'on_target'), 'bp · exact-target overlap'),
         ('Mean exact-target depth', lookup('coverage.mean_depth', 'targets', 20), '× · primary alignments, MAPQ ≥20'),
-        ('Target CpGs at ≥10 calls', lookup('methylation.reference_fraction_at_depth', 'targets', modification='combined', threshold=10), 'of all reference CpGs in exact targets'),
+        ('Median CpG coverage', dict(value=cpg_median, unit='depth'), '× · exact targets, including uncovered CpGs'),
+        ('Target CpGs covered at ≥1×', lookup('methylation.reference_fraction_at_depth', 'targets', modification='combined', threshold=1), 'of all reference CpGs in exact targets'),
     ]
     out += '<div class="qc-ext-cards">' + ''.join('<div class="qc-ext-card"><span>' + escape(title) + '</span><strong>' + escape(value(row)) + '</strong><small>' + escape(note) + '</small></div>' for title, row, note in cards) + '</div>'
     statuses = []
@@ -221,7 +245,7 @@ STYLE = '''<style>
 .qc-ext h4{font-size:1.13em;margin:0 0 12px}.qc-ext h5{font-size:1em;margin:16px 0 4px}
 .qc-ext p{line-height:1.5}.qc-ext-note,.qc-ext-tail{font-size:.88em;line-height:1.5;opacity:.85}
 .qc-ext-box{border:1px solid var(--qc-line);border-radius:10px;padding:22px;margin:20px 0}
-.qc-ext-cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:20px 0}
+.qc-ext-cards{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin:20px 0}
 .qc-ext-card{border:1px solid var(--qc-line);background:var(--qc-surface);border-radius:9px;padding:18px}
 .qc-ext-card span,.qc-ext-card small{display:block;font-size:.84em}.qc-ext-card strong{display:block;font-size:1.85em;line-height:1.4;margin:6px 0;font-variant-numeric:tabular-nums}.qc-ext-card small{opacity:.8}
 .qc-ext-statuses{display:flex;flex-wrap:wrap;gap:8px}.qc-ext-status{font-size:.8em;border:1px solid var(--qc-line);padding:5px 9px;border-radius:6px}

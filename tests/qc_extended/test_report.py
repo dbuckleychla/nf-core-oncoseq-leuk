@@ -7,10 +7,37 @@ import unittest
 import xml.etree.ElementTree as ET
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'bin'))
-from qc_extended.report import bars, content, percent, rebin
+from qc_extended.report import bars, content, median_cpg_depth, percent, rebin
 
 
 class ReportTests(unittest.TestCase):
+    def test_median_cpg_depth_includes_uncovered_reference_sites(self):
+        h = dict(bins=[dict(lower=10, upper=10, count=1), dict(lower=20, upper=20, count=2)])
+        self.assertEqual(median_cpg_depth(h, 3), 20)
+        self.assertEqual(median_cpg_depth(h, 4), 15)
+        self.assertEqual(median_cpg_depth(h, 6), 5)
+        self.assertEqual(median_cpg_depth(h, 7), 0)
+        self.assertEqual(median_cpg_depth(dict(bins=[]), 10), 0)
+        self.assertIsNone(median_cpg_depth(None, 10))
+        self.assertIsNone(median_cpg_depth(h, 0))
+        with self.assertRaisesRegex(ValueError, 'smaller'):
+            median_cpg_depth(h, 2)
+
+    def test_cpg_cards_use_target_combined_depth_and_one_call_fraction(self):
+        common = dict(scope='targets', modification='combined', mapq=None, target_id=None, panel_id=None)
+        data = dict(schema_name='oncoseq_extended_qc', schema_version='1.0.0', sample_id='SYNTHETIC',
+                    metrics=[dict(common, metric_id='methylation.reference_cpgs', threshold=None, value=6, unit='sites'),
+                             dict(common, metric_id='methylation.reference_fraction_at_depth', threshold=1, value=.5, unit='fraction')],
+                    histograms=[dict(metric_id='methylation.valid_depth', scope='genome_primary', modification='combined', bins=[dict(lower=100, upper=100, count=6)]),
+                                dict(metric_id='methylation.valid_depth', scope='targets', modification='combined', bins=[dict(lower=10, upper=10, count=1), dict(lower=20, upper=20, count=2)])],
+                    components={}, warnings=[])
+        original = copy.deepcopy(data)
+        html = content(data)
+        self.assertIn('<span>Median CpG coverage</span><strong>5</strong>', html)
+        self.assertIn('<span>Target CpGs covered at ≥1×</span><strong>50.00%</strong>', html)
+        self.assertNotIn('Target CpGs at ≥10 calls', html)
+        self.assertEqual(data, original)
+
     def test_sparse_length_bins_preserve_counts_and_overflow(self):
         h = dict(denominator=20, bins=[
             dict(lower=0, upper=100, count=4),
