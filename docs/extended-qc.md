@@ -29,6 +29,16 @@ Metrics describe the full mapping-stage BAM, before downstream filtering, phasin
 
 Theoretical sampling adequacy is a binomial coverage calculation, not assay sensitivity, MRD detection, or a clinical negative-result guarantee. Observed enrichment and short off-target reads do not establish adaptive-sampling acceptance or rejection rates. No sequencer exports are required and no clinical pass/fail thresholds are introduced.
 
+## Reading the QC report
+
+The report opens with alignment rate, on-target median read length, mean exact-target depth at MAPQ ≥20, and the fraction of target reference CpGs with at least 10 valid calls. Component statuses indicate available evidence, not clinical acceptability.
+
+Read-length distributions use separate on/off-target bars with the same percentage axis. Select **0–10 kb** (500-bp bins), **0–2 kb** (100-bp bins), or **All lengths** (labeled, unequal length bands). Display bins merge whole original bins without smoothing or estimating counts. Every view uses all reads with known length in its own group as the denominator. Zoomed views explicitly report the reads beyond the displayed range; the full-range view includes the entire tail. On/off comparisons exclude unmapped reads. Enrichment comparisons and the complete read-statistics table, including missing-length counts, expand below the plots.
+
+Coverage and methylation depth use compact heatmaps: each cell gives the percentage of reference bases or CpGs meeting a minimum depth. Darker shading indicates a larger fraction, not pass/fail. Coverage defaults to MAPQ ≥20; MAPQ 0 coverage is expandable. Methylation beta distributions are expandable and display only observed primary-genome CpGs with at least 10 valid calls, separately for 5mC and 5hmC.
+
+Theoretical low-VAF adequacy, classifier feature coverage, and detailed regional metrics remain available in expandable sections. In the review report, additional native-tool summaries and gene coverage are grouped separately because their inputs and filtering can differ. All metric JSON/TSV values and analytical calculations are unchanged by this presentation.
+
 ## Outputs and private intermediates
 
 Aggregate metric JSON/TSV files are published under `qc_extended/<sample>/`: `metrics.json`, `summary.tsv`, `read_lengths.tsv`, `coverage.tsv`, `targets.tsv`, `methylation.tsv`, `classifier_cpgs.tsv`, `adequacy.tsv`, and `preprocessing.tsv`. Run summaries are `qc_extended/run_summary.tsv` and `qc_extended/run_preprocessing.tsv`.

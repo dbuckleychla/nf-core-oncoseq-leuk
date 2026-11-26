@@ -195,6 +195,9 @@
         cursor: pointer;
         font-weight: 600;
       }
+      #qc summary {
+        white-space: normal;
+      }
       .gallery {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
@@ -1576,8 +1579,26 @@
           d.append(s, el("pre", JSON.stringify(data.nasvar[key], null, 2)));
           p.append(d);
         }
+      if (data.extended_qc_html) {
+        const expanded = el("div");
+        expanded.innerHTML = data.extended_qc_html;
+        sections.qc.append(expanded);
+      } else {
+        panel(
+          sections.qc,
+          "Read length distributions",
+          "Unavailable in these outputs. Enable extended QC with an explicit exact-target BED to add regional read lengths and methylation QC.",
+        );
+      }
+      const nativeQc = data.extended_qc_html
+        ? collapsed(
+            sections.qc,
+            "Additional tool summaries and gene coverage",
+            "Native tools use their own input regions and alignment filters. Their measurements may differ from the full mapping-stage QC above.",
+          )
+        : sections.qc;
       if (data.alignment_qc) {
-        const alignment = panel(sections.qc, "Read alignment");
+        const alignment = panel(nativeQc, "Read alignment");
         alignment.append(
           el(
             "p",
@@ -1587,7 +1608,7 @@
         alignment.append(el("p", data.alignment_qc.scope, "muted"));
       }
       function qcChart(plot) {
-        const box = panel(sections.qc, plot.title),
+        const box = panel(nativeQc, plot.title),
           ns = "http://www.w3.org/2000/svg";
         const svg = document.createElementNS(ns, "svg"),
           height = 55 + plot.bars.length * 27;
@@ -1621,20 +1642,9 @@
         box.append(svg);
       }
       for (const plot of data.qc_plots || []) qcChart(plot);
-      if (data.extended_qc_html) {
-        const expanded = el("div");
-        expanded.innerHTML = data.extended_qc_html;
-        sections.qc.append(expanded);
-      } else {
-        panel(
-          sections.qc,
-          "Read length distributions",
-          "Unavailable in these outputs. Enable extended QC with an explicit exact-target BED to add regional read lengths and methylation QC.",
-        );
-      }
       table(
         panel(
-          sections.qc,
+          nativeQc,
           "Coverage and read quality summary",
           "Average target coverage and read quality. These measurements are not an assay pass/fail assessment.",
         ),
@@ -1646,7 +1656,7 @@
         "QC metrics",
       );
       table(
-        panel(sections.qc, "Lowest-coverage genes", "The 20 genes with the lowest average coverage."),
+        collapsed(nativeQc, "Lowest-coverage gene values", "The 20 genes with the lowest average coverage."),
         data.coverage_genes || [],
         [
           { label: "Gene", value: (r) => r.gene },
@@ -1655,7 +1665,7 @@
         "gene coverage",
       );
       const q = collapsed(
-        sections.qc,
+        nativeQc,
         "All coverage intervals",
         "Coverage is shown for each target region. The measurements use different alignment filters.",
       );
