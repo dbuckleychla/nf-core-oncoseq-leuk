@@ -120,12 +120,15 @@ def length_comparison(data, lookup, group):
             title = LABELS[scope]
             summary = f'{denominator:,} measured reads · Median {value(lookup("read_length.median", scope))} bp · N50 {value(lookup("read_length.n50", scope))} bp'
             labels = [f'{lo:g}–{hi:g} bp' if math.isfinite(hi) else f'≥{lo:g} bp' for lo, hi in zip(edges, edges[1:])]
-            plot = bars(title, list(zip(labels, counts)), denominator, ticks, COLORS[i], peak, axis)
+            scale = peak_scale([(h, counts, overflow)]) if group == 'target' else peak
+            plot = bars(title, list(zip(labels, counts)), denominator, ticks, COLORS[i], scale, axis)
             if index < 2 and denominator:
                 plot += f'<p class="qc-ext-tail">Beyond this view (≥{edges[-1]/1000:g} kb): <strong>{escape(percent(overflow/denominator))}</strong> · {overflow:,} reads</p>'
             out += '<div class="qc-ext-distribution"><h5><span style="background:' + COLORS[i] + '"></span>' + title + '</h5><p class="qc-ext-note">' + escape(summary) + '</p>' + plot + '</div>'
         out += '</div></div>'
-    out += '</div><p class="qc-ext-note">Each group sums to 100% of reads with known length. The two plots share a y-axis scale within each view. Longer reads stay in the denominator when zoomed; use All lengths to include the full tail. Missing lengths are excluded. Hover over a bar for counts.</p>'
+    scale_note = ('Each plot uses its own y-axis scale; compare groups using the percentage labels. ' if group == 'target'
+                  else 'The two plots share a y-axis scale within each view. ')
+    out += '</div><p class="qc-ext-note">Each group sums to 100% of reads with known length. ' + scale_note + 'Longer reads stay in the denominator when zoomed; use All lengths to include the full tail. Missing lengths are excluded. Hover over a bar for counts.</p>'
     return out
 
 
