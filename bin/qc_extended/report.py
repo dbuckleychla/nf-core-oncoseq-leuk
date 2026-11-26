@@ -173,15 +173,15 @@ def content(data):
         return row['value'] if row else None
 
     cpg_depth = next((h for h in data['histograms'] if h['metric_id'] == 'methylation.valid_depth'
-                      and h['scope'] == 'targets' and h['modification'] == 'combined'), None)
-    cpg_median = median_cpg_depth(cpg_depth, number('methylation.reference_cpgs', 'targets', modification='combined'))
+                      and h['scope'] == 'genome_primary' and h['modification'] == 'combined'), None)
+    cpg_median = median_cpg_depth(cpg_depth, number('methylation.reference_cpgs', 'genome_primary', modification='combined'))
     out = '<section class="qc-ext">' + STYLE + '<h3>Extended sequencing QC</h3><p class="qc-ext-note">Full mapping-stage sample: ' + escape(data['sample_id']) + '. Primary records before downstream filtering or classifier subsampling. These summaries are not clinical pass/fail assessments.</p>'
     cards = [
         ('Mapped reads', lookup('alignment.rate'), value(lookup('alignment.primary_records')) + ' primary records'),
         ('On-target median length', lookup('read_length.median', 'on_target'), 'bp · exact-target overlap'),
         ('Mean exact-target depth', lookup('coverage.mean_depth', 'targets', 20), '× · primary alignments, MAPQ ≥20'),
-        ('Median CpG coverage', dict(value=cpg_median, unit='depth'), '× · exact targets, including uncovered CpGs'),
-        ('Target CpGs covered at ≥1×', lookup('methylation.reference_fraction_at_depth', 'targets', modification='combined', threshold=1), 'of all reference CpGs in exact targets'),
+        ('Median CpG coverage', dict(value=cpg_median, unit='depth'), '× · primary genome, including uncovered CpGs'),
+        ('CpGs covered at ≥1×', lookup('methylation.reference_fraction_at_depth', 'genome_primary', modification='combined', threshold=1), 'of all primary-genome reference CpGs'),
     ]
     out += '<div class="qc-ext-cards">' + ''.join('<div class="qc-ext-card"><span>' + escape(title) + '</span><strong>' + escape(value(row)) + '</strong><small>' + escape(note) + '</small></div>' for title, row, note in cards) + '</div>'
     statuses = []

@@ -23,18 +23,19 @@ class ReportTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, 'smaller'):
             median_cpg_depth(h, 2)
 
-    def test_cpg_cards_use_target_combined_depth_and_one_call_fraction(self):
-        common = dict(scope='targets', modification='combined', mapq=None, target_id=None, panel_id=None)
+    def test_cpg_cards_use_genome_combined_depth_and_one_call_fraction(self):
+        common = dict(scope='genome_primary', modification='combined', mapq=None, target_id=None, panel_id=None)
         data = dict(schema_name='oncoseq_extended_qc', schema_version='1.0.0', sample_id='SYNTHETIC',
                     metrics=[dict(common, metric_id='methylation.reference_cpgs', threshold=None, value=6, unit='sites'),
                              dict(common, metric_id='methylation.reference_fraction_at_depth', threshold=1, value=.5, unit='fraction')],
-                    histograms=[dict(metric_id='methylation.valid_depth', scope='genome_primary', modification='combined', bins=[dict(lower=100, upper=100, count=6)]),
-                                dict(metric_id='methylation.valid_depth', scope='targets', modification='combined', bins=[dict(lower=10, upper=10, count=1), dict(lower=20, upper=20, count=2)])],
+                    histograms=[dict(metric_id='methylation.valid_depth', scope='targets', modification='combined', bins=[dict(lower=100, upper=100, count=6)]),
+                                dict(metric_id='methylation.valid_depth', scope='genome_primary', modification='combined', bins=[dict(lower=10, upper=10, count=1), dict(lower=20, upper=20, count=2)])],
                     components={}, warnings=[])
         original = copy.deepcopy(data)
         html = content(data)
         self.assertIn('<span>Median CpG coverage</span><strong>5</strong>', html)
-        self.assertIn('<span>Target CpGs covered at ≥1×</span><strong>50.00%</strong>', html)
+        self.assertIn('<span>CpGs covered at ≥1×</span><strong>50.00%</strong>', html)
+        self.assertIn('of all primary-genome reference CpGs', html)
         self.assertNotIn('Target CpGs at ≥10 calls', html)
         self.assertEqual(data, original)
 
