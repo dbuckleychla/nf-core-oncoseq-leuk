@@ -124,6 +124,7 @@ workflow CLASSY {
 
     emit:
     json = CLASSY_COMBINED.out.json_combined
+    summary_plot = CLASSY_COMBINED.out.svg_combined
     plot = ch_final_plot
     pred = ch_final_pred
     versions = ch_versions // All tool versions

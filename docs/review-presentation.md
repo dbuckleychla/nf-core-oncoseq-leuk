@@ -2,6 +2,8 @@ The optional review report retains Oncoseq as the primary workflow and uses the 
 
 Classification cards show the top class, numeric score, emitted diagnostic cutoff, and a red cutoff marker. Input methylation thresholds remain in model evidence; they are not substituted for diagnostic cutoffs. Missing cutoffs are explicitly marked. Nanomix reports mixture proportions rather than diagnostic classifications. Marlin, ALMA, Lamprey, TUCAN, Nanomix and Optic are visible by default; other classifiers appear in a collapsed section. Missing results remain visible as unavailable, and Optic remains disabled pending model availability.
 
+The Classification tab opens with Classy's native combined summary SVG when available, with an **Open full view** button. The existing Classy output is embedded in the portable HTML without recomputing classifier results. New runs pass it directly into the review artifacts; rendering older outputs with `--results-root` also discovers the sample's `reports/tumor_classifiers/*_combined_classification_combined_task_pies.svg`. Runs without that plot retain the classification cards.
+
 Small variants primarily use mandatory COSMIC targeted-screen annotations. Exact
 normalized matches with positive blood/lymphoid tissue evidence appear in the
 primary table. The collapsed expanded view includes all other COSMIC matches and

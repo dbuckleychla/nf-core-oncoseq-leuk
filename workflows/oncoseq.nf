@@ -915,6 +915,7 @@ workflow ONCOSEQ {
         }
         if (do_classify) {
             ch_review = ch_review.mix(CLASSY.out.json.map { meta, path -> tuple(meta.id, 'classification', path) })
+            ch_review = ch_review.mix(CLASSY.out.summary_plot.map { meta, path -> tuple(meta.id, 'figure:classification', path) })
         }
         if (genome != 'hg19') {
             ch_review = ch_review.mix(NASVAR.out.coverage.map { meta, path -> tuple(meta.id, 'nasvar:coverage', path) })

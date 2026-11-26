@@ -7,9 +7,23 @@ from pathlib import Path
 from adapters import classifiers, chromosome_key
 
 
+def add_classy_summary(data, results_root=None):
+    """Use the native combined SVG from pipeline inputs or a completed run."""
+    figures = data.setdefault('figures', [])
+    for item in figures:
+        if item.get('category') == 'classification' and Path(item['path']).name.endswith('_combined_task_pies.svg'):
+            item['classy_summary'] = True
+    if results_root and data.get('sample') and not any(item.get('classy_summary') for item in figures):
+        path = Path(results_root) / 'reports/tumor_classifiers' / (data['sample'] + '_combined_classification_combined_task_pies.svg')
+        if path.is_file():
+            figures.append(dict(category='classification', name='Classy combined summary',
+                                path=str(path.resolve()), classy_summary=True))
+
+
 def enrich(data, root, results_root=None):
     from variant_presentation import enrich_variants
     enrich_variants(data)
+    add_classy_summary(data, results_root)
     root = Path(root)
     native = root / 'classification.native.json'
     if native.exists():

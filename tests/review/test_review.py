@@ -181,6 +181,7 @@ class ReviewTests(unittest.TestCase):
             html = render(Path(tmp) / 'output/review.json', Path(tmp) / 'report.html',
                           Path(__file__).resolve().parents[2] / 'assets/review/report.html')
             self.assertIn('SYNTHETIC', html.read_text())
+            self.assertIn('"classy_summary":true', html.read_text())
             self.assertNotIn('https://cdn', html.read_text())
 
     def row(self, caller, pos, other=500, orientation=('right', 'left')):

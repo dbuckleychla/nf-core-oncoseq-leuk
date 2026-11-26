@@ -195,6 +195,9 @@ def import_results(results, sample, output):
             inventory.append(dict(kind=kind, path=str(path.resolve()), name=path.name))
     if missing:
         raise ValueError('Missing native artifacts: ' + ', '.join(missing))
+    classy_summary = root / 'reports/tumor_classifiers' / f'{sample}_combined_classification_combined_task_pies.svg'
+    if classy_summary.is_file():
+        inventory.append(dict(kind='figure:classification', path=str(classy_summary.resolve()), name='Classy combined summary'))
     for path in sorted((root / 'program_outputs' / 'figeno').glob(sample + '*')):
         if path.suffix.lower() in ('.png', '.svg'):
             category = 'fusions' if 'fusion' in path.name.lower() else 'target_loci' if 'target' in path.name.lower() else 'chromosomes'

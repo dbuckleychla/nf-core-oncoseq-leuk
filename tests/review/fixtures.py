@@ -151,6 +151,9 @@ def make(directory):
     (root / 'alignment_qc.json').write_text(json.dumps({'QC-passed reads': {'primary': 1000, 'primary mapped': 950}, 'QC-failed reads': {'primary': 0, 'primary mapped': 0}}))
     inventory += [dict(kind='qc:alignment', path='alignment_qc.json')]
     inventory += [dict(kind='classification', path='classification.json'), dict(kind='nasvar', path='nasvar.json')]
+    summary = 'SYNTHETIC_combined_classification_combined_task_pies.svg'
+    (root / summary).write_text('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="200"><rect width="600" height="200" fill="white"/><text x="20" y="40">Synthetic Classy summary</text></svg>')
+    inventory.append(dict(kind='figure:classification', path=summary))
     inventory += [dict(kind='coverage:' + label, path=label + '.bed') for label in ('primary', 'mapq60', 'nofilter')]
     (root / 'inputs.json').write_text(json.dumps(inventory, indent=2) + '\n')
     return root

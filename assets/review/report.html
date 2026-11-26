@@ -198,6 +198,13 @@
       #qc summary {
         white-space: normal;
       }
+      .classy-summary figure {
+        margin: 0;
+      }
+      .classy-summary img {
+        background: white;
+        border-radius: 4px;
+      }
       .gallery {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(min(100%, 440px), 1fr));
@@ -1745,6 +1752,7 @@
           img = el("img");
         img.src = data.images[item.image_key];
         img.alt = item.name;
+        if (item.classy_summary) img.style.background = "white";
         viewport.append(img);
         content.append(toggle, viewport);
         dialog.showModal();
@@ -1762,6 +1770,16 @@
         b.onclick = () => zoom(item);
         box.append(img, b);
         parent.append(box);
+      }
+      for (const item of data.figures.filter((f) => f.classy_summary)) {
+        const summary = panel(
+          sections.classification,
+          "Classy combined summary",
+          "Native Classy summary across classifiers. Open the full view to inspect labels and scores.",
+        );
+        summary.classList.add("classy-summary");
+        figurePanel(summary, item);
+        sections.classification.prepend(summary);
       }
       const cnOverview = el("div");
       sections.nasvar.prepend(cnOverview);
@@ -1783,7 +1801,7 @@
       }
       const galleries = {};
       for (const item of data.figures || []) {
-        if (item.generated || item.reformatted || item.category === "chromosomes") continue;
+        if (item.generated || item.reformatted || item.classy_summary || item.category === "chromosomes") continue;
         const id =
           item.category === "fusions"
             ? "fusions"
