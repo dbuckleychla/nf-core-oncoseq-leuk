@@ -1116,12 +1116,14 @@
         additionalCards = el("div", undefined, "cards"),
         additionalClassifiers = el("details");
       additionalClassifiers.append(el("summary", "Additional classifiers"), additionalCards);
-      const defaultClassifiers = new Set(["marlin", "alma", "lamprey", "tucan", "nanomix", "optic"]);
+      const defaultClassifiers = new Set(["marlin", "alma", "alma3", "lamprey", "tucan", "nanomix", "optic"]);
       for (const c of data.classification || []) {
-        const evaluable = typeof c.score === "number" && typeof c.cutoff === "number";
-        const box = el("div", undefined, "card" + (evaluable ? (c.score >= c.cutoff ? " above" : " below") : ""));
+        const nativeAcceptance = typeof c.accepted_call === "boolean",
+          evaluable = nativeAcceptance || (typeof c.score === "number" && typeof c.cutoff === "number"),
+          accepted = nativeAcceptance ? c.accepted_call : c.score >= c.cutoff;
+        const box = el("div", undefined, "card" + (evaluable ? (accepted ? " above" : " below") : ""));
         box.append(
-          el("h3", c.name),
+          el("h3", c.display_name || c.name),
           el("strong", c.label || c.status),
           el(
             "p",
@@ -1138,13 +1140,21 @@
           el(
             "p",
             evaluable
-              ? c.score >= c.cutoff
-                ? "Above threshold"
-                : "Below threshold"
+              ? nativeAcceptance
+                ? accepted
+                  ? "Accepted by native model"
+                  : "Not accepted by native model"
+                : accepted
+                  ? "Above threshold"
+                  : "Below threshold"
               : c.reason || "No classification cutoff available",
             "muted",
           ),
         );
+        if (c.approximation)
+          box.append(
+            el("p", "Research use only. ALMA3.1 native approximation: numerical parity is not established.", "muted"),
+          );
         if (typeof c.score === "number") {
           const bar = el("div", undefined, "scorebar"),
             fill = el("span");
@@ -1164,6 +1174,8 @@
         (defaultClassifiers.has(c.name.split(":")[0]) ? cc : additionalCards).append(box);
       }
       sections.classification.append(cc);
+      if (data.classification?.some((c) => c.name === "alma3" && c.status !== "disabled"))
+        sections.classification.append(el("p", "Analysis performed using ALMA3.", "muted"));
       if (additionalCards.children.length) sections.classification.append(additionalClassifiers);
       if (!(data.classification || []).length)
         panel(sections.classification, null, "Classification was not run for this sample.");
@@ -1801,22 +1813,34 @@
           width = view.width || original.width.baseVal.value,
           height = view.height || original.height.baseVal.value;
         for (const child of [...measurement.children]) {
-          if (child.localName === "rect" &&
-              Number(child.getAttribute("x") || 0) === (view.x || 0) &&
-              Number(child.getAttribute("y") || 0) === (view.y || 0) &&
-              Number(child.getAttribute("width")) === width &&
-              Number(child.getAttribute("height")) === height) child.remove();
+          if (
+            child.localName === "rect" &&
+            Number(child.getAttribute("x") || 0) === (view.x || 0) &&
+            Number(child.getAttribute("y") || 0) === (view.y || 0) &&
+            Number(child.getAttribute("width")) === width &&
+            Number(child.getAttribute("height")) === height
+          )
+            child.remove();
         }
         measurement.style.position = "absolute";
         measurement.style.left = "-100000px";
         measurement.style.visibility = "hidden";
         document.body.append(measurement);
         try {
-          const bounds = measurement.getBBox(), pad = 24;
-          if (![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) || bounds.width <= 0 || bounds.height <= 0) return;
-          original.setAttribute("viewBox", [bounds.x-pad, bounds.y-pad, bounds.width+2*pad, bounds.height+2*pad].join(" "));
-          original.setAttribute("width", bounds.width+2*pad);
-          original.setAttribute("height", bounds.height+2*pad);
+          const bounds = measurement.getBBox(),
+            pad = 24;
+          if (
+            ![bounds.x, bounds.y, bounds.width, bounds.height].every(Number.isFinite) ||
+            bounds.width <= 0 ||
+            bounds.height <= 0
+          )
+            return;
+          original.setAttribute(
+            "viewBox",
+            [bounds.x - pad, bounds.y - pad, bounds.width + 2 * pad, bounds.height + 2 * pad].join(" "),
+          );
+          original.setAttribute("width", bounds.width + 2 * pad);
+          original.setAttribute("height", bounds.height + 2 * pad);
           const encoded = new TextEncoder().encode(new XMLSerializer().serializeToString(original));
           let binary = "";
           for (const byte of encoded) binary += String.fromCharCode(byte);
@@ -1844,7 +1868,13 @@
         parent.append(box);
       }
       const classyPlots = data.figures.filter((f) => f.classy_summary),
-        classyTitles = { blood: "Blood classifiers", brain: "Brain classifiers", solid: "Solid-tumor classifiers", combined: "Combined summary", nanomix: "Tissue of origin" },
+        classyTitles = {
+          blood: "Blood classifiers",
+          brain: "Brain classifiers",
+          solid: "Solid-tumor classifiers",
+          combined: "Combined summary",
+          nanomix: "Tissue of origin",
+        },
         bloodPlots = classyPlots.filter((f) => f.classy_plot === "blood"),
         otherClassyPlots = classyPlots.filter((f) => f.classy_plot !== "blood");
       if (bloodPlots.length) {
@@ -1954,9 +1984,10 @@
       }
       function showReferences() {
         const query = referenceSearch.value.toLowerCase().trim(),
-          matches = bibliography.entries.filter((r) =>
-            (referenceCategory.value === "All categories" || r.group === referenceCategory.value) &&
-            [r.name, r.citation, r.doi || ""].join(" ").toLowerCase().includes(query),
+          matches = bibliography.entries.filter(
+            (r) =>
+              (referenceCategory.value === "All categories" || r.group === referenceCategory.value) &&
+              [r.name, r.citation, r.doi || ""].join(" ").toLowerCase().includes(query),
           );
         referenceCount.textContent = matches.length + " references";
         referenceList.replaceChildren();
@@ -1981,56 +2012,109 @@
       }
       referenceSearch.oninput = referenceCategory.onchange = showReferences;
       showReferences();
-      if (bibliography.reviewed) sections.references.append(el("p", "Bibliography reviewed " + bibliography.reviewed + ".", "muted"));
-      const provenance = data.run_provenance || { workflow: {}, identity: {}, parameters: {}, models: [], versions: [], containers: [], qc_containers: [], configured_containers: [], checksums: [] };
+      if (bibliography.reviewed)
+        sections.references.append(el("p", "Bibliography reviewed " + bibliography.reviewed + ".", "muted"));
+      const provenance = data.run_provenance || {
+        workflow: {},
+        identity: {},
+        parameters: {},
+        models: [],
+        versions: [],
+        containers: [],
+        qc_containers: [],
+        configured_containers: [],
+        checksums: [],
+      };
       table(
         panel(sections.provenance, "Workflow and run", "Metadata captured for the analytical run and review report."),
         Object.entries({ ...provenance.workflow, ...provenance.identity, run_id: provenance.parameters.run_id })
           .filter(([_key, value]) => value !== null && value !== undefined && value !== "")
           .map(([key, value]) => ({ field: key.replaceAll("_", " "), value })),
-        [{ label: "Field", value: (r) => r.field }, { label: "Recorded value", value: (r) => r.value }],
+        [
+          { label: "Field", value: (r) => r.field },
+          { label: "Recorded value", value: (r) => r.value },
+        ],
         "workflow provenance",
       );
       table(
-        panel(sections.provenance, "Basecalling and modified-base models", "Sources distinguish configured model requests from identifiers recorded in BAM read groups."),
+        panel(
+          sections.provenance,
+          "Basecalling and modified-base models",
+          "Sources distinguish configured model requests from identifiers recorded in BAM read groups.",
+        ),
         provenance.models,
-        [{ label: "Model", value: (r) => r.kind }, { label: "Specification", value: (r) => r.specification }, { label: "Source", value: (r) => r.source }],
+        [
+          { label: "Model", value: (r) => r.kind },
+          { label: "Specification", value: (r) => r.specification },
+          { label: "Source", value: (r) => r.source },
+        ],
         "basecalling models",
       );
       table(
-        panel(sections.provenance, "Captured software versions", "Versions emitted by tools are shown verbatim. Multiple versions of a tool can occur in different containers."),
+        panel(
+          sections.provenance,
+          "Captured software versions",
+          "Versions emitted by tools are shown verbatim. Multiple versions of a tool can occur in different containers.",
+        ),
         provenance.versions,
-        [{ label: "Tool", value: (r) => r.tool }, { label: "Version", value: (r) => r.version }, { label: "Process", value: (r) => r.process }, { label: "Source", value: (r) => r.source }],
+        [
+          { label: "Tool", value: (r) => r.tool },
+          { label: "Version", value: (r) => r.version },
+          { label: "Process", value: (r) => r.process },
+          { label: "Source", value: (r) => r.source },
+        ],
         "software versions",
       );
       const containerColumns = [
         { label: "Process", value: (r) => r.process },
         { label: "Container", value: (r) => r.image.split("@")[0] },
-        { label: "SHA-256", value: (r) => r.image.includes("@sha256:") ? r.image.split("@sha256:")[1] : "Not recorded" },
+        {
+          label: "SHA-256",
+          value: (r) => (r.image.includes("@sha256:") ? r.image.split("@sha256:")[1] : "Not recorded"),
+        },
         { label: "Source", value: (r) => r.source },
       ];
       table(
-        panel(sections.provenance, "Recorded containers", "Execution-trace entries describe completed or cached tasks. QC entries come from the saved metric provenance."),
+        panel(
+          sections.provenance,
+          "Recorded containers",
+          "Execution-trace entries describe completed or cached tasks. QC entries come from the saved metric provenance.",
+        ),
         [...provenance.containers, ...provenance.qc_containers],
         containerColumns,
         "recorded containers",
       );
       table(
-        collapsed(sections.provenance, "Configured container lock", "Configured pins cover workflow capabilities and do not establish that every process ran. Execution-trace entries above take precedence."),
-        provenance.configured_containers.map((r) => ({ process: r.processes.join(", "), image: r.image, source: "Saved image lock" })),
+        collapsed(
+          sections.provenance,
+          "Configured container lock",
+          "Configured pins cover workflow capabilities and do not establish that every process ran. Execution-trace entries above take precedence.",
+        ),
+        provenance.configured_containers.map((r) => ({
+          process: r.processes.join(", "),
+          image: r.image,
+          source: "Saved image lock",
+        })),
         containerColumns,
         "configured container pins",
       );
       table(
         panel(sections.provenance, "Reference checksums"),
         provenance.checksums,
-        [{ label: "Reference", value: (r) => r.asset }, { label: "SHA-256", value: (r) => r.sha256 }, { label: "Source", value: (r) => r.source }],
+        [
+          { label: "Reference", value: (r) => r.asset },
+          { label: "SHA-256", value: (r) => r.sha256 },
+          { label: "Source", value: (r) => r.source },
+        ],
         "reference checksums",
       );
       table(
         collapsed(sections.provenance, "Run settings"),
         Object.entries(provenance.parameters).map(([key, value]) => ({ setting: key, value })),
-        [{ label: "Setting", value: (r) => r.setting }, { label: "Value", value: (r) => r.value }],
+        [
+          { label: "Setting", value: (r) => r.setting },
+          { label: "Value", value: (r) => r.value },
+        ],
         "recorded run settings",
       );
       const methods = panel(sections.provenance, "Reference and policy details");

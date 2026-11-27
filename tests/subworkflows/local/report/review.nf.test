@@ -38,6 +38,24 @@ nextflow_workflow {
             assert !file("${outputDir}/results/reports/review/SYNTHETIC/review_data").exists()
         }
     }
+    test("Native blood models and ALMA3 approximation reach the final HTML") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                review_blood = true
+            }
+        }
+        then {
+            assert workflow.success
+            def html = file(workflow.out.html[0][1]).text
+            def data = new groovy.json.JsonSlurperClassic().parseText(file("${workflow.out.data[0][1]}/review.json").text)
+            assert data.classification*.name == ['marlin', 'lamprey', 'alma3', 'optic']
+            assert !data.classification.find { it.name == 'optic' }.accepted_call
+            assert html.contains('ALMA3.1 (native approximation)')
+            assert html.contains('Analysis performed using ALMA3.')
+            assert html.contains('"specification":"synthetic-v1"')
+        }
+    }
     test("Empty candidate union remains a completed report") {
         when {
             params {

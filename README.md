@@ -15,6 +15,8 @@
 
 [![Get help on Slack](http://img.shields.io/badge/slack-nf--core%20%23oncoseq-4A154B?labelColor=000000&logo=slack)](https://nfcore.slack.com/channels/oncoseq)[![Follow on Twitter](http://img.shields.io/badge/twitter-%40nf__core-1DA1F2?labelColor=000000&logo=twitter)](https://twitter.com/nf_core)[![Follow on Mastodon](https://img.shields.io/badge/mastodon-nf__core-6364ff?labelColor=FFFFFF&logo=mastodon)](https://mstdn.science/@nf_core)[![Watch on YouTube](http://img.shields.io/badge/youtube-nf--core-FF0000?labelColor=000000&logo=youtube)](https://www.youtube.com/c/nf-core)
 
+The additive [Classy blood workflow](docs/classy-blood.md) runs alongside legacy Classy and supplies the native and review reports by default. ALMA3.1 is enabled with its native-approximation label; `--classy_blood_enable_alma3 false` disables it. Legacy classifier outputs are retained under `reports/classy_legacy/`.
+
 ## Dependencies
 
 - [Nextflow](https://www.nextflow.io/) ( version >= 26.04.0 & < 26.10.0 )

@@ -1,5 +1,7 @@
 # Additive cellular-DNA QC: comparison and implementation handoff
 
+Publication update (27 November 2026): the genome-wide CpG bedMethyl is now an explicitly requested final deliverable at `methylation/<sample>.genomewide.cpg.bedmethyl.gz`. This supersedes the blanket pileup-publication exclusion below for the independent full-BAM genome-wide pileup only. Classifier-specific locus pileups and other intermediates remain private. See [current behavior](extended-qc.md).
+
 ## 1. Purpose, authority, and delivery boundary
 
 This document specifies an additive QC expansion for adaptive-sampling profiling of cellular blood/marrow DNA. It is intended for implementation by agents that need explicit definitions, interfaces, small work packages, and numerical acceptance criteria. It is a design specification, not a task-status tracker; subsequent implementation work belongs in Beads.

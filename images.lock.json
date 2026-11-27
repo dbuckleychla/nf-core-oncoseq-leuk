@@ -72,7 +72,8 @@
                 "QC_EXT_PREPROCESSING",
                 "QC_EXT_REFERENCE",
                 "QC_EXT_REPORT",
-                "QC_EXT_RUN_SUMMARY"
+                "QC_EXT_RUN_SUMMARY",
+                "CLASSY_BLOOD_TABLES"
             ]
         },
         "community.wave.seqera.io/library/pharmcat3:3.2.0--5126bb296d1e59ac": {
@@ -203,6 +204,10 @@
         "ghcr.io/chusj-pigu/classy-slim@sha256:7ec5fc1e4607be13d30dc65a1b07f2844f8289edbec0ca67a70e9b88ef8beb4c": {
             "image": "ghcr.io/chusj-pigu/classy-slim@sha256:7ec5fc1e4607be13d30dc65a1b07f2844f8289edbec0ca67a70e9b88ef8beb4c",
             "processes": ["QC_EXT_MODKIT_PILEUP"]
+        },
+        "288525090463.dkr.ecr.us-west-2.amazonaws.com/oncoseq-leuk/classy-blood-nextflow:sha-8713032": {
+            "image": "288525090463.dkr.ecr.us-west-2.amazonaws.com/oncoseq-leuk/classy-blood-nextflow@sha256:77aed6f284d94eda23f27a75080919a7b6888accb75cbbe73d7fd08c72121561",
+            "processes": ["CLASSY_BLOOD"]
         }
     }
 }

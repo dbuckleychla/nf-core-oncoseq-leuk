@@ -68,6 +68,8 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
     out.mkdir(parents=True, exist_ok=True)
     cat, saved = Path(catalogue), Path(payload)
     inventory = json.loads((saved / 'inputs.json').read_text())
+    classifier_settings = next((json.loads((saved / item['path']).read_text()).get('settings', {})
+                                for item in inventory if item['kind'] == 'classification:metadata'), None)
     sources = json.loads((cat / 'native_sources.json').read_text())
     if sources:
         finish_catalog(cat, vep, refs, sample, out, panel)
@@ -98,10 +100,15 @@ def complete(sample, catalogue, payload, vep, references, panel, known_fusions, 
             statuses[kind] = 'completed'
         elif kind == 'classification':
             raw = json.loads(path.read_text())
+            if classifier_settings:
+                raw['oncoseq_classifier'] = classifier_settings
             if raw.get('sample_label', raw.get('sample_id', sample)) != sample:
                 raise ValueError('Classifier sample mismatch')
             classification = classifiers(raw)
-            shutil.copyfile(path, out / 'classification.native.json')
+            if classifier_settings:
+                write_json(out / 'classification.native.json', raw)
+            else:
+                shutil.copyfile(path, out / 'classification.native.json')
             statuses[kind] = 'completed'
         elif kind == 'nasvar':
             native = json.loads(path.read_text())
@@ -179,6 +186,8 @@ def import_results(results, sample, output):
     if not root.is_dir():
         raise ValueError('Results directory does not exist')
     inventory = []
+    from presentation import classy_publication
+    classifier_folder = classy_publication(root, sample)
     patterns = {
         'small:clair3': f'program_outputs/clair3/{sample}/merge_output.vcf.gz',
         'small:clairsto': f'program_outputs/bcftools/{sample}_snp_clairsto.vcf.gz',
@@ -186,7 +195,7 @@ def import_results(results, sample, output):
         'sv:sniffles': f'program_outputs/sniffles/{sample}_sv_sniffles.vcf.gz',
         'sv:severus': f'program_outputs/htslib/{sample}_sv_severus.vcf.gz',
         'sv:stellerator': f'program_outputs/htslib/{sample}_sv_stellerator.vcf.gz',
-        'classification': f'reports/tumor_classifiers/{sample}_combined_classification.json',
+        'classification': str(classifier_folder.relative_to(root) / f'{sample}_combined_classification.json'),
         'nasvar': f'nasvar/{sample}.result.json',
         'coverage:primary': f'reports/mosdepth/{sample}_panel_primary.regions.bed.gz',
         'coverage:nofilter': f'program_outputs/mosdepth/{sample}_panel_nofilter.regions.bed.gz',
@@ -201,10 +210,17 @@ def import_results(results, sample, output):
             inventory.append(dict(kind=kind, path=str(path.resolve()), name=path.name))
     if missing:
         raise ValueError('Missing native artifacts: ' + ', '.join(missing))
+    metadata = classifier_folder / f'{sample}_classification.metadata.json'
+    allowed_plots = None
+    if metadata.is_file():
+        inventory.append(dict(kind='classification:metadata', path=str(metadata.resolve()), name=metadata.name))
+        detail = json.loads(metadata.read_text())
+        if detail.get('source') == 'classy_blood':
+            allowed_plots = set(detail.get('plots', []))
     from presentation import CLASSY_PLOTS, classy_output_path
     for suffix, (_kind, title) in CLASSY_PLOTS.items():
         plot = classy_output_path(root, sample, suffix)
-        if plot.is_file():
+        if plot.is_file() and (allowed_plots is None or plot.name in allowed_plots):
             inventory.append(dict(kind='figure:classification', path=str(plot.resolve()), name=title))
     for path in sorted((root / 'program_outputs' / 'figeno').glob(sample + '*')):
         if path.suffix.lower() in ('.png', '.svg'):

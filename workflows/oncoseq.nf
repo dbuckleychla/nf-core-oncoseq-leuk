@@ -38,6 +38,7 @@ include { QC_EXT_ATTACH_REPORT } from '../modules/local/extended_qc/main'
 
 // Tumor classification
 include { CLASSY } from '../subworkflows/local/methylation_analysis/classy.nf'
+include { CLASSY_BLOOD_WORKFLOW } from '../subworkflows/local/methylation_analysis/classy_blood.nf'
 include { SAMTOOLS_COUNT_READS } from '../modules/local/samtools/main.nf'
 include { SAMTOOLS_TOFASTQ as SAMTOOLS_TIME_FASTQ } from '../modules/local/samtools/main.nf'
 
@@ -498,13 +499,15 @@ workflow ONCOSEQ {
             ch_tumor_type,
         )
 
-        CLASSIFIER_REPORT(
-            CLASSY.out.plot,
-            CLASSY.out.pred,
-            ch_tumor_type,
-        )
-
-        ch_classy_section = CLASSIFIER_REPORT.out.sections
+        if (params.classy_blood) {
+            CLASSY_BLOOD_WORKFLOW(ch_classy_in, ch_ref)
+            ch_classy_section = CLASSY_BLOOD_WORKFLOW.out.sections
+            ch_versions = ch_versions.mix(CLASSY_BLOOD_WORKFLOW.out.versions)
+        }
+        else {
+            CLASSIFIER_REPORT(CLASSY.out.plot, CLASSY.out.pred, ch_tumor_type)
+            ch_classy_section = CLASSIFIER_REPORT.out.sections
+        }
 
         ch_versions = ch_versions.mix(CLASSY.out.versions)
     }
@@ -914,8 +917,10 @@ workflow ONCOSEQ {
             )
         }
         if (do_classify) {
-            ch_review = ch_review.mix(CLASSY.out.json.map { meta, path -> tuple(meta.id, 'classification', path) })
-            ch_review = ch_review.mix(CLASSY.out.review_plots.map { meta, path -> tuple(meta.id, 'figure:classification', path) })
+            def selected_json = params.classy_blood ? CLASSY_BLOOD_WORKFLOW.out.json : CLASSY.out.json
+            def selected_plots = params.classy_blood ? CLASSY_BLOOD_WORKFLOW.out.plots : CLASSY.out.review_plots
+            ch_review = ch_review.mix(selected_json.map { meta, path -> tuple(meta.id, 'classification', path) })
+            ch_review = ch_review.mix(selected_plots.map { meta, path -> tuple(meta.id, 'figure:classification', path) })
         }
         if (genome != 'hg19') {
             ch_review = ch_review.mix(NASVAR.out.coverage.map { meta, path -> tuple(meta.id, 'nasvar:coverage', path) })
@@ -924,7 +929,8 @@ workflow ONCOSEQ {
         }
         def provenance_params = ['run_id', 'genome', 'basecall_model', 'm_bases', 'skip_basecalling',
             'skip_mapping', 'basecall_shards', 'device', 'bed', 'padding', 'qc_targets_bed',
-            'time_series', 'cfdna', 'clinical'].collectEntries { key ->
+            'time_series', 'cfdna', 'clinical', 'classy_blood', 'classy_blood_enable_alma3',
+            'classy_blood_alma3_modification_mode'].collectEntries { key ->
                 def value = params[key]
                 [(key): value instanceof Path ? value.toUriString() : value]
             }

@@ -6,7 +6,11 @@ workflow CHECK_REVIEW {
     def root = file(params.review_fixture_root)
     def inputs = new groovy.json.JsonSlurperClassic().parseText(file("${root}/inputs.json").text)
     ch_inputs = channel.of(inputs)
-        .flatMap { entries -> entries.collect { entry -> tuple('SYNTHETIC', entry.kind, file("${root}/${params.review_empty && entry.kind.startsWith('small:') ? entry.kind.split(':')[1] + '.empty.vcf.gz' : entry.path}")) } }
+        .flatMap { entries -> entries.collect { entry ->
+            def selected = params.review_empty && entry.kind.startsWith('small:') ? entry.kind.split(':')[1] + '.empty.vcf.gz' :
+                params.review_blood && entry.kind == 'classification' ? 'classy_blood.synthetic.json' : entry.path
+            tuple('SYNTHETIC', entry.kind, file("${root}/${selected}"))
+        } }
         .mix(channel.of(tuple('SYNTHETIC', 'sample', [])))
     // Version topics close after rendering; the attachment must not emit one.
     ch_versions = channel.topic('versions')

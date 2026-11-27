@@ -1,0 +1,15 @@
+#!/usr/bin/env python3
+"""Synthetic pileup stand-in for publication/channel regression testing."""
+import shutil
+import sys
+from pathlib import Path
+if sys.argv[1:] == ['--version']:
+    print('modkit SYNTHETIC-0.0.0')
+    raise SystemExit
+args = sys.argv[1:]
+assert args[0] == 'pileup'
+assert '--include-bed' not in args and '--region' not in args
+assert '--cpg' in args and '--combine-strands' in args and '--bgzf' in args
+assert args[args.index('--modified-bases') + 1:args.index('--modified-bases') + 3] == ['5mC', '5hmC']
+source = Path(__file__).resolve().parents[5] / 'test_data/qc_extended/mods.bed.gz'
+shutil.copyfile(source, args[2])

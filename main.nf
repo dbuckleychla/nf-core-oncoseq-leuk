@@ -183,6 +183,9 @@ params {
 
     // Specify a different container for Classy module (default: same as pipeline container)
     classy_container: String
+    classy_blood: Boolean = true
+    classy_blood_enable_alma3: Boolean = true
+    classy_blood_alma3_modification_mode: String = '5mc'
 
     // -- ichorCNA parameters --------------------------------------------------
 

@@ -16,8 +16,19 @@ CLASSY_PLOTS = {
 }
 
 
+def classy_publication(results_root, sample):
+    """Choose the active publication, including legacy-only rollback runs."""
+    root = Path(results_root)
+    canonical = root / 'reports/tumor_classifiers'
+    legacy = root / 'reports/classy_legacy' / sample
+    params = sorted((root / 'pipeline_info').glob('params_*.json'))
+    legacy_requested = bool(params and json.loads(params[-1].read_text()).get('classy_blood') is False)
+    filename = sample + '_combined_classification.json'
+    return legacy if legacy_requested or (not (canonical / filename).is_file() and (legacy / filename).is_file()) else canonical
+
+
 def classy_output_path(results_root, sample, suffix):
-    folder = Path(results_root) / 'reports/tumor_classifiers'
+    folder = classy_publication(results_root, sample)
     prefix = sample + '_combined_classification_'
     path = folder / (prefix + suffix)
     if suffix == 'nanomix_pie.svg' and not path.is_file():
@@ -28,6 +39,14 @@ def classy_output_path(results_root, sample, suffix):
 def add_classy_summary(data, results_root=None):
     """Use native Classy SVGs from pipeline inputs or a completed run."""
     figures = data.setdefault('figures', [])
+    allowed = None
+    if results_root and data.get('sample'):
+        metadata = classy_publication(results_root, data['sample']) / (data['sample'] + '_classification.metadata.json')
+        if metadata.is_file():
+            native = json.loads(metadata.read_text())
+            if native.get('source') == 'classy_blood':
+                allowed = set(native.get('plots', []))
+                figures[:] = [item for item in figures if item.get('category') != 'classification']
     for item in figures:
         if item.get('category') == 'classification':
             for suffix, (kind, _title) in CLASSY_PLOTS.items():
@@ -36,7 +55,7 @@ def add_classy_summary(data, results_root=None):
     if results_root and data.get('sample'):
         for suffix, (kind, title) in CLASSY_PLOTS.items():
             path = classy_output_path(results_root, data['sample'], suffix)
-            if path.is_file() and not any(item.get('classy_plot') == kind for item in figures):
+            if path.is_file() and (allowed is None or path.name in allowed) and not any(item.get('classy_plot') == kind for item in figures):
                 figures.append(dict(category='classification', name=title,
                                     path=str(path.resolve()), classy_summary=True, classy_plot=kind))
 
@@ -49,8 +68,25 @@ def enrich(data, root, results_root=None):
     data['publications'] = catalog()
     root = Path(root)
     native = root / 'classification.native.json'
+    classifier_settings = None
+    if results_root and data.get('sample'):
+        published = classy_publication(results_root, data['sample'])
+        published_native = published / (data['sample'] + '_combined_classification.json')
+        if published_native.is_file():
+            native = published_native
+        metadata = published / (data['sample'] + '_classification.metadata.json')
+        if metadata.is_file():
+            details = json.loads(metadata.read_text())
+            if details.get('source') == 'classy_blood':
+                native = published / (data['sample'] + '_combined_classification.json')
+                classifier_settings = details.get('settings', {})
     if native.exists():
-        data['classification'] = classifiers(json.loads(native.read_text()))
+        result = json.loads(native.read_text())
+        if classifier_settings:
+            result['oncoseq_classifier'] = classifier_settings
+        data['classification'] = classifiers(result)
+        data['classifier_workflow'] = result.get('oncoseq_classifier', {}).get('workflow', 'classy_legacy')
+        data['classifier_provenance'] = result.get('oncoseq_classifier', {})
     summaries = []
     genes = defaultdict(lambda: [0, 0])
     for key in ('primary', 'mapq60', 'nofilter'):

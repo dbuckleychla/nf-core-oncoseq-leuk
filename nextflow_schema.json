@@ -587,6 +587,22 @@
             "minimum": 0,
             "default": 10,
             "description": "Minimum qs tag score for streamed uBAM read filtering. Zero disables this filter and the qs tag requirement."
+        },
+        "classy_blood": {
+            "type": "boolean",
+            "default": true,
+            "description": "Run the new blood Classy step and use its results in reports; preserve the legacy execution."
+        },
+        "classy_blood_enable_alma3": {
+            "type": "boolean",
+            "default": true,
+            "description": "Enable ALMA3.1 native approximation in the blood classifier; numerical parity is not established."
+        },
+        "classy_blood_alma3_modification_mode": {
+            "type": "string",
+            "enum": ["5mc", "5mc-plus-5hmc"],
+            "default": "5mc",
+            "description": "ALMA3 modification mode, independent of the basecalling model specification."
         }
     }
 }

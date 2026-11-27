@@ -6,7 +6,8 @@ from pathlib import Path
 
 PARAMETERS = ('run_id', 'genome', 'basecall_model', 'm_bases', 'skip_basecalling',
               'skip_mapping', 'basecall_shards', 'device', 'bed', 'padding',
-              'qc_targets_bed', 'time_series', 'cfdna', 'clinical')
+              'qc_targets_bed', 'time_series', 'cfdna', 'clinical', 'classy_blood',
+              'classy_blood_enable_alma3', 'classy_blood_alma3_modification_mode')
 WORKFLOW_FIELDS = ('pipeline', 'pipeline_version', 'nextflow_version', 'commit_id', 'revision')
 
 
@@ -100,7 +101,16 @@ def enrich(data, results_root=None):
         models.append(dict(kind='Modified-base model request', specification=params['m_bases'], source='Configured run parameters'))
         if params.get('basecall_model') and '@' in params['basecall_model'] and '@' in params['m_bases']:
             models.append(dict(kind='Modified-base model specification', specification=params['basecall_model'] + '_' + params['m_bases'], source='Derived from configured model requests'))
+    for classifier in data.get('classification', []):
+        if classifier.get('model_version'):
+            models.append(dict(kind=classifier.get('display_name', classifier['name']) + ' classifier',
+                               specification=str(classifier['model_version']),
+                               source=classifier.get('model_version_source') or 'Native classifier report'))
     context['models'] = models
+    classifier = data.get('classifier_provenance', {})
+    if classifier.get('workflow') == 'classy_blood' and classifier.get('container'):
+        context['containers'].append(dict(process='CLASSY_BLOOD', image=classifier['container'],
+                                          source='Captured classifier invocation'))
     lock = data.get('images_provenance', {})
     context['configured_containers'] = [dict(name=name, image=entry['image'], processes=entry.get('processes', [])) for name, entry in lock.get('images', {}).items()]
     context['qc_containers'] = [dict(process=process, image=image, source='Recorded QC metric provenance') for process, image in qc.get('images', {}).items()]
@@ -109,6 +119,9 @@ def enrich(data, results_root=None):
                                container_platform=lock.get('platform'))
     context['checksums'] = [dict(asset=key.removesuffix('_sha256').replace('_', ' ').capitalize(), sha256=qc[key], source='Recorded QC metrics')
                             for key in ('reference_sha256', 'targets_sha256', 'enrichment_sha256') if qc.get(key)]
+    if classifier.get('source_digest'):
+        context['checksums'].append(dict(asset='Classy blood source image', sha256=classifier['source_digest'].removeprefix('sha256:'),
+                                         source='Captured classifier invocation'))
     for key, entry in data.get('references', {}).get('resources', {}).items():
         if isinstance(entry, dict) and entry.get('sha256'):
             context['checksums'].append(dict(asset=key, sha256=entry['sha256'], source='Review reference manifest'))

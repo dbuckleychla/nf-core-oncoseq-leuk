@@ -12,6 +12,9 @@ def open_text(path):
 
 def classifiers(data):
     """Keep class-score cutoffs distinct from input methylation thresholds."""
+    if data.get('oncoseq_classifier', {}).get('workflow') == 'classy_blood':
+        from classy_blood import classifiers as blood_classifiers
+        return blood_classifiers(data)
     import math
     def number(value):
         return isinstance(value, (int, float)) and not isinstance(value, bool) and math.isfinite(value)

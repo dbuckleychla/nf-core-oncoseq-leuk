@@ -25,11 +25,11 @@ nextflow_workflow {
                 }])
                 assert new GroovyShell(binding).evaluate(helper + '\\nqcAsset(value, null)') == remote
                 input[0] = channel.of([[id:'SYNTHETIC_A'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')],
-                                      [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')])
+                                        [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/plain.bam'), file('${projectDir}/test_data/qc_extended/plain.bam.bai')])
                 input[1] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa')])
                 input[2] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa.fai')])
                 input[3] = channel.of([[id:'SYNTHETIC_A'], file('${projectDir}/test_data/qc_extended/enrichment.bed'), 0, []],
-                                      [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/enrichment.bed'), 0, []])
+                                        [[id:'SYNTHETIC_B'], file('${projectDir}/test_data/qc_extended/enrichment.bed'), 0, []])
                 input[4] = channel.empty()
                 input[5] = 'hg38'
                 """
@@ -51,4 +51,36 @@ nextflow_workflow {
             }
         }
     }
+    test("Publish genome-wide bedMethyl only when methylation is available") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                qc_targets_bed = "${projectDir}/test_data/qc_extended/targets.bed"
+                qc_methylation = true
+                qc_test_mock_modkit = true
+            }
+            workflow {
+                """
+                params.qc_targets_bed = file(params.qc_targets_bed)
+                input[0] = channel.of([[id:'SYNTHETIC'], file('${projectDir}/test_data/qc_extended/tagged.bam'), file('${projectDir}/test_data/qc_extended/tagged.bam.bai')])
+                input[1] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa')])
+                input[2] = channel.value([[id:'reference'], file('${projectDir}/test_data/qc_extended/reference.fa.fai')])
+                input[3] = channel.of([[id:'SYNTHETIC'], file('${projectDir}/test_data/qc_extended/enrichment.bed'), 0, []])
+                input[4] = channel.empty()
+                input[5] = 'hg38'
+                """
+            }
+        }
+        then {
+            assert workflow.success
+            def published = file("${outputDir}/results/methylation")
+            assert file("${published}/SYNTHETIC.genomewide.cpg.bedmethyl.gz").bytes == file("${projectDir}/test_data/qc_extended/mods.bed.gz").bytes
+            assert !file("${published}/modkit.version.txt").exists()
+            assert !file("${published}/modkit.log").exists()
+            assert !file("${published}/pileup.bed.gz").exists()
+            def data = new groovy.json.JsonSlurperClassic().parseText(file(workflow.out.metrics[0][1]).text)
+            assert data.components.methylation.status in ['complete', 'partial']
+        }
+    }
+
 }

@@ -1,8 +1,8 @@
 # Private Classy blood image: compatibility and AWS delivery
 
-Audit date: 27 November 2026. This is an inspection and integration design; production classifier pins and AWS infrastructure have not been changed.
+Audit date: 27 November 2026. The initial inspection and delivery options are retained below. The selected implementation now uses a configuration-only wrapper pushed directly to private ECR, with an additive blood workflow and ALMA3 enabled by default. See [implemented integration and validation boundaries](classy-blood.md). No pull-through-cache infrastructure was deployed.
 
-## Recommendation
+## Initial delivery recommendation
 
 Use **private ECR pull-through caching of GHCR**, following the two ECR resources in `../cpm_msq_pipeline_research/terraform/AWS/ecr.tf`. The existing sandbox AWS GHCR credential can read this image. ECR can therefore fetch the source image from GHCR while Batch workers authenticate to ECR using AWS IAM.
 
@@ -15,18 +15,18 @@ Direct worker-to-GHCR pulling is also supported by the existing Terraform regist
 
 ## Image inspected
 
-| Item | Recorded value |
-| --- | --- |
-| Source tag | `ghcr.io/bwbioinfo/classy-blood:sha-8713032` |
-| Source OCI index | `sha256:e593b00b44b6ad50b84045d3e2dac67f12780317c4a02f9f415983f4a20a28df` |
-| Linux/amd64 manifest | `sha256:cd1f5ea7a1ecf140f7ff5da013018f5f5f22c257bf8ad861899d2882d6dc3e91` |
-| Declared source revision | `8713032d4eba385ca041f1b8ec207282d6814ba9` |
-| Runtime | Linux/amd64; executed locally under ARM-host Docker emulation |
-| Classy executable/version | `/usr/local/bin/classy`; `classy 0.22.0` |
-| Modkit version | `modkit 0.6.3` |
-| Working directory | `/opt/classy` |
-| Entrypoint / command | `["classy"]` / `["--help"]` |
-| Local unpacked image size | 12,522,390,907 bytes, approximately 11.66 GiB |
+| Item                      | Recorded value                                                            |
+| ------------------------- | ------------------------------------------------------------------------- |
+| Source tag                | `ghcr.io/bwbioinfo/classy-blood:sha-8713032`                              |
+| Source OCI index          | `sha256:e593b00b44b6ad50b84045d3e2dac67f12780317c4a02f9f415983f4a20a28df` |
+| Linux/amd64 manifest      | `sha256:cd1f5ea7a1ecf140f7ff5da013018f5f5f22c257bf8ad861899d2882d6dc3e91` |
+| Declared source revision  | `8713032d4eba385ca041f1b8ec207282d6814ba9`                                |
+| Runtime                   | Linux/amd64; executed locally under ARM-host Docker emulation             |
+| Classy executable/version | `/usr/local/bin/classy`; `classy 0.22.0`                                  |
+| Modkit version            | `modkit 0.6.3`                                                            |
+| Working directory         | `/opt/classy`                                                             |
+| Entrypoint / command      | `["classy"]` / `["--help"]`                                               |
+| Local unpacked image size | 12,522,390,907 bytes, approximately 11.66 GiB                             |
 
 The index also contains an unknown-platform attestation manifest. Use the **Linux/amd64 child digest** for platform-specific locks; the index digest is not the same identifier.
 
@@ -124,12 +124,12 @@ The MSQ source configuration identifies a GHCR Secrets Manager credential in the
 
 Using the sandbox AWS profile, the credential was retrieved into process memory, then tested against GHCR. No token, password, Authorization header or secret payload was printed or saved.
 
-| Request | Result |
-| --- | --- |
-| Repository-scoped GHCR pull token for `bwbioinfo/classy-blood` | Success |
-| Manifest for `sha-8713032` | HTTP 200; matched the local OCI index digest |
-| Manifest for the Linux/amd64 child digest | HTTP 200 |
-| Image-layer access via authenticated HEAD | HTTP 200 |
+| Request                                                        | Result                                       |
+| -------------------------------------------------------------- | -------------------------------------------- |
+| Repository-scoped GHCR pull token for `bwbioinfo/classy-blood` | Success                                      |
+| Manifest for `sha-8713032`                                     | HTTP 200; matched the local OCI index digest |
+| Manifest for the Linux/amd64 child digest                      | HTTP 200                                     |
+| Image-layer access via authenticated HEAD                      | HTTP 200                                     |
 
 This establishes that the **current AWS-stored PAT has pull access to this specific image**. It does not establish that an ECR cache rule has been deployed or that workers can launch the image. The tested sandbox us-west-2 registry had no active GHCR `github` pull-through rule at audit time. The default AWS credential context also differed from the explicitly selected sandbox profile; select account/profile and region explicitly when deploying.
 
