@@ -21,6 +21,8 @@ Use a distinct backend state key or an independently managed local state for thi
 
 All 15 GHCR image digests in the current lock were verified anonymously readable on 20 November 2026. Public pulls use the default `ghcr_secret_arn = null`; workers receive no registry-secret policy or authentication hook. If private images are added, supply an existing same-region secret ARN with `username`/`accessToken` or `username`/`password` JSON. Workers retrieve it before ECS starts. Supply `ghcr_secret_kms_key_arn` only when that secret uses a customer-managed key.
 
+For the private Classy blood image, the recommended delivery design is ECR pull-through caching so ECR uses the upstream GHCR credential while workers pull with AWS IAM. The [image and AWS integration audit](classy-blood-private-image-audit.md) records the successful repository-specific PAT test, the MSQ Terraform cache pattern, and the separate launcher/output-contract changes required. This cache has not been deployed by the audit.
+
 ## Launching
 
 Install Nextflow 26.04.6 and initialise the recorded module commits. The environment helper reads this stack's outputs and emits shell-quoted `ONCOSEQ_*` variables. Use a distinct run ID for each analysis.

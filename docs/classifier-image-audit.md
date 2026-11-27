@@ -1,5 +1,7 @@
 # Combined classifier image audit
 
+The 27 November 2026 [private Classy blood image audit](classy-blood-private-image-audit.md) evaluates a separate blood-focused build, its launcher/output compatibility, and ECR pull-through caching with verified AWS GHCR credentials. It does not replace the full combined-classifier image described below.
+
 The clinical combined-classifier report requires Alma, both CrossNN models, Marlin, MPACT, Nanomix, Lamprey, Tucan and both Sturgeon models. Optic output and report integration are temporarily commented out because the selected full image lacks declared Optic assets; restoration is recorded in `TODO.md`. Missing required results are fatal. A successful parser exit does not establish that all required classifiers ran.
 
 The validation JSON contained Marlin, CrossNN Capper, CrossNN PanCancer, Alma, MPACT and Nanomix. Inspection on 20 November 2026 confirmed that the currently pinned image cannot supply the full required set:
