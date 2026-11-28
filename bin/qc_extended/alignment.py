@@ -12,7 +12,7 @@ import pysam
 
 from .regions import Regions, indexes, merged, primary_contig, read_bed
 
-THRESHOLDS = (1, 5, 10, 20, 30, 50, 100)
+THRESHOLDS = (1, 5, 10, 20, 30, 50, 100, 150, 200)
 GROUPS = ('all', 'mapped', 'unmapped', 'on_target', 'off_target', 'on_enrichment', 'off_enrichment')
 
 

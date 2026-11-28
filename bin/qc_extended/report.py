@@ -201,10 +201,26 @@ def content(data):
     out += box('Read lengths on/off exact targets', lengths, 'An on-target read has an aligned match overlapping the exact-target BED. Off-target reads are mapped reads without that overlap. Unmapped reads are excluded from this comparison.')
 
     scopes = ('targets', 'enrichment', 'off_enrichment')
-    thresholds = (1, 5, 10, 20, 30, 50, 100)
+    thresholds = (1, 5, 10, 20, 30, 50, 100, 150, 200)
+    def breadth(scope, mapq, threshold):
+        row = lookup('coverage.breadth', scope, mapq, threshold=threshold)
+        if row is not None:
+            return row['value']
+        # Older reports retain exact depth counts, so new columns need no BAM scan.
+        histogram = next((h for h in data['histograms'] if h['metric_id'] == 'coverage.depth_distribution'
+                          and h['scope'] == scope and h.get('mapq') == mapq
+                          and not h.get('target_id') and not h.get('panel_id')), None)
+        if not histogram or histogram.get('status') != 'complete' or histogram.get('binning') != 'discrete':
+            return None
+        bins = histogram['bins']
+        denominator = histogram.get('denominator')
+        if not denominator or any(b['lower'] != b['upper'] for b in bins) or sum(b['count'] for b in bins) != denominator:
+            return None
+        return sum(b['count'] for b in bins if b['lower'] >= threshold) / denominator
+
     coverage = ''
     for mq in (20, 0):
-        grid = heatmap([f'≥{t}×' for t in thresholds], [LABELS[s] for s in scopes], [[number('coverage.breadth', s, mq, threshold=t) for t in thresholds] for s in scopes])
+        grid = heatmap([f'≥{t}×' for t in thresholds], [LABELS[s] for s in scopes], [[breadth(s, mq, t) for t in thresholds] for s in scopes])
         grid += '<p class="qc-ext-note">Darker cells mean more reference bases meet the depth threshold; color does not indicate pass/fail. Zero-coverage bases are included.</p>'
         coverage += grid if mq == 20 else details('Coverage including MAPQ 0 alignments', grid)
     out += box('Coverage breadth', coverage, 'Percent of reference bases with at least the indicated depth. Default: primary alignments with MAPQ ≥20. Exact targets and enrichment regions can overlap; these rows are not additive.')

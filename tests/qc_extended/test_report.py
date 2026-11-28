@@ -11,6 +11,23 @@ from qc_extended.report import bars, content, median_cpg_depth, percent, rebin
 
 
 class ReportTests(unittest.TestCase):
+    def test_new_coverage_columns_use_exact_existing_histograms(self):
+        histogram = dict(metric_id='coverage.depth_distribution', scope='targets', mapq=20,
+                         status='complete', binning='discrete', denominator=25,
+                         bins=[dict(lower=d, upper=d, count=n) for d, n in [(0, 5), (149, 2), (150, 3), (199, 4), (200, 5), (201, 6)]])
+        data = dict(schema_name='oncoseq_extended_qc', schema_version='1.0.0', sample_id='SYNTHETIC',
+                    metrics=[], histograms=[histogram], components={}, warnings=[])
+        html = content(data)
+        self.assertIn('≥150×', html)
+        self.assertIn('≥200×', html)
+        self.assertIn('72.00%', html)
+        self.assertIn('44.00%', html)
+        # An explicit unavailable measurement must not be replaced by inference.
+        data['metrics'] = [dict(metric_id='coverage.breadth', scope='targets', mapq=20, threshold=150, value=None)]
+        self.assertNotIn('72.00%', content(data))
+        histogram['binning'] = 'fixed_width'
+        self.assertNotIn('44.00%', content(data))
+
     def test_median_cpg_depth_includes_uncovered_reference_sites(self):
         h = dict(bins=[dict(lower=10, upper=10, count=1), dict(lower=20, upper=20, count=2)])
         self.assertEqual(median_cpg_depth(h, 3), 20)

@@ -66,6 +66,12 @@ class QCTests(unittest.TestCase):
         self.assertIsNone(alignment.depth_summary({}, 0)['mean'])
         self.assertEqual(alignment.length_summary({10: 1, 20: 1})['median'], 15)
 
+    def test_high_depth_breadth_includes_threshold_boundary_and_zero_bases(self):
+        summary = alignment.depth_summary({149: 2, 150: 3, 199: 4, 200: 5, 201: 6}, 25)
+        self.assertEqual(summary['breadth']['150'], 18 / 25)
+        self.assertEqual(summary['breadth']['200'], 11 / 25)
+        self.assertIsNone(alignment.depth_summary({}, 0)['breadth']['200'])
+
     def test_empty_bam_has_explicit_zero_counts(self):
         path = self.root / 'empty.bam'
         with pysam.AlignmentFile(str(path), 'wb', header={'HD': {'SO': 'coordinate'}, 'SQ': [{'SN': 'chr1', 'LN': 100}]}):
@@ -120,6 +126,9 @@ class QCTests(unittest.TestCase):
         self.assertTrue((self.root / 'adequacy.tsv').exists())
         zero = next(r for r in data['metrics'] if r['metric_id'] == 'coverage.zero_fraction' and r['scope'] == 'genome_primary' and r['mapq'] == 0)
         self.assertEqual(zero['value'], .6)
+        high = [r for r in data['metrics'] if r['metric_id'] == 'coverage.breadth' and r['scope'] == 'targets' and r['mapq'] == 20 and not r.get('target_id') and r['threshold'] in (150, 200)]
+        self.assertEqual({r['threshold'] for r in high}, {150, 200})
+        self.assertTrue(all(r['value'] == 0 for r in high))
 
     def test_binomial_oracles(self):
         for vaf, expected in [(.01, (628, 913)), (.02, (313, 456)), (.05, (124, 181)), (.1, (61, 89))]:
