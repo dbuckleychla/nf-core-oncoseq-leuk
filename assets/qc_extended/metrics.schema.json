@@ -1,0 +1,144 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "title": "Oncoseq additive cellular DNA QC",
+    "type": "object",
+    "required": [
+        "schema_name",
+        "schema_version",
+        "sample_id",
+        "input_scope",
+        "status",
+        "components",
+        "provenance",
+        "definitions",
+        "metrics",
+        "histograms",
+        "warnings",
+        "tables"
+    ],
+    "properties": {
+        "schema_name": {
+            "const": "oncoseq_extended_qc"
+        },
+        "schema_version": {
+            "const": "1.0.0"
+        },
+        "sample_id": {
+            "type": "string"
+        },
+        "input_scope": {
+            "const": "full_mapping_stage_sample"
+        },
+        "status": {
+            "enum": ["complete", "partial"]
+        },
+        "components": {
+            "type": "object",
+            "required": ["alignment", "coverage", "methylation", "classifier_features", "preprocessing"],
+            "additionalProperties": {
+                "type": "object",
+                "required": ["status", "reason", "exhaustive"],
+                "properties": {
+                    "status": {
+                        "enum": ["complete", "partial", "unavailable", "disabled", "not_applicable"]
+                    },
+                    "reason": {
+                        "type": ["string", "null"]
+                    },
+                    "exhaustive": {
+                        "type": "boolean"
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "provenance": {
+            "type": "object"
+        },
+        "definitions": {
+            "type": "object"
+        },
+        "metrics": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": [
+                    "metric_id",
+                    "unit",
+                    "value",
+                    "numerator",
+                    "denominator",
+                    "status",
+                    "reason",
+                    "scope",
+                    "target_id",
+                    "panel_id",
+                    "stage",
+                    "modification",
+                    "mapq",
+                    "threshold"
+                ],
+                "properties": {
+                    "metric_id": {
+                        "type": "string"
+                    },
+                    "unit": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": ["number", "null"]
+                    },
+                    "numerator": {
+                        "type": ["number", "null"]
+                    },
+                    "denominator": {
+                        "type": ["number", "null"]
+                    },
+                    "status": {
+                        "enum": ["complete", "unavailable"]
+                    },
+                    "reason": {
+                        "type": ["string", "null"]
+                    },
+                    "scope": {
+                        "type": ["string", "null"]
+                    },
+                    "target_id": {
+                        "type": ["string", "null"]
+                    },
+                    "panel_id": {
+                        "type": ["string", "null"]
+                    },
+                    "stage": {
+                        "type": ["string", "null"]
+                    },
+                    "modification": {
+                        "type": ["string", "null"]
+                    },
+                    "mapq": {
+                        "type": ["integer", "null"],
+                        "minimum": 0
+                    },
+                    "threshold": {
+                        "type": ["string", "number", "null"]
+                    }
+                },
+                "additionalProperties": false
+            }
+        },
+        "histograms": {
+            "type": "array",
+            "items": {
+                "type": "object",
+                "required": ["metric_id", "denominator", "bins"]
+            }
+        },
+        "warnings": {
+            "type": "array"
+        },
+        "tables": {
+            "type": "array"
+        }
+    },
+    "additionalProperties": false
+}

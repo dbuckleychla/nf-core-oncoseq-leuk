@@ -1,0 +1,44 @@
+nextflow_workflow {
+    name "Additive Classy blood report contract (synthetic executable)"
+    script "tests/subworkflows/local/classy_blood/workflow.nf"
+    workflow "CHECK_BLOOD"
+    config "tests/subworkflows/local/classy_blood/local.config"
+
+    test("ALMA3 defaults on; only final classifier assets publish") {
+        when {
+            params { outdir = "${outputDir}/results" }
+        }
+        then {
+            assert workflow.success
+            def data = new groovy.json.JsonSlurperClassic().parseText(file(workflow.out.json[0][1]).text)
+            assert data.oncoseq_classifier.enable_alma3
+            assert data.alma3.model_version == 'SYNTHETIC'
+            assert workflow.out.section[0][1] == 'Methylation'
+            assert file("${workflow.out.section[0][2]}/SYNTHETIC-Methylation.qmd").text.contains('Analysis performed using ALMA3.')
+            assert file("${outputDir}/results/reports/tumor_classifiers/SYNTHETIC_optic.tsv").text.contains('Not accepted')
+            assert file("${outputDir}/results/reports/tumor_classifiers/SYNTHETIC_combined_classification.json").exists()
+            assert file("${outputDir}/results/reports/tumor_classifiers/SYNTHETIC_classification.metadata.json").exists()
+            assert !file("${outputDir}/results/reports/tumor_classifiers/blood_metrics").exists()
+            assert !file("${outputDir}/results/reports/tumor_classifiers/review_classification.json").exists()
+            assert !file("${outputDir}/results/reports/tumor_classifiers/native_report_inputs").exists()
+        }
+    }
+    test("ALMA3 opt-out and cfDNA input defaults") {
+        when {
+            params {
+                outdir = "${outputDir}/results"
+                classy_blood_enable_alma3 = false
+                cfdna = true
+                classy_blood_alma3_modification_mode = '5mc-plus-5hmc'
+            }
+        }
+        then {
+            assert workflow.success
+            def data = new groovy.json.JsonSlurperClassic().parseText(file(workflow.out.json[0][1]).text)
+            assert !data.oncoseq_classifier.enable_alma3
+            assert !data.containsKey('alma3')
+            assert data.oncoseq_classifier.alma3_modification_mode == '5mc-plus-5hmc'
+            assert file("${outputDir}/results/reports/tumor_classifiers/SYNTHETIC_alma3.tsv").text.contains('disabled')
+        }
+    }
+}

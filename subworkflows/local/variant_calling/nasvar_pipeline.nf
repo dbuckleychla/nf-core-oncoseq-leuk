@@ -39,6 +39,8 @@ workflow NASVAR {
 
     emit:
     json                   = NASVAR_PIPELINE.out.json
+    coverage               = NASVAR_PIPELINE.out.coverage_tsv
+    maf                    = NASVAR_PIPELINE.out.maf
     baf_plot               = NASVAR_PIPELINE.out.karyotype_baf_svg
     versions               = ch_versions
 

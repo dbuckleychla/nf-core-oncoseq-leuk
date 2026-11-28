@@ -8,6 +8,10 @@
 
 > Di Tommaso P, Chatzou M, Floden EW, Barja PP, Palumbo E, Notredame C. Nextflow enables reproducible computational workflows. Nat Biotechnol. 2017 Apr 11;35(4):316-319. doi: 10.1038/nbt.3820. PubMed PMID: 28398311.
 
+## [nf-core/oncoseq](https://github.com/chusj-pigu/nf-core-oncoseq)
+
+> Geoffrion, Nicholas et al. (2026). Accelerated and comprehensive pediatric cancer profiling using whole-genome sequencing with adaptive sampling. Genome Medicine. https://doi.org/10.1186/s13073-026-01815-7
+
 ## Pipeline tools
 
 - [Alma](https://github.com/f-marchi/ALMA-classifier)
@@ -44,7 +48,7 @@
 
 - [Deepsomatic](https://github.com/google/deepsomatic)
 
-> Park, J., Cook, D. E., Chang, P.-C., Kolesnikov, A., Brambrink, L., Mier, J. C., Gardner, J., McNulty, B., Sacco, S., Keskus, A., Bryant, A., Ahmad, T., Shetty, J., Zhao, Y., Tran, B., Narzisi, G., Helland, A., Yoo, B., Pushel, I., … Shafin, K. (2024). DeepSomatic: Accurate somatic small variant discovery for multiple sequencing technologies. bioRxiv. https://doi.org/10.1101/2024.08.16.608331
+> Park, Jimin et al. (2025). Accurate somatic small variant discovery for multiple sequencing technologies with DeepSomatic. Nature Biotechnology. https://doi.org/10.1038/s41587-025-02839-x
 
 - [Dorado](https://dorado-docs.readthedocs.io/en/latest/)
 
@@ -116,7 +120,7 @@
 
 - [SnpEff](https://pcingola.github.io/SnpEff/)
 
-> Cingolani, P., Patel, V. M., Coon, M., Nguyen, T., Land, S. J., Ruden, D. M., & Lu, X. (2012). Using Drosophila melanogaster as a Model for Genotoxic Chemical Mutational Studies with a New Program, SnpSift. Frontiers in Genetics, 3, 35. https://doi.org/10.3389/fgene.2012.00035
+> Cingolani, Pablo et al. (2012). A program for annotating and predicting the effects of single nucleotide polymorphisms, SnpEff. Fly. https://doi.org/10.4161/fly.19695
 
 - [Stellerator](https://github.com/chusj-pigu/stellerator)
 

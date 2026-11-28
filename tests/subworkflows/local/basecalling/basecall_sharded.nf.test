@@ -1,0 +1,71 @@
+nextflow_workflow {
+    name "POD5 shards and per-sample unaligned BAM consolidation"
+    script "tests/subworkflows/local/basecalling/workflow.nf"
+    workflow "CHECK_SHARDS"
+    config "tests/subworkflows/local/basecalling/local.config"
+
+    test("Call five shards across two samples and merge without losing tags or identity") {
+        when {
+            params {
+                basecall_shards = 3
+                outdir = "${outputDir}/results"
+                aws_bam_high_queue = 'bam-high'
+                aws_basecall_queue = 'basecall'
+            }
+        }
+        then {
+            assert workflow.success
+            def outputs = workflow.out.ubam.collectEntries { meta, bam -> [(meta.id): bam] }
+            assert outputs.keySet() == ['alpha', 'beta'] as Set
+            assert file("${outputDir}/results/ubams/alpha.unaligned.bam").exists()
+            assert file("${outputDir}/results/ubams/beta.unaligned.bam").exists()
+            assert !file("${outputDir}/results/program_outputs/dorado").exists()
+            outputs.each { sample, bam ->
+                def process = ['samtools', 'view', bam.toString()].execute()
+                def records = process.text.readLines()
+                assert process.waitFor() == 0
+                assert records.size() == (sample == 'alpha' ? 5 : 2)
+                assert records.every { line -> line.contains("RG:Z:rg_${sample}") && line.contains('MM:Z:C+m,0;') && line.contains('ML:B:C,200') }
+                assert records.collect { line -> line.tokenize('\t')[0] }.unique().size() == records.size()
+            }
+            assert workflow.trace.tasks().count { row -> row.name.contains('DORADO_BASECALL') } == 5
+            assert workflow.trace.tasks().count { row -> row.name.contains('SAMTOOLS_MERGE_BASECALL') } == 2
+        }
+    }
+
+    test("A single POD5 file creates one nonempty shard even when N is larger") {
+        when {
+            params {
+                basecall_shards = 16
+                outdir = "${outputDir}/results"
+                single_pod5 = true
+                aws_basecall_queue = 'basecall'
+            }
+        }
+        then {
+            assert workflow.success
+            assert workflow.out.ubam.size() == 1
+            assert workflow.out.ubam[0][0] == [id:'alpha']
+            assert file("${outputDir}/results/ubams/alpha.unaligned.bam").exists()
+            assert workflow.trace.tasks().count { row -> row.name.contains('DORADO_BASECALL') } == 1
+            assert workflow.trace.tasks().count { row -> row.name.contains('SAMTOOLS_MERGE_BASECALL') } == 0
+        }
+    }
+
+    test("A failed shard cannot produce a partial merged BAM") {
+        when {
+            params {
+                basecall_shards = 3
+                aws_bam_high_queue = 'bam-high'
+                aws_basecall_queue = 'basecall'
+                mock_fail_sample = 'alpha'
+                mock_fail_shard = 2
+            }
+        }
+        then {
+            assert !workflow.success
+            assert workflow.trace.tasks().any { row -> row.name.contains('DORADO_BASECALL') && row.name.contains('alpha__bc0002') && !row.success }
+            assert !workflow.trace.tasks().any { row -> row.name.contains('SAMTOOLS_MERGE_BASECALL') && row.name.contains('alpha') }
+        }
+    }
+}

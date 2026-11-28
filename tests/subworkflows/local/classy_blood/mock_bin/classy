@@ -1,0 +1,32 @@
+#!/usr/bin/env python3
+"""Synthetic CLI stand-in: validates orchestration, never performs inference."""
+import json
+import sys
+from pathlib import Path
+
+if sys.argv[1:] == ['--version']:
+    print('classy SYNTHETIC-0.0.0')
+    raise SystemExit
+args = sys.argv[1:]
+assert args[0] == 'combined'
+def value(flag):
+    return args[args.index(flag) + 1]
+assert Path(value('--input')).is_file()
+assert Path(value('--reference')).is_file()
+assert value('--genome') == 'hg38'
+assert int(value('--pileup-threads')) == 1
+assert value('--exclude') == 'crossnn,tucan,sturgeon,alma,mpact,nanomix'
+assert '--use-pileup' in args and value('--motif') == 'CpG:CG'
+alma = value('--enable-alma3') == 'true'
+assert value('--alma3-modification-mode') in ('5mc', '5mc-plus-5hmc')
+if '--min-read-length' in args:
+    assert value('--min-read-length') == '20'
+raw = dict(sample_label=value('--sample'), combined=dict(classification_scores=[]))
+for name in ('marlin', 'lamprey', 'optic') + (('alma3',) if alma else ()):
+    raw[name] = dict(model_version='SYNTHETIC', target_coverage=dict(observed_target_count=6000))
+    raw['combined']['classification_scores'].append(dict(classifier_run_id=name,
+        native_path=[dict(name='Synthetic class')], score=0.9, cutoff=0.8, accepted_call=name != 'optic'))
+output = Path(value('--output'))
+output.write_text(json.dumps(raw))
+for suffix in ('combined_blood', 'combined_task_pies'):
+    output.with_name(output.stem + '_' + suffix + '.svg').write_text('<svg xmlns="http://www.w3.org/2000/svg"><text>SYNTHETIC</text></svg>')

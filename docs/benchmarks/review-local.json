@@ -1,0 +1,179 @@
+{
+    "environment": {
+        "python": "3.14.6",
+        "machine": "arm64",
+        "system": "Darwin",
+        "pysam": "0.23.3"
+    },
+    "synthetic": true,
+    "production_changed": false,
+    "lookup": [
+        {
+            "seconds": 44.283308167010546,
+            "queries": 20000,
+            "matched_records": 20021,
+            "indexed_fetches": 20000,
+            "logical_digest": "da7592034b7726a8741ef82288afff34f50d1b5e828d55dac087c22bddb8ea20",
+            "peak_rss_mib": 31.140625,
+            "pattern": "dense",
+            "window_bp": 0,
+            "speedup": 1.0
+        },
+        {
+            "seconds": 3.6154152500093915,
+            "queries": 20000,
+            "matched_records": 20021,
+            "indexed_fetches": 1563,
+            "logical_digest": "da7592034b7726a8741ef82288afff34f50d1b5e828d55dac087c22bddb8ea20",
+            "peak_rss_mib": 32.15625,
+            "pattern": "dense",
+            "window_bp": 128,
+            "speedup": 12.24847081310937
+        },
+        {
+            "seconds": 0.994591708004009,
+            "queries": 20000,
+            "matched_records": 20021,
+            "indexed_fetches": 391,
+            "logical_digest": "da7592034b7726a8741ef82288afff34f50d1b5e828d55dac087c22bddb8ea20",
+            "peak_rss_mib": 32.78125,
+            "pattern": "dense",
+            "window_bp": 512,
+            "speedup": 44.52410754145564
+        },
+        {
+            "seconds": 0.5431847499858122,
+            "queries": 20000,
+            "matched_records": 20021,
+            "indexed_fetches": 196,
+            "logical_digest": "da7592034b7726a8741ef82288afff34f50d1b5e828d55dac087c22bddb8ea20",
+            "peak_rss_mib": 33.578125,
+            "pattern": "dense",
+            "window_bp": 1024,
+            "speedup": 81.52531559136594
+        },
+        {
+            "seconds": 0.6667647910071537,
+            "queries": 300,
+            "matched_records": 301,
+            "indexed_fetches": 300,
+            "logical_digest": "b3c429d8105cb12d295469e26bdab0f21bdd4fd94bf8037b97e12c21c78df786",
+            "peak_rss_mib": 31.0625,
+            "pattern": "sparse",
+            "window_bp": 0,
+            "speedup": 1.0
+        },
+        {
+            "seconds": 0.6741717909753788,
+            "queries": 300,
+            "matched_records": 301,
+            "indexed_fetches": 300,
+            "logical_digest": "b3c429d8105cb12d295469e26bdab0f21bdd4fd94bf8037b97e12c21c78df786",
+            "peak_rss_mib": 31.78125,
+            "pattern": "sparse",
+            "window_bp": 128,
+            "speedup": 0.9890131861531779
+        },
+        {
+            "seconds": 0.716214249987388,
+            "queries": 300,
+            "matched_records": 301,
+            "indexed_fetches": 300,
+            "logical_digest": "b3c429d8105cb12d295469e26bdab0f21bdd4fd94bf8037b97e12c21c78df786",
+            "peak_rss_mib": 32.6875,
+            "pattern": "sparse",
+            "window_bp": 512,
+            "speedup": 0.9309571696163472
+        },
+        {
+            "seconds": 0.7458544589753728,
+            "queries": 300,
+            "matched_records": 301,
+            "indexed_fetches": 292,
+            "logical_digest": "b3c429d8105cb12d295469e26bdab0f21bdd4fd94bf8037b97e12c21c78df786",
+            "peak_rss_mib": 33.453125,
+            "pattern": "sparse",
+            "window_bp": 1024,
+            "speedup": 0.8939609906242706
+        }
+    ],
+    "junctions": [
+        {
+            "count": 600,
+            "dense_collisions": false,
+            "baseline": {
+                "seconds": 0.20065191699541174,
+                "input_records": 600,
+                "events": 255,
+                "logical_digest": "d2d977f20565e33f920cc3ad4fbfc75d00322bc2af52a4e495f5a901b85ebd61",
+                "peak_rss_mib": 33.9375
+            },
+            "indexed": {
+                "seconds": 0.005193707998842001,
+                "input_records": 600,
+                "events": 255,
+                "logical_digest": "d2d977f20565e33f920cc3ad4fbfc75d00322bc2af52a4e495f5a901b85ebd61",
+                "peak_rss_mib": 34.234375
+            },
+            "speedup": 38.63365384425722
+        },
+        {
+            "count": 1800,
+            "dense_collisions": false,
+            "baseline": {
+                "seconds": 1.7807091670110822,
+                "input_records": 1800,
+                "events": 761,
+                "logical_digest": "96c97c50c7a3f84bc04403afa7bd8c75863d15292f2f3c4ce95290a723537f2e",
+                "peak_rss_mib": 43.796875
+            },
+            "indexed": {
+                "seconds": 0.015121333999559283,
+                "input_records": 1800,
+                "events": 761,
+                "logical_digest": "96c97c50c7a3f84bc04403afa7bd8c75863d15292f2f3c4ce95290a723537f2e",
+                "peak_rss_mib": 44.015625
+            },
+            "speedup": 117.7613805146412
+        },
+        {
+            "count": 3600,
+            "dense_collisions": false,
+            "baseline": {
+                "seconds": 7.26178233299288,
+                "input_records": 3600,
+                "events": 1519,
+                "logical_digest": "9ec475f84b63185b590e18a7ea37e53ad7b96364126b9d87ec553c632da57520",
+                "peak_rss_mib": 55.328125
+            },
+            "indexed": {
+                "seconds": 0.0324491249921266,
+                "input_records": 3600,
+                "events": 1519,
+                "logical_digest": "9ec475f84b63185b590e18a7ea37e53ad7b96364126b9d87ec553c632da57520",
+                "peak_rss_mib": 54.859375
+            },
+            "speedup": 223.7897735225485
+        },
+        {
+            "count": 180,
+            "dense_collisions": true,
+            "baseline": {
+                "seconds": 0.024679958994966,
+                "input_records": 180,
+                "events": 180,
+                "logical_digest": "602c9959ee6ba249d03ed3558315c9943527c2d982078ce6feeeaece2fdfbc0b",
+                "peak_rss_mib": 34.65625
+            },
+            "indexed": {
+                "seconds": 0.004457416012883186,
+                "input_records": 180,
+                "events": 180,
+                "logical_digest": "602c9959ee6ba249d03ed3558315c9943527c2d982078ce6feeeaece2fdfbc0b",
+                "peak_rss_mib": 35.609375
+            },
+            "speedup": 5.536830962969122
+        }
+    ],
+    "reference_compressed_mib": 17.99503517150879
+}

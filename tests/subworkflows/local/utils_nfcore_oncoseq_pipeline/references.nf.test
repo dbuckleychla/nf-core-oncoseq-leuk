@@ -1,0 +1,43 @@
+nextflow_function {
+    name "Separate clinical auxiliary reference cache"
+    script "subworkflows/local/utils_nfcore_oncoseq_pipeline/main.nf"
+    function "findCached"
+
+    test("Use the separate auxiliary directory rather than the FASTA parent") {
+        when {
+            params {
+                clinical = true
+                ref_cache = "${projectDir}/assets/NOFILE"
+                reference_aux_cache = "${projectDir}/tests/config/fixtures"
+            }
+            function {
+                """
+                input[0] = 'https://example.test/reference.fa'
+                """
+            }
+        }
+        then {
+            assert function.success
+            assert function.result.toString().endsWith('/tests/config/fixtures/reference.fa')
+        }
+    }
+
+    test("A missing clinical auxiliary file does not fall back to a download") {
+        when {
+            params {
+                clinical = true
+                ref_cache = "${projectDir}/assets/NOFILE"
+                reference_aux_cache = "${projectDir}/tests/config/fixtures"
+            }
+            function {
+                """
+                input[0] = 'https://example.test/absent.bed'
+                """
+            }
+        }
+        then {
+            assert function.failed
+            assert function.stdout.join('\n').contains('Clinical reference asset is missing')
+        }
+    }
+}

@@ -1,0 +1,38 @@
+nextflow_function {
+    name "Stable review artifact ordering across arrival permutations"
+    script "subworkflows/local/report/input_order.nf"
+    function "orderedReviewArtifacts"
+
+    test("Order asynchronous caller and figure arrivals canonically") {
+        when {
+            function {
+                """
+                def root = file('${projectDir}/test_data/review')
+                input[0] = ['small:deepsomatic', 'figure:fusions', 'sample', 'figure:fusions']
+                input[1] = [root.resolve('deepsomatic.vcf.gz'), root.resolve('render_figures/generated.png'), [], root.resolve('render_data/figures/native.svg')]
+                """
+            }
+        }
+        then {
+            assert function.success
+            assert function.result[0] == ['figure:fusions', 'figure:fusions', 'small:deepsomatic']
+            assert function.result[1].collect { file(it).name } == ['native.svg', 'generated.png', 'deepsomatic.vcf.gz']
+        }
+    }
+    test("Reversed arrivals produce the same canonical order") {
+        when {
+            function {
+                """
+                def root = file('${projectDir}/test_data/review')
+                input[0] = ['figure:fusions', 'sample', 'figure:fusions', 'small:deepsomatic']
+                input[1] = [root.resolve('render_data/figures/native.svg'), [], root.resolve('render_figures/generated.png'), root.resolve('deepsomatic.vcf.gz')]
+                """
+            }
+        }
+        then {
+            assert function.success
+            assert function.result[0] == ['figure:fusions', 'figure:fusions', 'small:deepsomatic']
+            assert function.result[1].collect { file(it).name } == ['native.svg', 'generated.png', 'deepsomatic.vcf.gz']
+        }
+    }
+}

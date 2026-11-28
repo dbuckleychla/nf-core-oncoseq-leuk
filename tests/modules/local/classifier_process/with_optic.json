@@ -1,0 +1,195 @@
+{
+    "combined": {
+        "classification_scores": [
+            {
+                "classifier_run_id": "alma",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "lineage",
+                        "name": "Synthetic lineage"
+                    },
+                    {
+                        "level_kind": "mcf",
+                        "name": "Synthetic group"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "crossnn:capper_et_al",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "lineage",
+                        "name": "Synthetic lineage"
+                    },
+                    {
+                        "level_kind": "mcf",
+                        "name": "Synthetic group"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "crossnn:pancan_devel_v5i",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "lineage",
+                        "name": "Synthetic lineage"
+                    },
+                    {
+                        "level_kind": "mcf",
+                        "name": "Synthetic group"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "marlin",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "lineage",
+                        "name": "Synthetic lineage"
+                    },
+                    {
+                        "level_kind": "mcf",
+                        "name": "Synthetic group"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "mpact",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "lineage",
+                        "name": "Synthetic lineage"
+                    },
+                    {
+                        "level_kind": "mcf",
+                        "name": "Synthetic group"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "nanomix:llse",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "lineage",
+                        "name": "Synthetic lineage"
+                    },
+                    {
+                        "level_kind": "mcf",
+                        "name": "Synthetic group"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "optic",
+                "score": 0.9,
+                "accepted_call": true,
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic optic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "lamprey",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "sturgeon_brainstem",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "sturgeon_general",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            },
+            {
+                "classifier_run_id": "tucan",
+                "score": 0.9,
+                "cutoff": 0.7,
+                "leaf_name": "Synthetic class",
+                "native_path": [
+                    {
+                        "level_kind": "class",
+                        "name": "Synthetic class"
+                    }
+                ]
+            }
+        ]
+    },
+    "inference": {
+        "lineage_probabilities": [
+            {
+                "label": "Synthetic lineage",
+                "probability": 0.95
+            }
+        ],
+        "group_probabilities": [
+            {
+                "label": "Synthetic group",
+                "probability": 0.92
+            }
+        ]
+    },
+    "tucan": {
+        "cutoff": 0.7,
+        "samplings": [
+            {
+                "family_scores": [
+                    {
+                        "family": "Synthetic family",
+                        "score": 0.9
+                    }
+                ],
+                "scores": [
+                    {
+                        "family": "Synthetic family",
+                        "name": "Synthetic class",
+                        "score": 0.9
+                    }
+                ]
+            }
+        ]
+    }
+}

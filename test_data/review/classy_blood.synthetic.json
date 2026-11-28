@@ -1,0 +1,83 @@
+{
+    "sample_label": "SYNTHETIC",
+    "oncoseq_classifier": {
+        "workflow": "classy_blood",
+        "enable_alma3": true
+    },
+    "combined": {
+        "classification_scores": [
+            {
+                "classifier_run_id": "marlin:synthetic",
+                "native_path": [
+                    {
+                        "name": "Synthetic class"
+                    }
+                ],
+                "score": 0.9,
+                "cutoff": 0.8,
+                "accepted_call": true
+            },
+            {
+                "classifier_run_id": "lamprey:synthetic",
+                "native_path": [
+                    {
+                        "name": "Synthetic class"
+                    }
+                ],
+                "score": 0.9,
+                "cutoff": 0.8,
+                "accepted_call": true
+            },
+            {
+                "classifier_run_id": "alma3:synthetic",
+                "native_path": [
+                    {
+                        "name": "Synthetic class"
+                    }
+                ],
+                "score": 0.9,
+                "cutoff": 0.8,
+                "accepted_call": true
+            },
+            {
+                "classifier_run_id": "optic:synthetic",
+                "native_path": [
+                    {
+                        "name": "Synthetic class"
+                    }
+                ],
+                "score": 0.9,
+                "cutoff": 0.8,
+                "accepted_call": false
+            }
+        ]
+    },
+    "marlin": {
+        "model_version": "synthetic-v1",
+        "model_version_source": "Synthetic fixture",
+        "target_coverage": {
+            "observed_target_count": 6000
+        }
+    },
+    "lamprey": {
+        "model_version": "synthetic-v1",
+        "model_version_source": "Synthetic fixture",
+        "target_coverage": {
+            "observed_target_count": 6000
+        }
+    },
+    "alma3": {
+        "model_version": "synthetic-v1",
+        "model_version_source": "Synthetic fixture",
+        "target_coverage": {
+            "observed_target_count": 6000
+        }
+    },
+    "optic": {
+        "model_version": "synthetic-v1",
+        "model_version_source": "Synthetic fixture",
+        "target_coverage": {
+            "observed_target_count": 6000
+        }
+    }
+}

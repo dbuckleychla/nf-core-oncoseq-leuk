@@ -1,0 +1,48 @@
+nextflow_process {
+    name "DeepSomatic clinical command contract"
+    script "modules/local/clinical_threads/main.nf"
+    process "DEEPSOMATIC_TUMORONLY"
+    config "tests/config/caller_local.config"
+
+    test("Pass the five-percent indel candidate threshold and bounded shards") {
+        when {
+            params { aws_bam_high_queue = 'bam-high' }
+            process {
+                """
+                input[0] = [[id:'test'], file('tests/config/fixtures/input.bam'), file('tests/config/fixtures/input.bam.bai'), file('tests/config/fixtures/targets.bed')]
+                input[1] = [[id:'hg38'], file('tests/config/fixtures/reference.fa')]
+                input[2] = [[id:'hg38'], file('tests/config/fixtures/reference.fa.fai')]
+                input[3] = [[id:'hg38'], []]
+                """
+            }
+        }
+        then {
+            assert process.success
+            def args = new File(process.out.vcf[0][1].toString()).readLines()
+            assert args.contains('--make_examples_extra_args=vsc_min_fraction_indels=0.05')
+            assert args.contains('--model_type=ONT_TUMOR_ONLY')
+            assert args.contains('--num_shards=8')
+        }
+    }
+
+    test("Pass an explicitly selected indel candidate threshold") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                deepsomatic_indel_min_af = 0.1
+            }
+            process {
+                """
+                input[0] = [[id:'test'], file('tests/config/fixtures/input.bam'), file('tests/config/fixtures/input.bam.bai'), file('tests/config/fixtures/targets.bed')]
+                input[1] = [[id:'hg38'], file('tests/config/fixtures/reference.fa')]
+                input[2] = [[id:'hg38'], file('tests/config/fixtures/reference.fa.fai')]
+                input[3] = [[id:'hg38'], []]
+                """
+            }
+        }
+        then {
+            assert process.success
+            assert new File(process.out.vcf[0][1].toString()).readLines().contains('--make_examples_extra_args=vsc_min_fraction_indels=0.1')
+        }
+    }
+}

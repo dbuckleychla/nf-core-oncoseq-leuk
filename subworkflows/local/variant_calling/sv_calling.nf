@@ -7,9 +7,9 @@ include { WGET as WGET_TR_BED               } from '../../../modules/nf-core/wge
 include { WGET as WGET_PON                  } from '../../../modules/nf-core/wget/main'
 include { SNIFFLES                          } from '../../../modules/nf-core/sniffles'
 include { BCFTOOLS_INDEX                    } from '../../../modules/nf-core/bcftools/index'
-include { SEVERUS_TUMOR_SINGLE              } from '../../../modules/local/severus/main.nf'
+include { SEVERUS_TUMOR_SINGLE              } from '../../../modules/local/clinical_threads/main.nf'
 include { HTSLIB_BGZIPTABIX                 } from '../../../modules/nf-core/htslib/bgziptabix'
-include { STELLERATOR                       } from '../../../modules/local/stellerator/main.nf'
+include { STELLERATOR                       } from '../../../modules/local/clinical_threads/main.nf'
 
 // functions
 include { softwareVersionsToYAML       } from '../../../subworkflows/nf-core/utils_nfcore_pipeline'
@@ -34,7 +34,7 @@ workflow SV_CALLING {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     SNIFLLES2
+    SNIFLLES2
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
@@ -42,9 +42,9 @@ workflow SV_CALLING {
 
     ch_td_repeat = channel.of("trf.bed")
         .map { type ->
-            def url = genome == "hg38" ? "https://github.com/PacificBiosciences/pbsv/raw/master/annotations/human_GRCh38_no_alt_analysis_set.trf.bed"
-                    : genome == "hg19" ? "https://github.com/PacificBiosciences/pbsv/raw/master/annotations/human_hs37d5.trf.bed"
-                    : "https://github.com/PacificBiosciences/pbsv/raw/master/annotations/human_chm13v2.0_maskedY_rCRS.trf.bed"
+            def url = genome == "hg38" ? "https://github.com/PacificBiosciences/pbsv/raw/59dceda422d8dea95e41dce17a89456ac1530d47/annotations/human_GRCh38_no_alt_analysis_set.trf.bed"
+                    : genome == "hg19" ? "https://github.com/PacificBiosciences/pbsv/raw/59dceda422d8dea95e41dce17a89456ac1530d47/annotations/human_hs37d5.trf.bed"
+                    : "https://github.com/PacificBiosciences/pbsv/raw/59dceda422d8dea95e41dce17a89456ac1530d47/annotations/human_chm13v2.0_maskedY_rCRS.trf.bed"
 
             // 4th element: local copy, or null if not in the cache
             tuple(id: url.tokenize('/')[-1], url, type, findCached(url))
@@ -80,7 +80,7 @@ workflow SV_CALLING {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     SEVERUS
+    SEVERUS
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
@@ -88,9 +88,9 @@ workflow SV_CALLING {
 
     ch_pon_url = channel.of("tsv.gz")
         .map { type ->
-            def url = genome == "hg38" ? "https://github.com/KolmogorovLab/Severus/raw/main/pon/PoN_1000G_hg38_extended.tsv.gz"
-                    : genome == "hs1" ? "https://github.com/KolmogorovLab/Severus/raw/main/pon/PoN_1000G_chm13.tsv.gz" :
-                    "https://github.com/KolmogorovLab/Severus/raw/main/pon/PoN_1000G_hg19.tsv.gz"
+            def url = genome == "hg38" ? "https://github.com/KolmogorovLab/Severus/raw/7301b90b69b8da2061d3985d8b3428008b352a54/pon/PoN_1000G_hg38_extended.tsv.gz"
+                    : genome == "hs1" ? "https://github.com/KolmogorovLab/Severus/raw/7301b90b69b8da2061d3985d8b3428008b352a54/pon/PoN_1000G_chm13.tsv.gz" :
+                    "https://github.com/KolmogorovLab/Severus/raw/7301b90b69b8da2061d3985d8b3428008b352a54/pon/PoN_1000G_hg19.tsv.gz"
 
             tuple(id: url.tokenize('/')[-1], url, type, findCached(url))
         }
@@ -137,7 +137,7 @@ workflow SV_CALLING {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     STELLERATOR
+    STELLERATOR
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
@@ -156,7 +156,7 @@ workflow SV_CALLING {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     POST-PROCESSING
+    POST-PROCESSING
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 

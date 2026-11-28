@@ -1,0 +1,107 @@
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="ONCOSEQ_LEUK"
+
+--ONCOSEQ_LEUK
+Content-Type: text/x-shellscript; charset="us-ascii"
+
+#!/bin/bash
+set -euo pipefail
+systemctl stop ecs || true
+%{ if use_existing_aws_cli ~}
+# Verify before allowing ECS to accept jobs; never download a fallback.
+test -x '${existing_aws_cli_path}'
+'${existing_aws_cli_path}' --version
+%{ else ~}
+# ECS AL2023 provides curl-minimal, which supports this HTTPS download.
+# Installing the full curl package conflicts with curl-minimal and aborts boot.
+dnf install -y unzip zlib
+if ! command -v curl >/dev/null 2>&1; then
+    dnf install -y curl-minimal
+fi
+install -d /opt/oncoseq-leuk-bootstrap
+cd /opt/oncoseq-leuk-bootstrap
+curl --fail --location --retry 5 "https://awscli.amazonaws.com/awscli-exe-linux-x86_64-${aws_cli_version}.zip" -o awscliv2.zip
+unzip -q awscliv2.zip
+./aws/install --install-dir /opt/aws-cli --bin-dir /opt/aws-cli-bin
+# Nextflow mounts the CLI tree, not the host's /lib64. Minimal tool images
+# may omit zlib, which the CLI executable needs before Python can start.
+install -d /opt/aws-cli/v2/current/runtime-libs
+cp -L /lib64/libz.so.1 /opt/aws-cli/v2/current/runtime-libs/libz.so.1
+# Replace only the bin symlink; retain the original executable in dist/aws.
+rm /opt/aws-cli/v2/current/bin/aws
+cat > /opt/aws-cli/v2/current/bin/aws <<'AWS_WRAPPER'
+#!/bin/sh
+set -eu
+cli_root=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
+export LD_LIBRARY_PATH="$cli_root/runtime-libs$${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+exec "$cli_root/dist/aws" "$@"
+AWS_WRAPPER
+chmod 0755 /opt/aws-cli/v2/current/bin/aws
+/opt/aws-cli/v2/current/bin/aws --version
+%{ endif ~}
+# Set before ECS registers this worker. Digest-pinned images can reuse cached
+# layers without a registry pull on every task; missing images still download.
+install -d /etc/ecs /var/log/oncoseq-leuk
+printf '\nECS_IMAGE_PULL_BEHAVIOR=once\n' >> /etc/ecs/ecs.config
+
+%{ if ghcr_secret_arn != null ~}
+# ECS init loads this root-only file when launching the agent. Refresh registry
+# credentials on every ECS start, and fail startup if retrieval/validation fails.
+# Only the ARN and this code enter user data/Terraform state, never the token.
+dnf install -y python3
+install -d -m 0700 /opt/oncoseq-leuk-registry
+cat > /opt/oncoseq-leuk-registry/configure.py <<'PYTHON'
+${registry_auth_script}
+PYTHON
+chmod 0700 /opt/oncoseq-leuk-registry/configure.py
+install -d /etc/systemd/system/ecs.service.d
+cat > /etc/systemd/system/ecs.service.d/20-ghcr-auth.conf <<'UNIT'
+[Service]
+ExecStartPre=/usr/bin/python3 /opt/oncoseq-leuk-registry/configure.py --aws-cli ${use_existing_aws_cli ? existing_aws_cli_path : "/opt/aws-cli/v2/current/bin/aws"} --region ${region} --secret-arn ${ghcr_secret_arn}
+UNIT
+%{ endif ~}
+
+# AL2023 keeps Docker/kernel logs in journald. Export them automatically; no
+# interactive access is needed. Rotation prevents the diagnostic file filling disk.
+dnf install -y amazon-cloudwatch-agent logrotate
+cat > /etc/systemd/system/oncoseq-leuk-host-journal.service <<'UNIT'
+[Unit]
+Description=Persist Batch worker journal for CloudWatch
+After=systemd-journald.service
+[Service]
+ExecStart=/bin/bash -c 'exec journalctl --follow --boot --output=short-iso >> /var/log/oncoseq-leuk/host-journal.log'
+Restart=always
+RestartSec=5
+[Install]
+WantedBy=multi-user.target
+UNIT
+cat > /etc/logrotate.d/oncoseq-leuk-host <<'ROTATE'
+/var/log/oncoseq-leuk/host-journal.log {
+    size 100M
+    rotate 2
+    copytruncate
+    missingok
+    notifempty
+}
+ROTATE
+# Bound growth during high-volume incidents rather than waiting for daily rotation.
+cat > /etc/systemd/system/oncoseq-leuk-logrotate.service <<'UNIT'
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/logrotate /etc/logrotate.d/oncoseq-leuk-host
+UNIT
+cat > /etc/systemd/system/oncoseq-leuk-logrotate.timer <<'UNIT'
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=5min
+[Install]
+WantedBy=timers.target
+UNIT
+cat > /opt/aws/amazon-cloudwatch-agent/etc/oncoseq-leuk.json <<'CONFIG'
+${host_agent_config}
+CONFIG
+systemctl daemon-reload
+systemctl enable --now oncoseq-leuk-host-journal.service oncoseq-leuk-logrotate.timer
+/opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a fetch-config -m ec2 -s -c file:/opt/aws/amazon-cloudwatch-agent/etc/oncoseq-leuk.json
+systemctl start ecs --no-block
+--ONCOSEQ_LEUK--

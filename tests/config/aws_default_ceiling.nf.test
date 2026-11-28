@@ -1,0 +1,16 @@
+nextflow_process {
+    name "Clinical default memory ceiling"
+    script "tests/config/retry_processes.nf"
+    process "SAMTOOLS_COUNT_READS"
+    config "tests/config/ceiling_local.config"
+
+    test("A lightweight step also stops when its OOM budget cannot increase") {
+        when {
+            params { aws_bam_high_queue = 'bam-high' }
+        }
+        then {
+            assert !process.success
+            assert process.trace.tasks().size() == 1
+        }
+    }
+}

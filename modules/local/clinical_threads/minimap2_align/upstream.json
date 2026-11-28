@@ -1,0 +1,5 @@
+{
+    "path": "modules/nf-core/minimap2/align/main.nf",
+    "sha256": "f6775b5dcbe8ee565c0bc83e9ece0eed851ac85ab3f0f219b0fac7f17b65af97",
+    "change": "Adds sampled uBAM tag validation and streamed quality filtering; retains the upstream FASTQ path, tool image and mapping interface."
+}

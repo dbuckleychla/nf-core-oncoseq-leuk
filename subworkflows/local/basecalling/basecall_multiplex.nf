@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { DORADO_BASECALL                           } from '../../../modules/local/dorado/main.nf'
+include { BASECALL_SHARDED } from './basecall_sharded'
 include { DORADO_DEMULTIPLEX                        } from '../../../modules/local/dorado/main.nf'
 include { DORADO_TRIM                               } from '../../../modules/local/dorado/main.nf'
 include { SAMTOOLS_QSFILTER                         } from '../../../modules/local/samtools/main.nf'
@@ -31,23 +31,18 @@ workflow BASECALL_MULTIPLEX {
 
     ch_versions = channel.empty()
 
-    DORADO_BASECALL(ch_samplesheet)
+    BASECALL_SHARDED(ch_samplesheet)
 
     ch_to_dmux = ch_demux
         .map { meta, _sample, _barcode, kit ->
             tuple(meta,kit) }
-        .join(DORADO_BASECALL.out.ubam)
+        .join(BASECALL_SHARDED.out.ubam)
 
     DORADO_DEMULTIPLEX(ch_to_dmux)
 
     split_bams_ch = DORADO_DEMULTIPLEX.out.demux
         .map { meta, dir ->
-            def bams = []
-            dir.toFile().eachFileRecurse { f ->
-                if (f.name.endsWith('.bam')) {
-                    bams << file(f)
-                }
-            }
+            def bams = file("${dir.toUriString()}/**/*.bam", checkIfExists: true)
             tuple(meta, bams)
         }
         .transpose()
@@ -75,7 +70,7 @@ workflow BASECALL_MULTIPLEX {
 
     SAMTOOLS_QSFILTER(DORADO_TRIM.out.bam)
 
-     // Get the sample_ids from the demux_samplesheet that specify each barcode to each sample_id
+    // Get the sample_ids from the demux_samplesheet that specify each barcode to each sample_id
     ch_new_sample_ids_pass = SAMTOOLS_QSFILTER.out.ubam_pass
         .map { meta, ubam ->
             def meta_suffix = ubam.baseName.tokenize('_')[-1].replace('.bam', '')       // Add pass to meta in tuples for output naming
@@ -97,8 +92,8 @@ workflow BASECALL_MULTIPLEX {
     ch_fastq_pass = SAMTOOLS_TOFASTQ.out.fq
         .filter { meta, _reads -> meta.id.contains('pass')}
         .map { meta, fq ->
-         def meta_restore = [id : meta.id.replace('_pass', '')]
-         tuple(meta_restore, fq)}
+        def meta_restore = [id : meta.id.replace('_pass', '')]
+        tuple(meta_restore, fq)}
 
     ch_stats_pass = SEQKIT_STATS.out.stats
         .filter { meta, _tbl -> meta.id.contains('pass')}
@@ -111,7 +106,7 @@ workflow BASECALL_MULTIPLEX {
         COLLECT VERSIONS
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
-    ch_versions = DORADO_BASECALL.out.versions
+    ch_versions = BASECALL_SHARDED.out.versions
         .mix(DORADO_DEMULTIPLEX.out.versions)
         .mix(DORADO_TRIM.out.versions)
         .mix(SAMTOOLS_QSFILTER.out.versions)
@@ -138,6 +133,15 @@ workflow BASECALL_MULTIPLEX {
         .mix(topic_versions_string)
 
     emit:
+    qc_stages = BASECALL_SHARDED.out.ubam.map { meta, bam -> tuple([id: meta.id, scope_type: 'run', stage: 'prepared_input', format: 'bam'], bam) }
+        .mix(DORADO_DEMULTIPLEX.out.demux.flatMap { meta, dir ->
+            files("${dir}/**/*.bam").collect { bam -> tuple([id: meta.id, scope_type: 'run', stage: bam.name.contains('unclassified') ? 'demultiplexed_unclassified' : 'demultiplexed_assigned', format: 'bam'], bam) }
+        })
+        .mix(DORADO_TRIM.out.bam.map { meta, bam -> tuple([id: meta.id, scope_type: 'sample', stage: 'post_trim', format: 'bam'], bam) })
+        .mix(SEQKIT_STATS.out.stats.map { meta, stats -> tuple(meta.id, stats) }
+            .join(SAMTOOLS_QSFILTER.out.ubam_pass.map { meta, bam -> tuple(meta.id + '_pass', meta, 'quality_pass') }
+                .mix(SAMTOOLS_QSFILTER.out.ubam_fail.map { meta, bam -> tuple(meta.id + '_fail', meta, 'quality_fail') }))
+            .map { _key, stats, meta, stage -> tuple([id: meta.id, scope_type: 'sample', stage: stage, format: 'seqkit'], stats) })
     fastq          = ch_fastq_pass
     stats_pass     = ch_stats_pass
     versions       = ch_collated_versions

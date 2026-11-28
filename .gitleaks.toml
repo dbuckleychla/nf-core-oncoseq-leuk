@@ -1,0 +1,17 @@
+# Keep the built-in detector rules; exceptions below identify exact public fixtures.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Synthetic Secrets Manager ARN in Terraform tests, not a credential"
+condition = "AND"
+regexTarget = "line"
+paths = ['''^terraform/aws/tests/(registry|storage)\.tftest\.hcl$''']
+regexes = ['''^\s*(?:variables\s*\{\s*)?ghcr_secret_arn\s*=\s*"arn:aws:secretsmanager:us-(?:east|west)-[12]:123456789012:secret:test-ghcr-Ab1234"\s*(?:\})?\s*$''']
+
+[[allowlists]]
+description = "SHA-256 image digest in the synthetic review preview"
+condition = "AND"
+regexTarget = "line"
+paths = ['''^docs/report-preview/review\.html$''']
+regexes = ['''^\s*"image_key":\s*"[a-f0-9]{64}"\s*,?\s*$''']

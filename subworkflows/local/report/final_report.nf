@@ -130,4 +130,5 @@ workflow MIDNIGHT_REPORT {
 
     emit:
     ch_report
+    html = QUARTO_REPORT.out.html
 }

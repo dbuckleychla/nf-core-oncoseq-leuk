@@ -1,0 +1,41 @@
+nextflow_process {
+    name "Clinical Classy resources"
+    script "tests/config/processes.nf"
+    process "CLASSY_COMBINED"
+    config "tests/config/local.config"
+
+    test("Reserve the high worker and retain eight inference threads") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+            }
+        }
+        then {
+            assert process.success
+            def values = process.out.settings[0].readLines()
+            assert values[0..1] == ['bam-high', '32']
+            assert values[2] == 'ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a'
+            assert values[3] == '64 GB'
+            assert values[4] == '1d'
+            assert values[5] == '8'
+        }
+    }
+
+    test("Retain the huge-input memory scaling") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                huge = true
+            }
+        }
+        then {
+            assert process.success
+            def values = process.out.settings[0].readLines()
+            assert values[0..1] == ['bam-high', '32']
+            assert values[2] == 'ghcr.io/chusj-pigu/classy@sha256:8d5148cdb0815b3fcbe3673c5ca0d6c6a451ad1d80f294a23242c078a1dc779a'
+            assert values[3] == '192 GB'
+            assert values[5] == '8'
+        }
+    }
+}

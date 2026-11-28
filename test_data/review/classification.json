@@ -1,0 +1,7 @@
+{
+    "sample_label": "SYNTHETIC",
+    "marlin": {
+        "cutoff": 0.8,
+        "inference": { "annotated_probabilities": [{ "class_name": "Synthetic model class", "probability": 0.9 }] }
+    }
+}

@@ -1,0 +1,44 @@
+nextflow_workflow {
+    name "Validated streaming uBAM alignment"
+    script "tests/subworkflows/local/mapping/ubam/smoke.nf"
+    workflow "UBAM_SMOKE"
+    config "tests/config/ubam_local.config"
+
+    test("Validate first 1000 reads, align without FASTQ files and preserve tags") {
+        when {
+            params { input_ubam=true; ubam_min_qscore=10; time_series=false; realtime=null }
+            workflow {
+                """
+                input[0] = channel.of([[id:'SYNTHETIC'],file('${projectDir}/test_data/ubam/valid.bam')])
+                input[1] = channel.value([[id:'reference'],file('${projectDir}/test_data/ubam/reference.fa')])
+                """
+            }
+        }
+        then {
+            assert workflow.success
+            def validation = new groovy.json.JsonSlurperClassic().parseText(file(workflow.out.validation[0][1]).text)
+            assert validation.checked_reads == 1000
+            assert validation.required_tags == ['MM','ML','qs']
+            assert file(workflow.out.checked[0]).text.contains('tags preserved')
+            def qc = new groovy.json.JsonSlurperClassic().parseText(file(workflow.out.alignment_qc[0][1]).text)
+            assert qc['QC-passed reads']['primary'] == 1004
+            assert qc['QC-passed reads']['primary mapped'] == 1004
+        }
+    }
+
+    test("Reject a missing methylation tag in the sampled reads") {
+        when {
+            params { input_ubam=true; ubam_min_qscore=10; time_series=false; realtime=null }
+            workflow {
+                """
+                input[0] = channel.of([[id:'SYNTHETIC'],file('${projectDir}/test_data/ubam/missing_mm.bam')])
+                input[1] = channel.value([[id:'reference'],file('${projectDir}/test_data/ubam/reference.fa')])
+                """
+            }
+        }
+        then {
+            assert workflow.failed
+            assert workflow.stdout.join('\n').contains('lacks required tag MM')
+        }
+    }
+}

@@ -3,7 +3,7 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { DORADO_BASECALL                           } from '../../../modules/local/dorado/main.nf'
+include { BASECALL_SHARDED } from './basecall_sharded'
 include { SAMTOOLS_QSFILTER                         } from '../../../modules/local/samtools/main.nf'
 include { SAMTOOLS_TOFASTQ                          } from '../../../modules/local/samtools/main.nf'
 include { HTSLIB_BGZIPTABIX                         } from '../../../modules/nf-core/htslib/bgziptabix/main'
@@ -28,9 +28,9 @@ workflow BASECALL_SIMPLEX {
 
     ch_versions = channel.empty()
 
-    DORADO_BASECALL(ch_samplesheet)
+    BASECALL_SHARDED(ch_samplesheet)
 
-    SAMTOOLS_QSFILTER(DORADO_BASECALL.out.ubam)
+    SAMTOOLS_QSFILTER(BASECALL_SHARDED.out.ubam)
 
     // Add pass and fail to meta in tuples for output naming
 
@@ -73,7 +73,7 @@ workflow BASECALL_SIMPLEX {
         COLLECT VERSIONS
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
-    ch_versions = DORADO_BASECALL.out.versions
+    ch_versions = BASECALL_SHARDED.out.versions
         .mix(SAMTOOLS_QSFILTER.out.versions)
         .mix(SAMTOOLS_TOFASTQ.out.versions)
 
@@ -98,6 +98,11 @@ workflow BASECALL_SIMPLEX {
         .mix(topic_versions_string)
 
     emit:
+    qc_stages = BASECALL_SHARDED.out.ubam.map { meta, bam -> tuple([id: meta.id, scope_type: 'sample', stage: 'prepared_input', format: 'bam'], bam) }
+        .mix(SEQKIT_STATS.out.stats.map { meta, stats -> tuple(meta.id, stats) }
+            .join(SAMTOOLS_QSFILTER.out.ubam_pass.map { meta, bam -> tuple(meta.id + '_pass', meta, 'quality_pass') }
+                .mix(SAMTOOLS_QSFILTER.out.ubam_fail.map { meta, bam -> tuple(meta.id + '_fail', meta, 'quality_fail') }))
+            .map { _key, stats, meta, stage -> tuple([id: meta.id, scope_type: 'sample', stage: stage, format: 'seqkit'], stats) })
     fastq          = ch_fastq_pass
     stats_pass     = ch_stats_pass
     versions       = ch_collated_versions

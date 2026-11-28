@@ -11,7 +11,7 @@ include { FIGENO_SV_FIGURE as FIGENO_FUSION    } from '../../../modules/local/fi
 include { FIGENO_SV_FIGURE as FIGENO_OTHER     } from '../../../modules/local/figeno/main.nf'
 include { FIGENO_SV_FIGURE as FIGENO_TARGETS   } from '../../../modules/local/figeno/main.nf'
 include { FIGENO_CIRCOS                        } from '../../../modules/local/figeno/main.nf'
-include { FIGENO_PAN_CHR                       } from '../../../modules/local/figeno/main.nf'
+include { FIGENO_PAN_CHR                       } from '../../../modules/local/figeno_pan_chr/main.nf'
 include { QDNASEQ_PROCESS                      } from '../../../modules/local/vcf_process/main.nf'
 include { BCFTOOLS_QUERY as BCFTOOLS_QUERY_SNP } from '../../../modules/nf-core/bcftools/query/main'
 include { ENSEMBL_VEP_TABLE                    } from '../../../modules/local/vcf_process/main.nf'
@@ -44,7 +44,7 @@ workflow VARIANT_PROCESS {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     CNV CIRCOS
+        CNV CIRCOS
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
@@ -56,7 +56,7 @@ workflow VARIANT_PROCESS {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     SV FILTERING AND PROCESSING
+        SV FILTERING AND PROCESSING
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 
@@ -132,7 +132,7 @@ workflow VARIANT_PROCESS {
 
     /*
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-     VIZUALISATION
+        VIZUALISATION
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     */
 

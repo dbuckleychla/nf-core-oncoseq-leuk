@@ -1,0 +1,22 @@
+nextflow_process {
+    name "Bounded chromosome plotting on isolated AWS worker"
+    script "tests/config/processes.nf"
+    process "FIGENO_PAN_CHR"
+    config "tests/config/local.config"
+
+    test("Reserve low worker with four plotting jobs and 24 GB") {
+        when {
+            params {
+                aws_bam_high_queue = 'bam-high'
+                aws_bam_low_queue = 'bam-low'
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.settings[0].readLines() == ['bam-low', '8', '24 GB', '4', '1']
+            def module = new File('modules/local/figeno_pan_chr/main.nf').text.split('process FIGENO_PAN_CHR')[1]
+            assert module.contains('--jobs ${threads}')
+            assert module.contains('Math.min(task.cpus as int, (task.ext.threads ?: 4) as int)')
+        }
+    }
+}

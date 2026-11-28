@@ -1,0 +1,36 @@
+nextflow_process {
+    name "Clinical review defaults and overrides"
+    script "tests/config/processes.nf"
+    process "CLINICAL_REVIEW_SETTINGS"
+    config "tests/config/local.config"
+
+    test("Clinical profile enables review with institutional resources") {
+        when {
+            params {}
+        }
+        then {
+            assert process.success
+            def values = process.out.settings[0].readLines()
+            assert values[0..1] == ['true', 's3://plm-cpm-sandbox-research-usw2/ONT/Oncoseq_refdata/hg38/aux/']
+            assert values[2].endsWith('/assets/institutional_hg38.review.json')
+            def refs = new groovy.json.JsonSlurperClassic().parseText(file(values[2]).text)
+            assert refs.pinning == 'development'
+            assert refs.resources.values().every { !it.sha256 }
+        }
+    }
+    test("Explicit settings override clinical defaults") {
+        when {
+            params {
+                report_review = false
+                reference_aux_cache = 's3://custom-references/aux/'
+                review_references = 's3://custom-references/review.json'
+            }
+        }
+        then {
+            assert process.success
+            assert process.out.settings[0].readLines() == [
+                'false', 's3://custom-references/aux/', 's3://custom-references/review.json'
+            ]
+        }
+    }
+}
